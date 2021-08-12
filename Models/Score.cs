@@ -32,7 +32,7 @@ namespace MatchingEngine.Models
         public double allFieldsScore_StepMode(DistanceVector d,
             int fn_treshold = 2, int mn_treshold = 1, int ln_treshold = 2, int sln_treshold = 2,
             int bday_treshold = 1, int city_treshold = 2, int pn_treshold = 1,
-            double fn_weight = 0.18, double mn_weight = 0.1, double ln_weight = 0.18, double sln_weight = 0.16,
+            double fn_weight = 0.18, double mn_weight = 0.1, double ln_weight = 0.34, double sln_weight = 0,
             double bday_weight = 0.20, double city_weight = 0.08, double pn_weight = 0.1)
         {
             var checkSum = fn_weight + mn_weight + ln_weight + sln_weight + bday_weight + city_weight + pn_weight;

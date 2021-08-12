@@ -2,18 +2,15 @@ using System;
 
 namespace MatchingEngine.Models
 {
-    public class PatientRecord
+    public class PatientRecord : Record
     {
-        //change to private
-        public string FirstName;
-        public string MiddleName;
-        public string LastName;
-        public string SecondLastName;
-
-        public string BirthDate;
-        public string City;
-
-        public string PhoneNumber;
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public string SecondLastName { get; set; }
+        public string BirthDate { get; set; }
+        public string City { get; set; }
+        public string PhoneNumber { get; set; }
 
         //Create new class that inherits PatientRecords
         // public string matchfound;

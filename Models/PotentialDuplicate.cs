@@ -54,15 +54,6 @@ namespace MatchingEngine.Models
             return (col_names);
         }
 
-        public string csvFormatStringAsterisk()
-        {
-            string str;
-            str =
-                $"{Value.IdType},{Value.RecordId},{Match.IdType},{Match.RecordId},{Score},{Distance.CsvFormatString()}";
-            str += $",{Value.PatientInfo.StringToCSVFormatAsterisk()},{Match.PatientInfo.StringToCSVFormatAsterisk()}";
-            return str;
-        }
-
         public PotentialDuplicate()
         {
             _value = new Record();
