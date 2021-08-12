@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>CSV_Example_Code</RootNamespace>
+    <RootNamespace>MatchingEngine</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>
