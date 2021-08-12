@@ -12,8 +12,8 @@ namespace MatchingEngine
         {
             TextFieldParser csvParser = new TextFieldParser(csv_path);
 
-            csvParser.CommentTokens = new string[] { "#" };
-            csvParser.SetDelimiters(new string[] { "," });
+            csvParser.CommentTokens = new[] { "#" };
+            csvParser.SetDelimiters(",");
             csvParser.HasFieldsEnclosedInQuotes = true;
 
             return (csvParser.ReadFields());
@@ -28,12 +28,12 @@ namespace MatchingEngine
             }
             catch (Exception e)
             {
-                Console.WriteLine($"No such field exists; rerunrning -1");
+                Console.WriteLine($"No such field exists; rerunning -1");
                 Console.WriteLine(e.Message);
                 index = -1;
             }
 
-            return (index);
+            return index;
         }
 
         public static bool FirstCharactersAreEqual(string A, string B)
@@ -63,15 +63,15 @@ namespace MatchingEngine
             string[] Column_Names = helpers.getColumnNames(csv_file_path);
 
             //and the indices
-            int firstNameIndex = Helpers.GetIndexOfField(Column_Names, "FirstName");
-            int middleNameIndex = Helpers.GetIndexOfField(Column_Names, "MiddleName");
-            int lastNameIndex = Helpers.GetIndexOfField(Column_Names, "LastName");
-            int secondLastNameIndex = Helpers.GetIndexOfField(Column_Names, "SecondLastName");
-            int birthDateIndex = Helpers.GetIndexOfField(Column_Names, "BirthDate");
-            int cityIndex = Helpers.GetIndexOfField(Column_Names, "City");
-            int phoneNumberIndex = Helpers.GetIndexOfField(Column_Names, "PhoneNumber");
-            int idTypeIndex = Helpers.GetIndexOfField(Column_Names, "IdType");
-            int idIndex = Helpers.GetIndexOfField(Column_Names, "ID");
+            var firstNameIndex = Helpers.GetIndexOfField(Column_Names, "FirstName");
+            var middleNameIndex = Helpers.GetIndexOfField(Column_Names, "MiddleName");
+            var lastNameIndex = Helpers.GetIndexOfField(Column_Names, "LastName");
+            var secondLastNameIndex = Helpers.GetIndexOfField(Column_Names, "SecondLastName");
+            var birthDateIndex = Helpers.GetIndexOfField(Column_Names, "BirthDate");
+            var cityIndex = Helpers.GetIndexOfField(Column_Names, "City");
+            var phoneNumberIndex = Helpers.GetIndexOfField(Column_Names, "PhoneNumber");
+            var idTypeIndex = Helpers.GetIndexOfField(Column_Names, "IdType");
+            var idIndex = Helpers.GetIndexOfField(Column_Names, "ID");
 
             //declare a new text field parser called csvparser
             TextFieldParser csvParser = new TextFieldParser(csv_file_path);
@@ -131,13 +131,13 @@ namespace MatchingEngine
             string[] Column_Names = helpers.getColumnNames(csv_file_path);
 
             //and the indices
-            int firstNameIndex = Helpers.GetIndexOfField(Column_Names, "FirstName");
-            int middleNameIndex = Helpers.GetIndexOfField(Column_Names, "MiddleName");
-            int lastNameIndex = Helpers.GetIndexOfField(Column_Names, "LastName");
-            int secondLastNameIndex = Helpers.GetIndexOfField(Column_Names, "SecondLastName");
-            int birthDateIndex = Helpers.GetIndexOfField(Column_Names, "BirthDate");
-            int cityIndex = Helpers.GetIndexOfField(Column_Names, "City");
-            int phoneNumberIndex = Helpers.GetIndexOfField(Column_Names, "PhoneNumber");
+            var firstNameIndex = Helpers.GetIndexOfField(Column_Names, "FirstName");
+            var middleNameIndex = Helpers.GetIndexOfField(Column_Names, "MiddleName");
+            var lastNameIndex = Helpers.GetIndexOfField(Column_Names, "LastName");
+            var secondLastNameIndex = Helpers.GetIndexOfField(Column_Names, "SecondLastName");
+            var birthDateIndex = Helpers.GetIndexOfField(Column_Names, "BirthDate");
+            var cityIndex = Helpers.GetIndexOfField(Column_Names, "City");
+            var phoneNumberIndex = Helpers.GetIndexOfField(Column_Names, "PhoneNumber");
 
             // declare a new text field parser called csvparser
             TextFieldParser csvParser = new TextFieldParser(csv_file_path);
@@ -157,15 +157,17 @@ namespace MatchingEngine
                 //Read the line
                 current_line = csvParser.ReadFields();
                 //empty the Record
-                tempRecord = new PatientRecord();
-                //set the values for the patient Info record
-                tempRecord.FirstName = current_line[firstNameIndex];
-                tempRecord.MiddleName = current_line[middleNameIndex];
-                tempRecord.LastName = current_line[lastNameIndex];
-                tempRecord.SecondLastName = current_line[secondLastNameIndex];
-                tempRecord.BirthDate = current_line[birthDateIndex];
-                tempRecord.City = current_line[cityIndex];
-                tempRecord.PhoneNumber = current_line[phoneNumberIndex];
+                tempRecord = new PatientRecord
+                {
+                    //set the values for the patient Info record
+                    FirstName = current_line[firstNameIndex],
+                    MiddleName = current_line[middleNameIndex],
+                    LastName = current_line[lastNameIndex],
+                    SecondLastName = current_line[secondLastNameIndex],
+                    BirthDate = current_line[birthDateIndex],
+                    City = current_line[cityIndex],
+                    PhoneNumber = current_line[phoneNumberIndex]
+                };
 
                 //now get the id type
 
@@ -173,8 +175,8 @@ namespace MatchingEngine
                 list.Add(tempRecord);
             } while (!csvParser.EndOfData);
 
-            var RecordsToReturn = list.ToArray();
-            return RecordsToReturn;
+            var recordsToReturn = list.ToArray();
+            return recordsToReturn;
         } // end of PatientRecord
     }
 }
