@@ -30,14 +30,6 @@ namespace MatchingEngine.Models
                 $"First Name: {FirstNameDistance} MiddleName: {MiddleNameDistance} Lastname: {LastNameDistance} SecondLastname: {SecondLastNameDistance} BirthDate: {BirthDateDistance} City: {CityDistance} PhoneNumber: {PhoneNumberDistance}";
         }
 
-        public string CsvFormatString()
-        {
-            string str = $"[{FirstNameDistance} {MiddleNameDistance} {LastNameDistance} ";
-            str +=
-                $"{SecondLastNameDistance} {BirthDateDistance} {CityDistance} {PhoneNumberDistance}]";
-            return str;
-        }
-
         public static DistanceVector CalculateDistance(PatientRecord firstRecord, PatientRecord secondRecord)
         {
             DistanceVector result = new()
