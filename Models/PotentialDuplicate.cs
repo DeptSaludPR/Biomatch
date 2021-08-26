@@ -2,18 +2,18 @@ namespace MatchingEngine.Models
 {
     public class PotentialDuplicate
     {
-        private Record _value;
-        private Record _match;
+        private PatientRecord _value;
+        private PatientRecord _match;
         private DistanceVector _distance;
         private double _score;
 
-        public Record Value
+        public PatientRecord Value
         {
             get => _value;
             set => _value = value;
         }
 
-        public Record Match
+        public PatientRecord Match
         {
             get => _match;
             set => _match = value;
@@ -54,15 +54,44 @@ namespace MatchingEngine.Models
             return (col_names);
         }
 
+        public string csvLineAsterisk()
+        {
+            string csv_str;
+
+            //ad the id type and id for record 1 
+            csv_str=_value.IdType+","+_value.RecordId.ToString()+",";
+
+            //ad the id type and id for record 2
+            csv_str+=_match.IdType+","+_match.RecordId.ToString()+",";
+
+            //add the score 
+            csv_str+=Score.ToString()+",";
+
+            //add the distance vector
+            csv_str+=Distance.vectorString()+",";
+
+            //add the patient info asterisk string for value
+            csv_str+=_value.csvAsteriskString()+",";
+
+            //add the patient info asterisk string for match
+            csv_str+=_match.csvAsteriskString();
+
+            return csv_str;
+
+
+
+        }
+        
+        
         public PotentialDuplicate()
         {
-            _value = new Record();
-            _match = new Record();
+            _value = new PatientRecord();
+            _match = new PatientRecord();
             _distance = new DistanceVector();
             _score = 0.0;
         }
 
-        public PotentialDuplicate(Record record1, Record record2, DistanceVector d, double score)
+        public PotentialDuplicate(PatientRecord record1, PatientRecord record2, DistanceVector d, double score)
         {
             _value = record1;
             _match = record2;

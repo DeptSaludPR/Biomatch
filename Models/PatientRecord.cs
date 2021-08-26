@@ -9,5 +9,15 @@ namespace MatchingEngine.Models
         public string BirthDate { get; set; } = null!;
         public string? City { get; set; }
         public string? PhoneNumber { get; set; }
+
+        public string csvAsteriskString()
+        {
+            string csv_str;
+
+            //Write out 
+            csv_str=FirstName+"*"+MiddleName+"*"+LastName+"*";
+            csv_str+=SecondLastName+"*"+BirthDate+"*"+City+"*"+PhoneNumber;
+            return(csv_str);
+        }
     }
 }
