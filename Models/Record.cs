@@ -2,7 +2,7 @@ using System;
 
 namespace MatchingEngine.Models
 {
-    public class Record
+    public class Record 
     {
         public string IdType { get; set; }
         public Guid RecordId { get; set; }

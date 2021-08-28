@@ -30,6 +30,13 @@ namespace MatchingEngine.Models
                 $"First Name: {FirstNameDistance} MiddleName: {MiddleNameDistance} Lastname: {LastNameDistance} SecondLastname: {SecondLastNameDistance} BirthDate: {BirthDateDistance} City: {CityDistance} PhoneNumber: {PhoneNumberDistance}";
         }
 
+        public string vectorString()
+        {
+            string v_str;
+            v_str=$"[{FirstNameDistance} {MiddleNameDistance} {LastNameDistance} {SecondLastNameDistance} {BirthDateDistance} {CityDistance} {PhoneNumberDistance}]";
+            return v_str;
+        }
+
         public static DistanceVector CalculateDistance(PatientRecord firstRecord, PatientRecord secondRecord)
         {
             DistanceVector result = new()

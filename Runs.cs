@@ -105,7 +105,7 @@ namespace MatchingEngine
 
 
             log.WriteLine("Now we wil look for any matches from " + filepath1 + " with " + filepath2 +
-                          " filtering by first character of FirstName and stopping at the first match");
+                        " filtering by first character of FirstName and stopping at the first match");
             //now, to look for the duplicates
 
             //*** I used to use a list but now I am writing to text directly. Idk if this is fater, but I think so ***
@@ -184,7 +184,7 @@ namespace MatchingEngine
             elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}", ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds);
             log.WriteLine("RunTime for matching " + filepath1 + " (up to index " + index1.ToString() + ") to " +
-                          filepath2 + " (up to index " + index2.ToString() + ") took:  " + elapsedTime);
+                        filepath2 + " (up to index " + index2.ToString() + ") took:  " + elapsedTime);
 
             //write the total elapsed time on the log
             log_time.Stop();
@@ -261,6 +261,9 @@ namespace MatchingEngine
                 {
                     //check if the first character of the first name is equal
                     // **** more work needs to go into this because I am getting system exceptions ****
+
+                    //****** Actually what we want to do here is block keys to limit the search space. O(m*n) is very large!!! *******
+                    //this checks if the blocking key condition is met 
                     if (Helpers.FirstCharactersAreEqual(records1[i].FirstName,
                         records2[j].FirstName))
                     {
@@ -282,7 +285,7 @@ namespace MatchingEngine
                                 new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore);
                             //maybe we can skip this, as we are writing to output
                             //PotentialDuplicates_list.Add(duplicate_to_add);
-                            // output.WriteLine(duplicateToAdd.csvFormatStringAsterisk());
+                            await output.WriteLineAsync(duplicateToAdd.csvLineAsterisk());
                         }
                     }
 
