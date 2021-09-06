@@ -203,7 +203,7 @@ namespace MatchingEngine
         public static async Task Run_TwoFileComparison_v2(List<PatientRecord> records1, List<PatientRecord> records2, string output_file_name,
             bool search_all_file_1 = true, int start_index_file_1 = 1, int end_index_file_1 = 100,
             bool search_all_file_2 = true, int start_index_file_2 = 1, int end_index_file_2 = 100,
-            bool stop_at_first_match = true, bool exact_matches_allowed = false, double lower_score_treshold = 0.70)
+            bool stop_at_first_match = true, bool exact_matches_allowed = false, double lower_score_treshold = 0.65)
         {
             //start a stopwatch
             var logTime = new Stopwatch();
@@ -215,7 +215,7 @@ namespace MatchingEngine
 
             //write the log start time
             await log.WriteLineAsync("Log start time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
-
+            await log.WriteLineAsync("\nFor this run, we are using a score treshold of: "+lower_score_treshold.ToString());
 
             // declare the classes we are going to use 
             Score score = new();
@@ -245,6 +245,13 @@ namespace MatchingEngine
             var output = new StreamWriter(outputText);
             var tempPotentialDuplicate = new PotentialDuplicate();
             await output.WriteLineAsync(tempPotentialDuplicate.csvColumnNamesAsterisk());
+
+            //make a new streamwriter to store the url variant
+            string urlText=output_file_name + "_url_doc.csv";
+            var urlDoc = new StreamWriter(urlText);
+
+            var tempPotentialDuplicate2 = new PotentialDuplicate();
+            await urlDoc.WriteLineAsync(tempPotentialDuplicate.csvColumnNamesUrl());
 
             //declare integers to use like in a for loop
             var i = startIndex1;
@@ -286,6 +293,7 @@ namespace MatchingEngine
                             //maybe we can skip this, as we are writing to output
                             //PotentialDuplicates_list.Add(duplicate_to_add);
                             await output.WriteLineAsync(duplicateToAdd.csvLineAsterisk());
+                            await urlDoc.WriteLineAsync(duplicateToAdd.urlCsvLine());
                         }
                     }
 
@@ -308,6 +316,96 @@ namespace MatchingEngine
 
             //get the current time 
             await log.WriteLineAsync("Log close time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+
+            log.Close();
+            output.Close();
+        }
+
+        public static async Task Run_SameFileComparison_v2(List<PatientRecord> records1, string output_file_name,
+            bool stop_at_first_match = false, bool exact_matches_allowed = false, double lower_score_treshold = 0.70)
+        {
+            //start a stopwatch
+            var logTime = new Stopwatch();
+            logTime.Start();
+
+            //open a new log document 
+            string outputLog = output_file_name + "_log.txt";
+            var log = new StreamWriter(outputLog);
+
+            //write the log start time
+            await log.WriteLineAsync("SAME FILE COMPARISON Log start time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+
+
+            // declare the classes we are going to use 
+            Score score = new();
+
+            //*** WE WILL BE CHECKING THE WHOLE FILE *******
+
+
+            //make a new streamwriter to write the potential duplicates. 
+            //The alternative is to write them at the end, but I fear this would mean we end up with nothingb if the search is interrupted
+            // **** Elvis if you can, look into this ****
+            string outputText = output_file_name + ".txt";
+            var output = new StreamWriter(outputText);
+            var tempPotentialDuplicate = new PotentialDuplicate();
+            await output.WriteLineAsync(tempPotentialDuplicate.csvColumnNamesAsterisk());
+
+            //declare integers to use like in a for loop
+            var i = 0;
+            var j = 1; 
+            
+            //check for wether the exact matches are allowed, and set the upper treshold accordingly 
+            var upperScoreTreshold = exact_matches_allowed ? 1.0 : 0.99999;
+            while (i < records1.Count)
+            {
+                //declare a bool variable to keep of track of wether or not a match has been found 
+                var noMatchFoundYet = true;
+                //this while loop searches for matches until one is found
+                while (j < records1.Count & noMatchFoundYet)
+                {
+                    //Temporarily, set the blocking key condition to true 
+                    if (true) //*** This is where the blocking key goes ******
+                    {
+                        //get the distance vector for the ith vector of the first table and the jth record of the second table
+                        var tempDist =
+                            DistanceVector.CalculateDistance(records1[i], records1[j]);
+                        var tempScore = score.allFieldsScore_StepMode(tempDist);
+
+                        //**** temporarily set to true to record all comparisons. I need to see why it's not recording partial matches ****
+                        if (tempScore >= lower_score_treshold & tempScore <= upperScoreTreshold)
+                        {
+                            //update the match found bool to stop searching other matches
+                            if (stop_at_first_match)
+                            {
+                                noMatchFoundYet = false;
+                            }
+
+                            var duplicateToAdd =
+                                new PotentialDuplicate(records1[i], records1[j], tempDist, tempScore);
+                            //maybe we can skip this, as we are writing to output
+                            //PotentialDuplicates_list.Add(duplicate_to_add);
+                            await output.WriteLineAsync(duplicateToAdd.csvLineAsterisk());
+                        }
+                    }
+
+                    //update the counter for j
+                    j++;
+                }
+                //update the counter for i 
+                i++;
+                //reset j to start index
+                j = i+1;
+            }
+            
+            //write the total elapsed time on the log
+            logTime.Stop();
+            var logTs = logTime.Elapsed;
+            string logElapsedTime =
+                $"{logTs.Hours:00}:{logTs.Minutes:00}:{logTs.Seconds:00}.{logTs.Milliseconds / 10:00}";
+            await log.WriteLineAsync("\n SAME FILE COMPARISON process took: " + logElapsedTime);
+
+            //get the current time 
+            await log.WriteLineAsync("\n SAME FILE COMPARISON Log close time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
             log.Close();
             output.Close();

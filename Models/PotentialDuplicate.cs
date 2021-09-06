@@ -54,14 +54,25 @@ namespace MatchingEngine.Models
             return (col_names);
         }
 
+        public string csvColumnNamesUrl()
+        {
+            string col_names;
+            col_names = "Patient 1 URL,Patient 2 URL, Score";
+            return (col_names);
+        }
+
+
+
+
+
         public string csvLineAsterisk()
         {
             string csv_str;
 
-            //ad the id type and id for record 1 
+            //add the id type and id for record 1 
             csv_str=_value.IdType+","+_value.RecordId.ToString()+",";
 
-            //ad the id type and id for record 2
+            //add the id type and id for record 2
             csv_str+=_match.IdType+","+_match.RecordId.ToString()+",";
 
             //add the score 
@@ -77,9 +88,16 @@ namespace MatchingEngine.Models
             csv_str+=_match.csvAsteriskString();
 
             return csv_str;
+        }
 
+        public string urlCsvLine()
+        {
+            string url_csv_str;
 
-
+            url_csv_str="https://bioportal.salud.gov.pr/administration/patients/"+_value.RecordId.ToString()+"/profile/general"+",";
+            url_csv_str+="https://bioportal.salud.gov.pr/administration/patients/"+_match.RecordId.ToString()+"/profile/general"+",";
+            url_csv_str+=Score.ToString();
+            return(url_csv_str);
         }
         
         

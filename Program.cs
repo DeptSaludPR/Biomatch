@@ -21,8 +21,6 @@ namespace MatchingEngine
             var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
             var records1 = records1FromCsv.ToList();
 
-            Console.WriteLine(records1[0].csvAsteriskString());
-
 
             const string? filePath2 = "C:/Users/Andres/Desktop/CSV Example Code - Copy/CASE_API_2021_07_23 - Copy.csv";
             using var reader = new StreamReader(filePath2);
