@@ -350,6 +350,12 @@ namespace MatchingEngine
             var tempPotentialDuplicate = new PotentialDuplicate();
             await output.WriteLineAsync(tempPotentialDuplicate.csvColumnNamesAsterisk());
 
+            string urlText=output_file_name + "_url_doc.csv";
+            var urlDoc = new StreamWriter(urlText);
+
+            var tempPotentialDuplicate2 = new PotentialDuplicate();
+            await urlDoc.WriteLineAsync(tempPotentialDuplicate.csvColumnNamesUrl());
+
             //declare integers to use like in a for loop
             var i = 0;
             var j = 1; 
@@ -385,6 +391,7 @@ namespace MatchingEngine
                             //maybe we can skip this, as we are writing to output
                             //PotentialDuplicates_list.Add(duplicate_to_add);
                             await output.WriteLineAsync(duplicateToAdd.csvLineAsterisk());
+                            await urlDoc.WriteLineAsync(duplicateToAdd.urlCsvLine());
                         }
                     }
 

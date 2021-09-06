@@ -31,8 +31,10 @@ namespace MatchingEngine
             //Passed the test: it's reading the files
             
 
-            await Run.Run_TwoFileComparison_v2(records1, records2,
-                "2021_08_11_test_run_for_duplicates", false, 123, 151, true, 1, 100, true, false, 0.7);
+            //await Run.Run_TwoFileComparison_v2(records1, records2,
+            //    "2021_08_11_test_run_for_duplicates", false, 123, 151, true, 1, 100, true, false, 0.7);
+
+            await Run.Run_SameFileComparison_v2(records1,"testing_same_file_comparison",false,false,0.70);
         }
     }
 }
