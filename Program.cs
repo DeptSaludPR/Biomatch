@@ -21,7 +21,7 @@ namespace MatchingEngine
             var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
             var records1 = records1FromCsv.ToList();
 
-            Console.WriteLine(records1[0].csvAsteriskString());
+
 
 
             const string? filePath2 = "C:/Users/Andres/Desktop/CSV Example Code - Copy/CASE_API_2021_07_23 - Copy.csv";
@@ -32,6 +32,12 @@ namespace MatchingEngine
 
             //Passed the test: it's reading the files
             
+
+
+            //await Run.Run_TwoFileComparison_v2(records1, records2,
+            //    "2021_08_11_test_run_for_duplicates", false, 123, 151, true, 1, 100, true, false, 0.7);
+
+            await Run.Run_SameFileComparison_v2(records1,"testing_same_file_comparison",false,false,0.70);
 
             await Run.Run_TwoFileComparison_v2(records1, records2,
                 "2021_08_11_test_run_for_duplicates", false, 123, 151, true, 1, 100, true, false, 0.7);
