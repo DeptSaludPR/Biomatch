@@ -293,6 +293,7 @@ namespace MatchingEngine
                             //maybe we can skip this, as we are writing to output
                             //PotentialDuplicates_list.Add(duplicate_to_add);
                             await output.WriteLineAsync(duplicateToAdd.csvLineAsterisk());
+
                             await urlDoc.WriteLineAsync(duplicateToAdd.urlCsvLine());
                         }
                     }

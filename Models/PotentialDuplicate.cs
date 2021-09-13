@@ -60,11 +60,7 @@ namespace MatchingEngine.Models
             col_names = "Patient 1 URL,Patient 2 URL, Score";
             return (col_names);
         }
-
-
-
-
-
+  
         public string csvLineAsterisk()
         {
             string csv_str;
@@ -88,6 +84,7 @@ namespace MatchingEngine.Models
             csv_str+=_match.csvAsteriskString();
 
             return csv_str;
+
         }
 
         public string urlCsvLine()
@@ -98,6 +95,10 @@ namespace MatchingEngine.Models
             url_csv_str+="https://bioportal.salud.gov.pr/administration/patients/"+_match.RecordId.ToString()+"/profile/general"+",";
             url_csv_str+=Score.ToString();
             return(url_csv_str);
+
+
+
+
         }
         
         
