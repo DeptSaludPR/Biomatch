@@ -75,13 +75,13 @@ namespace MatchingEngine.Models
             csv_str+=Score.ToString()+",";
 
             //add the distance vector
-            csv_str+=Distance.vectorString()+",";
+            csv_str+=Distance.VectorString()+",";
 
             //add the patient info asterisk string for value
-            csv_str+=_value.csvAsteriskString()+",";
+            csv_str+=_value.CsvAsteriskString()+",";
 
             //add the patient info asterisk string for match
-            csv_str+=_match.csvAsteriskString();
+            csv_str+=_match.CsvAsteriskString();
 
             return csv_str;
 
