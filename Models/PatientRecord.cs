@@ -10,14 +10,11 @@ namespace MatchingEngine.Models
         public string? City { get; set; }
         public string? PhoneNumber { get; set; }
 
-        public string csvAsteriskString()
+        public string CsvAsteriskString()
         {
-            string csv_str;
-
-            //Write out 
-            csv_str=FirstName+"*"+MiddleName+"*"+LastName+"*";
-            csv_str+=SecondLastName+"*"+BirthDate+"*"+City+"*"+PhoneNumber;
-            return(csv_str);
+            var csvStr = FirstName + "*" + MiddleName + "*" + LastName + "*";
+            csvStr += SecondLastName + "*" + BirthDate + "*" + City + "*" + PhoneNumber;
+            return csvStr;
         }
     }
 }

@@ -12,21 +12,5 @@ namespace MatchingEngine.Models
             IdType = "unspecifiedId";
             RecordId = Guid.NewGuid();
         }
-
-        public Record(PatientRecord PatientRecord, string idtype, string id)
-        {
-            string temp_id = id;
-
-            IdType = idtype;
-            try
-            {
-                RecordId = new Guid(id);
-            }
-            catch
-            {
-                RecordId = Guid.NewGuid();
-                Console.WriteLine($"Guid problem with id: {temp_id}");
-            }
-        }
     }
 }
