@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.CommandLine;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -12,42 +12,40 @@ public static class Program
 {
     private static async Task Main(string[] args)
     {
-        var filePath1 = args.Length > 0 ? args[0] : null;
-        if (filePath1 == null)
-        {
-            Console.WriteLine("Please provide a file path");
-            return;
-        }
+        var filePath1Option = new Option<string>
+            (name: "--filepath1", description: "File path for first file");
+        var filePath2Option = new Option<string>
+            (name: "--filepath2", description: "File path for second file");
+        var outputOption = new Option<string>
+            (name: "--output", description: "Output file path");
+        var scoreOption = new Option<double>
+        (name: "--score",
+            description: "Score for matching",
+            getDefaultValue: () => 0.8);
 
-        using var readerFile1 = new StreamReader(filePath1);
-        using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-        var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
-        var records1 = records1FromCsv.ToList();
+        var rootCommand = new RootCommand();
+        rootCommand.Add(filePath1Option);
+        rootCommand.Add(filePath2Option);
+        rootCommand.Add(outputOption);
+        rootCommand.Add(scoreOption);
 
+        rootCommand.SetHandler(async (filePath1OptionValue, filePath2OptionValue, outputOptionValue, scoreOptionValue) =>
+            {
+                using var readerFile1 = new StreamReader(filePath1OptionValue);
+                using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
+                var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
+                var records1 = records1FromCsv.ToList();
+                
+                using var reader = new StreamReader(filePath2OptionValue);
+                using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
+                var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
+                var records2 = records2FromCsv.ToList();
+                
+                await Run.Run_TwoFileComparison_v2(records1, records2,
+                    outputOptionValue, true, 1, 100, true, 1, 100, false, false, scoreOptionValue);
+            },
+            filePath1Option, filePath2Option, outputOption, scoreOption);
 
-        var filePath2 = args.Length > 1 ? args[1] : null;
-        if (filePath2 == null)
-        {
-            Console.WriteLine("Please provide a file path");
-            return;
-        }
-
-        using var reader = new StreamReader(filePath2);
-        using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
-        var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
-        var records2 = records2FromCsv.ToList();
-
-        var fileOutputName = args.Length > 2 ? args[2] : null;
-        if (fileOutputName == null)
-        {
-            Console.WriteLine("Please provide a file path");
-            return;
-        }
-        
-        var score = args.Length > 3 ? args[3] : "0.8";
-        var scoreValue = double.Parse(score);
-
-        await Run.Run_TwoFileComparison_v2(records1, records2,
-            fileOutputName, false, 123, 151, true, 1, 100, false, false, scoreValue);
+        await rootCommand.InvokeAsync(args);
     }
 }

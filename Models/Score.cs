@@ -40,7 +40,7 @@ public class Score
         double birthDateWeight = 0.20, double cityWeight = 0.08, double pn_weight = 0.1)
     {
         var checkSum = fn_weight + mn_weight + ln_weight + sln_weight + birthDateWeight + cityWeight + pn_weight;
-        if (Math.Abs(checkSum - 1.0) == 0)
+        if (Math.Abs(checkSum - 1.0) != 0)
         {
             throw new Exception("sum of weights is not 1.0");
         }
