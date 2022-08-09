@@ -29,13 +29,6 @@ public class DistanceVector : PatientRecord
             $"First Name: {FirstNameDistance} MiddleName: {MiddleNameDistance} Lastname: {LastNameDistance} SecondLastname: {SecondLastNameDistance} BirthDate: {BirthDateDistance} City: {CityDistance} PhoneNumber: {PhoneNumberDistance}";
     }
 
-    public string VectorString()
-    {
-        var vStr =
-            $"[{FirstNameDistance} {MiddleNameDistance} {LastNameDistance} {SecondLastNameDistance} {BirthDateDistance} {CityDistance} {PhoneNumberDistance}]";
-        return vStr;
-    }
-
     public static DistanceVector CalculateDistance(PatientRecord firstRecord, PatientRecord secondRecord)
     {
         DistanceVector result = new()
