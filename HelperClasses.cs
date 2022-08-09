@@ -1,20 +1,17 @@
 
-namespace MatchingEngine
-{
-    public class Helpers
-    {
-        // getColumnNames: gets the column names of a csv file and returns it as a string array
+namespace MatchingEngine;
 
-        public static bool FirstCharactersAreEqual(string A, string B)
+public static class Helpers
+{
+    public static bool FirstCharactersAreEqual(string a, string b)
+    {
+        try
         {
-            try
-            {
-                return A.Substring(0, 1) == B.Substring(0, 1);
-            }
-            catch
-            {
-                return true;
-            }
+            return a[..1] == b[..1];
+        }
+        catch
+        {
+            return true;
         }
     }
 }
