@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Threading.Tasks;
 using CsvHelper;
+using CsvHelper.Configuration;
 using MatchingEngine.Models;
 
 namespace MatchingEngine;
@@ -14,7 +15,7 @@ public static class Run
     public static async Task Run_TwoFileComparison_v2(List<PatientRecord> records1, List<PatientRecord> records2,
         string output_file_name, bool search_all_file_1 = true, int start_index_file_1 = 1, int end_index_file_1 = 100,
         bool search_all_file_2 = true, int start_index_file_2 = 1, int end_index_file_2 = 100,
-        bool stop_at_first_match = true, bool exact_matches_allowed = false, double lowerScoreThreshold = 0.65)
+        bool stop_at_first_match = false, bool exact_matches_allowed = false, double lowerScoreThreshold = 0.65)
     {
         //start a stopwatch
         var logTime = new Stopwatch();
@@ -24,8 +25,10 @@ public static class Run
         var outputLog = output_file_name + "_log.txt";
         var log = new StreamWriter(outputLog);
 
-        //write the log start time
+        //write the log start time and settings 
         await log.WriteLineAsync("Log start time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+        await log.WriteLineAsync("\nThe variable 'stop_at_first_match' is set to: "+stop_at_first_match.ToString());
+        await log.WriteLineAsync("\nThe variable 'exact_matches_allowed' is set to: "+exact_matches_allowed.ToString());
         await log.WriteLineAsync("\nFor this run, we are using a score threshold of: " + lowerScoreThreshold);
 
         //check if the user wants to search among all entities from record 1. 
@@ -47,7 +50,8 @@ public static class Run
         //declare integers to use like in a for loop
         var i = startIndex1;
         var j = startIndex2;
-        var duplicatesToAdd = new List<PotentialDuplicate>();
+        var UrlDuplicates=new List<UrlDoc>();
+        //var duplicatesToAdd = new List<PotentialDuplicate>();
 
         //check for whether the exact matches are allowed, and set the upper threshold accordingly 
         var upperScoreThreshold = exact_matches_allowed ? 1.0 : 0.99999;
@@ -64,7 +68,7 @@ public static class Run
                 //****** Actually what we want to do here is block keys to limit the search space. O(m*n) is very large!!! *******
                 //this checks if the blocking key condition is met 
                 if (Helpers.FirstCharactersAreEqual(records1[i].FirstName,
-                        records2[j].FirstName))
+                        records2[j].FirstName) & !(records1[i].RecordId==records2[j].RecordId) )
                 {
                     //get the distance vector for the ith vector of the first table and the jth record of the second table
                     var tempDist =
@@ -80,7 +84,8 @@ public static class Run
                             noMatchFoundYet = false;
                         }
 
-                        duplicatesToAdd.Add(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore));
+                        //duplicatesToAdd.Add(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore));
+                        UrlDuplicates.Add(new UrlDoc(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore)));
                     }
                 }
 
@@ -105,9 +110,12 @@ public static class Run
         await log.WriteLineAsync("Log close time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
         log.Close();
-        await using var writer = new StreamWriter(output_file_name + "_duplicates.csv");
-        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        await csv.WriteRecordsAsync(duplicatesToAdd);
+        await using var writer = new StreamWriter(output_file_name + "_url_doc.csv");
+        await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            csv.Context.RegisterClassMap<UrlDocMap>();
+            await csv.WriteRecordsAsync(UrlDuplicates);
+        }
     }
 
     public static async Task Run_SameFileComparison_v2(List<PatientRecord> records1, string output_file_name,
@@ -123,7 +131,7 @@ public static class Run
 
         //write the log start time
         await log.WriteLineAsync("SAME FILE COMPARISON Log start time: " +
-                                 DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+                                DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
         //*** WE WILL BE CHECKING THE WHOLE FILE *******
 
@@ -181,7 +189,7 @@ public static class Run
 
         //get the current time 
         await log.WriteLineAsync("\n SAME FILE COMPARISON Log close time: " +
-                                 DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+                                DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
         await using (var writer = new StreamWriter("Output.csv"))
         await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))

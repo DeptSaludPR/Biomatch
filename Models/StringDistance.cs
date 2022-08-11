@@ -84,7 +84,7 @@ public static class StringDistance
         return (v0[rowLen]);
     }
 
-    public static int GeneralDemographicFieldDistance(string a, string b)
+    public static int GeneralDemographicFieldDistance(string ?a, string ?b)
     {
         int distance;
         //check for empty values
