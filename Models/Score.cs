@@ -1,5 +1,3 @@
-using System;
-
 namespace MatchingEngine.Models;
 
 public static class Score
@@ -39,12 +37,6 @@ public static class Score
         double fnWeight = 0.18, double mnWeight = 0.1, double lnWeight = 0.17, double slnWeight = 0.17,
         double birthDateWeight = 0.20, double cityWeight = 0.08, double pnWeight = 0.1)
     {
-        var checkSum = fnWeight + mnWeight + lnWeight + slnWeight + birthDateWeight + cityWeight + pnWeight;
-        if (Math.Abs(checkSum - 1.0) != 0)
-        {
-            throw new Exception("sum of weights is not 1.0");
-        }
-
         //get the individual field score distances
         var firstNameDistance = singleFieldScore_StepMode(d.FirstNameDistance, fnThreshold);
         var middleNameDistance = singleFieldScore_StepMode(d.MiddleNameDistance, mnThreshold);

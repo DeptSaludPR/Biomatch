@@ -45,6 +45,7 @@ public sealed class UrlDocMap : ClassMap<UrlDoc>
         Map(m => m.Patient1Url).Name("Patient 1 URL");
         Map(m => m.Patient2Url).Name("Patient 2 URL");
         Map(m => m.Distance).Name("Distance");
+        Map(m => m.Score).Name("Score");
         Map(m => m.Error1).Name("Error 1");
         Map(m => m.Error2).Name("Error 2");
         Map(m => m.Error3).Name("Error 3");

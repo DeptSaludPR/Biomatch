@@ -1,27 +1,14 @@
 namespace MatchingEngine.Models;
 
-public class DistanceVector
+public readonly record struct DistanceVector
 {
-    public int FirstNameDistance { get; set; }
-    public int MiddleNameDistance { get; set; }
-    public int LastNameDistance { get; set; }
-    public int SecondLastNameDistance { get; set; }
-    public int BirthDateDistance { get; set; }
-    public int CityDistance { get; set; }
-    public int PhoneNumberDistance { get; set; }
-
-    public DistanceVector(int firstName = 0, int middleName = 0, int lastName = 0, int secondLastName = 0,
-        int birthDate = 0,
-        int city = 0, int phoneNumber = 0)
-    {
-        FirstNameDistance = firstName;
-        MiddleNameDistance = middleName;
-        LastNameDistance = lastName;
-        SecondLastNameDistance = secondLastName;
-        BirthDateDistance = birthDate;
-        CityDistance = city;
-        PhoneNumberDistance = phoneNumber;
-    }
+    public int FirstNameDistance { get; private init; }
+    public int MiddleNameDistance { get; private init; }
+    public int LastNameDistance { get; private init; }
+    public int SecondLastNameDistance { get; private init; }
+    public int BirthDateDistance { get; private init; }
+    public int CityDistance { get; private init; }
+    public int PhoneNumberDistance { get; private init; }
 
     public override string ToString()
     {

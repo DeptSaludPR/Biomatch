@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using CsvHelper;
 using MatchingEngine.Models;
 
@@ -14,8 +9,8 @@ public static class Run
 {
     public static async Task Run_TwoFileComparison_v2(List<PatientRecord> records1, List<PatientRecord> records2,
         string outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
-        bool searchAllFile2 = true, int startIndexFile2 = 1, int endIndexFile2 = 100,
-        bool stopAtFirstMatch = false, bool exactMatchesAllowed = false, double lowerScoreThreshold = 0.65)
+        bool searchAllFile2 = true, int startIndexFile2 = 1, int endIndexFile2 = 100, bool exactMatchesAllowed = false,
+        double lowerScoreThreshold = 0.65)
     {
         //start a stopwatch
         var logTime = new Stopwatch();
@@ -27,7 +22,6 @@ public static class Run
 
         //write the log start time and settings 
         await log.WriteLineAsync("Log start time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
-        await log.WriteLineAsync("\nThe variable 'stop_at_first_match' is set to: " + stopAtFirstMatch);
         await log.WriteLineAsync(
             "\nThe variable 'exact_matches_allowed' is set to: " + exactMatchesAllowed);
         await log.WriteLineAsync("\nFor this run, we are using a score threshold of: " + lowerScoreThreshold);
@@ -68,7 +62,8 @@ public static class Run
 
                 //****** Actually what we want to do here is block keys to limit the search space. O(m*n) is very large!!! *******
                 //this checks if the blocking key condition is met 
-                if (Helpers.FirstCharactersAreEqual(records1[i].FirstName, records2[j].FirstName) && !(records1[i].RecordId == records2[j].RecordId))
+                if (Helpers.FirstCharactersAreEqual(records1[i].FirstName, records2[j].FirstName) &&
+                    !(records1[i].RecordId == records2[j].RecordId))
                 {
                     //get the distance vector for the ith vector of the first table and the jth record of the second table
                     var tempDist =
@@ -78,11 +73,6 @@ public static class Run
                     //**** temporarily set to true to record all comparisons. I need to see why it's not recording partial matches ****
                     if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
                     {
-                        //update the match found bool to stop searching other matches
-                        if (stopAtFirstMatch)
-                        {
-                            matchFound = true;
-                        }
                         potentialDuplicates.Add(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore));
                     }
                 }
@@ -103,6 +93,12 @@ public static class Run
         var logElapsedTime =
             $"{logTs.Hours:00}:{logTs.Minutes:00}:{logTs.Seconds:00}.{logTs.Milliseconds / 10:00}";
         await log.WriteLineAsync("\nThe whole process took: " + logElapsedTime);
+        await log.WriteLineAsync(
+            $"\nOf the total of {potentialDuplicates.Count} potential duplicates, {potentialDuplicates.Count(x => x.Score >= 0.9)} have a score of 0.9 or higher.");
+        await log.WriteLineAsync(
+            $"\nOf the total of {potentialDuplicates.Count} potential duplicates, {potentialDuplicates.Count(x => x.Score >= 0.8)} have a score of 0.8 or higher.");
+        await log.WriteLineAsync(
+            $"\nOf the total of {potentialDuplicates.Count} potential duplicates, {potentialDuplicates.Count(x => x.Score >= 0.7)} have a score of 0.7 or higher.");
 
         //get the current time 
         await log.WriteLineAsync("Log close time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));

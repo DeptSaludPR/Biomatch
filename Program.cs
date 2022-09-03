@@ -1,8 +1,5 @@
 ﻿using System.CommandLine;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using CsvHelper;
 using MatchingEngine.Models;
 
@@ -42,7 +39,7 @@ public static class Program
                 var records2 = records2FromCsv.ToList();
                 
                 await Run.Run_TwoFileComparison_v2(records1, records2,
-                    outputOptionValue, true, 1, 100, true, 1, 100, false, false, scoreOptionValue);
+                    outputOptionValue, true, 1, 100, true, 1, 100, false, scoreOptionValue);
             },
             filePath1Option, filePath2Option, outputOption, scoreOption);
 
