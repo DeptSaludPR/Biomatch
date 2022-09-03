@@ -81,18 +81,18 @@ public static class StringDistance
             (v0, v1) = (v1, v0);
         }
 
-        return (v0[rowLen]);
+        return v0[rowLen];
     }
 
-    public static int GeneralDemographicFieldDistance(string ?a, string ?b)
+    public static int GeneralDemographicFieldDistance(string a, string b)
     {
         int distance;
         //check for empty values
-        if (a == "" || b == "")
+        if (a == string.Empty || b == string.Empty)
         {
             distance = -1;
         }
-        else if (a == "" && b == "")
+        else if (a == string.Empty && b == string.Empty)
         {
             distance = 0;
         }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using CsvHelper;
-using CsvHelper.Configuration;
 using MatchingEngine.Models;
 
 namespace MatchingEngine;
@@ -13,62 +13,62 @@ namespace MatchingEngine;
 public static class Run
 {
     public static async Task Run_TwoFileComparison_v2(List<PatientRecord> records1, List<PatientRecord> records2,
-        string output_file_name, bool search_all_file_1 = true, int start_index_file_1 = 1, int end_index_file_1 = 100,
-        bool search_all_file_2 = true, int start_index_file_2 = 1, int end_index_file_2 = 100,
-        bool stop_at_first_match = false, bool exact_matches_allowed = false, double lowerScoreThreshold = 0.65)
+        string outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
+        bool searchAllFile2 = true, int startIndexFile2 = 1, int endIndexFile2 = 100,
+        bool stopAtFirstMatch = false, bool exactMatchesAllowed = false, double lowerScoreThreshold = 0.65)
     {
         //start a stopwatch
         var logTime = new Stopwatch();
         logTime.Start();
 
         //open a new log document 
-        var outputLog = output_file_name + "_log.txt";
+        var outputLog = outputFileName + "_log.txt";
         var log = new StreamWriter(outputLog);
 
         //write the log start time and settings 
         await log.WriteLineAsync("Log start time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
-        await log.WriteLineAsync("\nThe variable 'stop_at_first_match' is set to: "+stop_at_first_match.ToString());
-        await log.WriteLineAsync("\nThe variable 'exact_matches_allowed' is set to: "+exact_matches_allowed.ToString());
+        await log.WriteLineAsync("\nThe variable 'stop_at_first_match' is set to: " + stopAtFirstMatch);
+        await log.WriteLineAsync(
+            "\nThe variable 'exact_matches_allowed' is set to: " + exactMatchesAllowed);
         await log.WriteLineAsync("\nFor this run, we are using a score threshold of: " + lowerScoreThreshold);
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set start_index1 to 0. Else, use the provided start index
-        var startIndex1 = search_all_file_1 ? 0 : start_index_file_1;
+        var startIndex1 = searchAllFile1 ? 0 : startIndexFile1;
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
-        var endIndex1 = search_all_file_1 ? records1.Count : end_index_file_1;
+        var endIndex1 = searchAllFile1 ? records1.Count : endIndexFile1;
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set start_index1 to 0. Else, use the provided start index
-        var startIndex2 = search_all_file_2 ? 0 : start_index_file_2;
+        var startIndex2 = searchAllFile2 ? 0 : startIndexFile2;
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
-        var endIndex2 = search_all_file_2 ? records2.Count : end_index_file_2;
+        var endIndex2 = searchAllFile2 ? records2.Count : endIndexFile2;
 
         //declare integers to use like in a for loop
         var i = startIndex1;
         var j = startIndex2;
-        var UrlDuplicates=new List<UrlDoc>();
+        var potentialDuplicates = new List<PotentialDuplicate>();
         //var duplicatesToAdd = new List<PotentialDuplicate>();
 
         //check for whether the exact matches are allowed, and set the upper threshold accordingly 
-        var upperScoreThreshold = exact_matches_allowed ? 1.0 : 0.99999;
+        var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
         while (i < endIndex1)
         {
             //declare a bool variable to keep of track of whether or not a match has been found 
-            var noMatchFoundYet = true;
+            var matchFound = false;
             //this while loop searches for matches until one is found
-            while (j < endIndex2 & noMatchFoundYet)
+            while (j < endIndex2 && !matchFound)
             {
                 //check if the first character of the first name is equal
                 // **** more work needs to go into this because I am getting system exceptions ****
 
                 //****** Actually what we want to do here is block keys to limit the search space. O(m*n) is very large!!! *******
                 //this checks if the blocking key condition is met 
-                if (Helpers.FirstCharactersAreEqual(records1[i].FirstName,
-                        records2[j].FirstName) & !(records1[i].RecordId==records2[j].RecordId) )
+                if (Helpers.FirstCharactersAreEqual(records1[i].FirstName, records2[j].FirstName) && !(records1[i].RecordId == records2[j].RecordId))
                 {
                     //get the distance vector for the ith vector of the first table and the jth record of the second table
                     var tempDist =
@@ -79,13 +79,11 @@ public static class Run
                     if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
                     {
                         //update the match found bool to stop searching other matches
-                        if (stop_at_first_match)
+                        if (stopAtFirstMatch)
                         {
-                            noMatchFoundYet = false;
+                            matchFound = true;
                         }
-
-                        //duplicatesToAdd.Add(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore));
-                        UrlDuplicates.Add(new UrlDoc(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore)));
+                        potentialDuplicates.Add(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore));
                     }
                 }
 
@@ -110,28 +108,28 @@ public static class Run
         await log.WriteLineAsync("Log close time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
         log.Close();
-        await using var writer = new StreamWriter(output_file_name + "_url_doc.csv");
-        await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-        {
-            csv.Context.RegisterClassMap<UrlDocMap>();
-            await csv.WriteRecordsAsync(UrlDuplicates);
-        }
+        var urlDocs = potentialDuplicates
+            .Select(e => new UrlDoc(e));
+        await using var writer = new StreamWriter(outputFileName + "_url_doc.csv");
+        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        csv.Context.RegisterClassMap<UrlDocMap>();
+        await csv.WriteRecordsAsync(urlDocs);
     }
 
-    public static async Task Run_SameFileComparison_v2(List<PatientRecord> records1, string output_file_name,
-        bool stop_at_first_match = false, bool exact_matches_allowed = false, double lowerScoreThreshold = 0.70)
+    public static async Task Run_SameFileComparison_v2(List<PatientRecord> records1, string outputFileName,
+        bool stopAtFirstMatch = false, bool exactMatchesAllowed = false, double lowerScoreThreshold = 0.70)
     {
         //start a stopwatch
         var logTime = new Stopwatch();
         logTime.Start();
 
         //open a new log document 
-        var outputLog = output_file_name + "_log.txt";
+        var outputLog = outputFileName + "_log.txt";
         var log = new StreamWriter(outputLog);
 
         //write the log start time
         await log.WriteLineAsync("SAME FILE COMPARISON Log start time: " +
-                                DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+                                 DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
         //*** WE WILL BE CHECKING THE WHOLE FILE *******
 
@@ -141,13 +139,13 @@ public static class Run
         var duplicatesToAdd = new List<PotentialDuplicate>();
 
         //check for whether the exact matches are allowed, and set the upper threshold accordingly 
-        var upperScoreThreshold = exact_matches_allowed ? 1.0 : 0.99999;
+        var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
         while (i < records1.Count)
         {
             //declare a bool variable to keep of track of whether or not a match has been found 
-            var noMatchFoundYet = true;
+            var matchFound = false;
             //this while loop searches for matches until one is found
-            while (j < records1.Count & noMatchFoundYet)
+            while (j < records1.Count && !matchFound)
             {
                 //Temporarily, set the blocking key condition to true 
                 if (true) //*** This is where the blocking key goes ******
@@ -161,9 +159,9 @@ public static class Run
                     if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
                     {
                         //update the match found bool to stop searching other matches
-                        if (stop_at_first_match)
+                        if (stopAtFirstMatch)
                         {
-                            noMatchFoundYet = false;
+                            matchFound = true;
                         }
 
                         duplicatesToAdd.Add(new PotentialDuplicate(records1[i], records1[j], tempDist, tempScore));
@@ -189,7 +187,7 @@ public static class Run
 
         //get the current time 
         await log.WriteLineAsync("\n SAME FILE COMPARISON Log close time: " +
-                                DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+                                 DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
         await using (var writer = new StreamWriter("Output.csv"))
         await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
