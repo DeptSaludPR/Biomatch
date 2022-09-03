@@ -2,7 +2,7 @@ using CsvHelper.Configuration;
 
 namespace MatchingEngine.Models;
 
-public record UrlDoc
+public readonly record struct  UrlDoc
 {
     public string Patient1Url { get; }
     public string Patient2Url { get; }
