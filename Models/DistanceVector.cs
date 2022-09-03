@@ -1,6 +1,6 @@
 namespace MatchingEngine.Models;
 
-public class DistanceVector : PatientRecord
+public class DistanceVector
 {
     public int FirstNameDistance { get; set; }
     public int MiddleNameDistance { get; set; }
@@ -31,7 +31,7 @@ public class DistanceVector : PatientRecord
 
     public static DistanceVector CalculateDistance(PatientRecord firstRecord, PatientRecord secondRecord)
     {
-        DistanceVector result = new()
+        return new DistanceVector
         {
             FirstNameDistance = StringDistance.GeneralDemographicFieldDistance(firstRecord.FirstName,
                 secondRecord.FirstName),
@@ -47,6 +47,5 @@ public class DistanceVector : PatientRecord
             PhoneNumberDistance =
                 StringDistance.GeneralDemographicFieldDistance(firstRecord.PhoneNumber, secondRecord.PhoneNumber)
         };
-        return result;
     }
 }

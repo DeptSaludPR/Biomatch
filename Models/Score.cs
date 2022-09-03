@@ -2,7 +2,7 @@ using System;
 
 namespace MatchingEngine.Models;
 
-public class Score
+public static class Score
 {
     private static double singleFieldScore_StepMode(int dist, int threshold = 2, double step = 0.3)
     {
@@ -27,42 +27,42 @@ public class Score
         //culminating at 1-step at the threshold
         else
         {
-            singleFieldScore = 1 - step * ((double)dist / threshold);
+            singleFieldScore = 1 - step * ((double) dist / threshold);
         }
 
         return singleFieldScore;
     }
 
     public static double allFieldsScore_StepMode(DistanceVector d,
-        int fn_treshold = 2, int mn_treshold = 1, int ln_treshold = 2, int sln_treshold = 2,
-        int bday_treshold = 1, int city_treshold = 2, int pn_treshold = 1,
-        double fn_weight = 0.18, double mn_weight = 0.1, double ln_weight = 0.17, double sln_weight = 0.17,
-        double birthDateWeight = 0.20, double cityWeight = 0.08, double pn_weight = 0.1)
+        int fnThreshold = 2, int mnThreshold = 1, int lnThreshold = 2, int slnThreshold = 2,
+        int birthDateThreshold = 1, int cityThreshold = 2, int pnThreshold = 1,
+        double fnWeight = 0.18, double mnWeight = 0.1, double lnWeight = 0.17, double slnWeight = 0.17,
+        double birthDateWeight = 0.20, double cityWeight = 0.08, double pnWeight = 0.1)
     {
-        var checkSum = fn_weight + mn_weight + ln_weight + sln_weight + birthDateWeight + cityWeight + pn_weight;
+        var checkSum = fnWeight + mnWeight + lnWeight + slnWeight + birthDateWeight + cityWeight + pnWeight;
         if (Math.Abs(checkSum - 1.0) != 0)
         {
             throw new Exception("sum of weights is not 1.0");
         }
 
         //get the individual field score distances
-        var firstNameDistance = singleFieldScore_StepMode(d.FirstNameDistance, fn_treshold);
-        var middleNameDistance = singleFieldScore_StepMode(d.MiddleNameDistance, mn_treshold);
-        var lastNameDistance = singleFieldScore_StepMode(d.LastNameDistance, ln_treshold);
-        var secondLastNameDistance = singleFieldScore_StepMode(d.SecondLastNameDistance, sln_treshold);
-        var birthDateDistance = singleFieldScore_StepMode(d.BirthDateDistance, bday_treshold);
-        var cityDistance = singleFieldScore_StepMode(d.CityDistance, city_treshold);
-        var phoneNumberDistance = singleFieldScore_StepMode(d.PhoneNumberDistance, pn_treshold);
+        var firstNameDistance = singleFieldScore_StepMode(d.FirstNameDistance, fnThreshold);
+        var middleNameDistance = singleFieldScore_StepMode(d.MiddleNameDistance, mnThreshold);
+        var lastNameDistance = singleFieldScore_StepMode(d.LastNameDistance, lnThreshold);
+        var secondLastNameDistance = singleFieldScore_StepMode(d.SecondLastNameDistance, slnThreshold);
+        var birthDateDistance = singleFieldScore_StepMode(d.BirthDateDistance, birthDateThreshold);
+        var cityDistance = singleFieldScore_StepMode(d.CityDistance, cityThreshold);
+        var phoneNumberDistance = singleFieldScore_StepMode(d.PhoneNumberDistance, pnThreshold);
         //Then compute the weighted average
         var totalScore = 0.0;
 
-        totalScore += fn_weight * firstNameDistance;
-        totalScore += mn_weight * middleNameDistance;
-        totalScore += ln_weight * lastNameDistance;
-        totalScore += sln_weight * secondLastNameDistance;
+        totalScore += fnWeight * firstNameDistance;
+        totalScore += mnWeight * middleNameDistance;
+        totalScore += lnWeight * lastNameDistance;
+        totalScore += slnWeight * secondLastNameDistance;
         totalScore += birthDateWeight * birthDateDistance;
         totalScore += cityWeight * cityDistance;
-        totalScore += pn_weight * phoneNumberDistance;
+        totalScore += pnWeight * phoneNumberDistance;
         return totalScore;
     }
 }

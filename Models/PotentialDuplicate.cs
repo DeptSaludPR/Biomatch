@@ -1,6 +1,6 @@
 namespace MatchingEngine.Models;
 
-public record PotentialDuplicate
+public readonly record struct PotentialDuplicate
 (
     PatientRecord Value,
     PatientRecord Match,

@@ -1,3 +1,4 @@
+using System;
 
 namespace MatchingEngine;
 
@@ -5,13 +6,6 @@ public static class Helpers
 {
     public static bool FirstCharactersAreEqual(string a, string b)
     {
-        try
-        {
-            return a[..1] == b[..1];
-        }
-        catch
-        {
-            return true;
-        }
+        return string.Equals(a[..1], b[..1], StringComparison.InvariantCultureIgnoreCase);
     }
 }
