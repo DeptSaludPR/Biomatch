@@ -42,49 +42,30 @@ public static class Run
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
         var endIndex2 = searchAllFile2 ? records2.Count : endIndexFile2;
 
-        //declare integers to use like in a for loop
-        var i = startIndex1;
-        var j = startIndex2;
         var potentialDuplicates = new List<PotentialDuplicate>();
-        //var duplicatesToAdd = new List<PotentialDuplicate>();
 
         //check for whether the exact matches are allowed, and set the upper threshold accordingly 
         var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
-        while (i < endIndex1)
+
+        // Parallel.For(0, endIndex1, list1Index =>
+        for (var list1Index = startIndex1; list1Index < endIndex1; list1Index++)
         {
-            //declare a bool variable to keep of track of whether or not a match has been found 
-            var matchFound = false;
-            //this while loop searches for matches until one is found
-            while (j < endIndex2 && !matchFound)
+            var primaryRecord = records1[list1Index];
+            Parallel.For(startIndex2, endIndex2, list2Index =>
+                // for (var list2Index = 0; list2Index < endIndex2; list2Index++)
             {
+                var tempRecord = records2[list2Index];
                 //check if the first character of the first name is equal
-                // **** more work needs to go into this because I am getting system exceptions ****
-
-                //****** Actually what we want to do here is block keys to limit the search space. O(m*n) is very large!!! *******
-                //this checks if the blocking key condition is met 
-                if (Helpers.FirstCharactersAreEqual(records1[i].FirstName, records2[j].FirstName) &&
-                    !(records1[i].RecordId == records2[j].RecordId))
+                if (Helpers.FirstCharactersAreEqual(primaryRecord.FirstName, tempRecord.FirstName) &&
+                    primaryRecord.RecordId != tempRecord.RecordId) return;
+                //get the distance vector for the ith vector of the first table and the jth record of the second table
+                var tempDist = DistanceVector.CalculateDistance(primaryRecord, tempRecord);
+                var tempScore = Score.allFieldsScore_StepMode(tempDist);
+                if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
                 {
-                    //get the distance vector for the ith vector of the first table and the jth record of the second table
-                    var tempDist =
-                        DistanceVector.CalculateDistance(records1[i], records2[j]);
-                    var tempScore = Score.allFieldsScore_StepMode(tempDist);
-
-                    //**** temporarily set to true to record all comparisons. I need to see why it's not recording partial matches ****
-                    if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
-                    {
-                        potentialDuplicates.Add(new PotentialDuplicate(records1[i], records2[j], tempDist, tempScore));
-                    }
+                    potentialDuplicates.Add(new PotentialDuplicate(primaryRecord, tempRecord, tempDist, tempScore));
                 }
-
-                //update the counter for j
-                j++;
-            }
-
-            //reset j to start index
-            j = startIndex2;
-            //update the counter for i 
-            i++;
+            });
         }
 
         //write the total elapsed time on the log
