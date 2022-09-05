@@ -1,6 +1,6 @@
 namespace MatchingEngine.Models;
 
-public readonly record struct PatientRecord
+public record PatientRecord
 (
     Guid RecordId,
     string FirstName,
