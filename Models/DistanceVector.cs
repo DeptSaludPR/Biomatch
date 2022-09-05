@@ -16,7 +16,7 @@ public readonly record struct DistanceVector
             $"First Name: {FirstNameDistance} MiddleName: {MiddleNameDistance} Lastname: {LastNameDistance} SecondLastname: {SecondLastNameDistance} BirthDate: {BirthDateDistance} City: {CityDistance} PhoneNumber: {PhoneNumberDistance}";
     }
 
-    public static DistanceVector CalculateDistance(PatientRecord firstRecord, PatientRecord secondRecord)
+    public static DistanceVector CalculateDistance(ref PatientRecord firstRecord, ref PatientRecord secondRecord)
     {
         return new DistanceVector
         {

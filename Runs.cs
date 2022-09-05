@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using CsvHelper;
@@ -7,7 +8,7 @@ namespace MatchingEngine;
 
 public static class Run
 {
-    public static async Task Run_TwoFileComparison_v2(List<PatientRecord> records1, List<PatientRecord> records2,
+    public static async Task RunFileComparisons(PatientRecord[] records1, PatientRecord[] records2,
         string outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
         bool searchAllFile2 = true, int startIndexFile2 = 1, int endIndexFile2 = 100, bool exactMatchesAllowed = false,
         double lowerScoreThreshold = 0.65)
@@ -21,7 +22,7 @@ public static class Run
         var log = new StreamWriter(outputLog);
 
         //write the log start time and settings 
-        await log.WriteLineAsync("Log start time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+        await log.WriteLineAsync("Log start time: " + DateTime.UtcNow.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
         await log.WriteLineAsync(
             "\nThe variable 'exact_matches_allowed' is set to: " + exactMatchesAllowed);
         await log.WriteLineAsync("\nFor this run, we are using a score threshold of: " + lowerScoreThreshold);
@@ -32,7 +33,7 @@ public static class Run
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
-        var endIndex1 = searchAllFile1 ? records1.Count : endIndexFile1;
+        var endIndex1 = searchAllFile1 ? records1.Length : endIndexFile1;
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set start_index1 to 0. Else, use the provided start index
@@ -40,33 +41,12 @@ public static class Run
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
-        var endIndex2 = searchAllFile2 ? records2.Count : endIndexFile2;
-
-        var potentialDuplicates = new List<PotentialDuplicate>();
-
+        var endIndex2 = searchAllFile2 ? records2.Length : endIndexFile2;
         //check for whether the exact matches are allowed, and set the upper threshold accordingly 
         var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
 
-        // Parallel.For(0, endIndex1, list1Index =>
-        for (var list1Index = startIndex1; list1Index < endIndex1; list1Index++)
-        {
-            var primaryRecord = records1[list1Index];
-            Parallel.For(startIndex2, endIndex2, list2Index =>
-                // for (var list2Index = 0; list2Index < endIndex2; list2Index++)
-            {
-                var tempRecord = records2[list2Index];
-                //check if the first character of the first name is equal
-                if (Helpers.FirstCharactersAreEqual(primaryRecord.FirstName, tempRecord.FirstName) &&
-                    primaryRecord.RecordId != tempRecord.RecordId) return;
-                //get the distance vector for the ith vector of the first table and the jth record of the second table
-                var tempDist = DistanceVector.CalculateDistance(primaryRecord, tempRecord);
-                var tempScore = Score.allFieldsScore_StepMode(tempDist);
-                if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
-                {
-                    potentialDuplicates.Add(new PotentialDuplicate(primaryRecord, tempRecord, tempDist, tempScore));
-                }
-            });
-        }
+        var potentialDuplicates = GetPotentialDuplicates(records1, records2, startIndex1, endIndex1, startIndex2,
+            endIndex2, lowerScoreThreshold, upperScoreThreshold);
 
         //write the total elapsed time on the log
         logTime.Stop();
@@ -82,7 +62,7 @@ public static class Run
             $"\nOf the total of {potentialDuplicates.Count} potential duplicates, {potentialDuplicates.Count(x => x.Score >= 0.7)} have a score of 0.7 or higher.");
 
         //get the current time 
-        await log.WriteLineAsync("Log close time: " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
+        await log.WriteLineAsync("Log close time: " + DateTime.UtcNow.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
 
         log.Close();
         var urlDocs = potentialDuplicates
@@ -93,85 +73,32 @@ public static class Run
         await csv.WriteRecordsAsync(urlDocs);
     }
 
-    public static async Task Run_SameFileComparison_v2(List<PatientRecord> records1, string outputFileName,
-        bool stopAtFirstMatch = false, bool exactMatchesAllowed = false, double lowerScoreThreshold = 0.70)
+    private static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(IReadOnlyList<PatientRecord> records1,
+        IReadOnlyList<PatientRecord> records2, int startIndex1, int endIndex1, int startIndex2, int endIndex2,
+        double lowerScoreThreshold, double upperScoreThreshold)
     {
-        //start a stopwatch
-        var logTime = new Stopwatch();
-        logTime.Start();
-
-        //open a new log document 
-        var outputLog = outputFileName + "_log.txt";
-        var log = new StreamWriter(outputLog);
-
-        //write the log start time
-        await log.WriteLineAsync("SAME FILE COMPARISON Log start time: " +
-                                 DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
-
-        //*** WE WILL BE CHECKING THE WHOLE FILE *******
-
-        //declare integers to use like in a for loop
-        var i = 0;
-        var j = 1;
-        var duplicatesToAdd = new List<PotentialDuplicate>();
-
-        //check for whether the exact matches are allowed, and set the upper threshold accordingly 
-        var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
-        while (i < records1.Count)
+        var potentialDuplicates = new ConcurrentBag<PotentialDuplicate>();
+        Parallel.For(startIndex1, endIndex1, list1Index =>
+            // for (var list1Index = startIndex1; list1Index < endIndex1; list1Index++)
         {
-            //declare a bool variable to keep of track of whether or not a match has been found 
-            var matchFound = false;
-            //this while loop searches for matches until one is found
-            while (j < records1.Count && !matchFound)
+            var primaryRecord = records1[list1Index];
+            // Parallel.For(startIndex2, endIndex2, list2Index =>
+            for (var list2Index = startIndex2; list2Index < endIndex2; list2Index++)
             {
-                //Temporarily, set the blocking key condition to true 
-                if (true) //*** This is where the blocking key goes ******
+                var tempRecord = records2[list2Index];
+                //check if the first character of the first name is equal
+                if (!Helpers.FirstCharactersAreEqual(primaryRecord.FirstName, tempRecord.FirstName) ||
+                    primaryRecord.RecordId == tempRecord.RecordId) continue;
+                //get the distance vector for the ith vector of the first table and the jth record of the second table
+                var tempDist = DistanceVector.CalculateDistance(ref primaryRecord, ref tempRecord);
+                var tempScore = Score.allFieldsScore_StepMode(tempDist);
+                if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
                 {
-                    //get the distance vector for the ith vector of the first table and the jth record of the second table
-                    var tempDist =
-                        DistanceVector.CalculateDistance(records1[i], records1[j]);
-                    var tempScore = Score.allFieldsScore_StepMode(tempDist);
-
-                    //**** temporarily set to true to record all comparisons. I need to see why it's not recording partial matches ****
-                    if (tempScore >= lowerScoreThreshold & tempScore <= upperScoreThreshold)
-                    {
-                        //update the match found bool to stop searching other matches
-                        if (stopAtFirstMatch)
-                        {
-                            matchFound = true;
-                        }
-
-                        duplicatesToAdd.Add(new PotentialDuplicate(records1[i], records1[j], tempDist, tempScore));
-                    }
+                    potentialDuplicates.Add(new PotentialDuplicate(primaryRecord, tempRecord, tempDist, tempScore));
                 }
-
-                //update the counter for j
-                j++;
             }
+        });
 
-            //update the counter for i 
-            i++;
-            //reset j to start index
-            j = i + 1;
-        }
-
-        //write the total elapsed time on the log
-        logTime.Stop();
-        var logTs = logTime.Elapsed;
-        var logElapsedTime =
-            $"{logTs.Hours:00}:{logTs.Minutes:00}:{logTs.Seconds:00}.{logTs.Milliseconds / 10:00}";
-        await log.WriteLineAsync("\n SAME FILE COMPARISON process took: " + logElapsedTime);
-
-        //get the current time 
-        await log.WriteLineAsync("\n SAME FILE COMPARISON Log close time: " +
-                                 DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
-
-        await using (var writer = new StreamWriter("Output.csv"))
-        await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-        {
-            await csv.WriteRecordsAsync(duplicatesToAdd);
-        }
-
-        log.Close();
+        return potentialDuplicates;
     }
 }

@@ -2,13 +2,12 @@ namespace MatchingEngine.Models;
 
 public static class StringDistance
 {
-    private static int LowMemoryLevenshteinDist(string sRow, string sCol)
+    private static int LowMemoryLevenshteinDist(ReadOnlySpan<char> sRow, ReadOnlySpan<char> sCol)
     {
         var rowLen = sRow.Length; // length of sRow
         var colLen = sCol.Length; // length of sCol
         int rowIdx; // iterates through sRow
         int colIdx; // iterates through sCol
-
 
         // Step 1
 
@@ -84,15 +83,15 @@ public static class StringDistance
         return v0[rowLen];
     }
 
-    public static int GeneralDemographicFieldDistance(string a, string b)
+    public static int GeneralDemographicFieldDistance(ReadOnlySpan<char> a, ReadOnlySpan<char> b)
     {
         int distance;
         //check for empty values
-        if (a == string.Empty || b == string.Empty)
+        if (a.IsEmpty || b.IsEmpty)
         {
             distance = -1;
         }
-        else if (a == string.Empty && b == string.Empty)
+        else if (a.IsEmpty && b.IsEmpty)
         {
             distance = 0;
         }
