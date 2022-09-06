@@ -7,7 +7,7 @@ using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.CLI.Services;
 
-public class DuplicateService
+public static class DuplicateService
 {
     public static async Task RunFileComparisons(PatientRecord[] records1, PatientRecord[] records2,
         string outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
@@ -68,7 +68,7 @@ public class DuplicateService
         log.Close();
         var urlDocs = potentialDuplicates
             .Select(e => new DuplicateRecord(e));
-        await using var writer = new StreamWriter(outputFileName + "_url_doc.csv");
+        await using var writer = new StreamWriter(outputFileName);
         await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csv.Context.RegisterClassMap<DuplicateRecordMap>();
         await csv.WriteRecordsAsync(urlDocs);

@@ -1,7 +1,6 @@
 using System.CommandLine;
 using System.Globalization;
 using CsvHelper;
-using MatchingEngine.CLI.Csv;
 using MatchingEngine.CLI.Services;
 using MatchingEngine.Domain.Models;
 
@@ -18,7 +17,8 @@ public static partial class MatchingCommand
             (name: "filePath2", description: "The path to the second file to be compared");
 
         var outputOption = new Option<string>
-            (name: "--output", description: "Output file path");
+            (name: "--output", description: "Output file path",
+                getDefaultValue: () => "./Duplicates.csv");
         outputOption.AddAlias("-o");
 
         var scoreOption = new Option<double>
