@@ -1,4 +1,4 @@
-namespace MatchingEngine.Models;
+namespace MatchingEngine.Domain.Models;
 
 public record PatientRecord
 (

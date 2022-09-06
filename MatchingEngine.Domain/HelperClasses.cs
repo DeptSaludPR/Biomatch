@@ -1,4 +1,4 @@
-namespace MatchingEngine;
+namespace MatchingEngine.Domain;
 
 public static class Helpers
 {

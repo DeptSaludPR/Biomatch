@@ -2,18 +2,19 @@ using System.Globalization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using CsvHelper;
-using MatchingEngine.Models;
+using MatchingEngine.Domain;
+using MatchingEngine.Domain.Models;
 
-namespace MatchingEngine;
+namespace MatchingEngine.Benchmark;
 
 [SimpleJob(RunStrategy.Throughput, warmupCount: 10, targetCount: 10)]
 [MemoryDiagnoser]
-public class MatchingEngineBenchmark
+public class FindDuplicateBenchmark
 {
     private PatientRecord[] RecordsToMatch { get; }
     private PatientRecord[] SampleRecords { get; }
 
-    public MatchingEngineBenchmark()
+    public FindDuplicateBenchmark()
     {
         using var readerFile1 = new StreamReader("./Data/Sample100.csv");
         using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
@@ -29,7 +30,7 @@ public class MatchingEngineBenchmark
     [Benchmark]
     public void RunBenchmark()
     {
-        Run.GetPotentialDuplicates(RecordsToMatch, SampleRecords, 0, RecordsToMatch.Length, 0, SampleRecords.Length,
+        Duplicate.GetPotentialDuplicates(RecordsToMatch, SampleRecords, 0, RecordsToMatch.Length, 0, SampleRecords.Length,
             0.8, 0.99999);
     }
 }

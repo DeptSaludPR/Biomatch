@@ -1,6 +1,6 @@
 using Quickenshtein;
 
-namespace MatchingEngine.Models;
+namespace MatchingEngine.Domain.Models;
 
 public static class StringDistance
 {
