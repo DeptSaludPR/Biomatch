@@ -1,6 +1,6 @@
-namespace MatchingEngine.Domain;
+namespace MatchingEngine.Domain.Helpers;
 
-public static class Helpers
+public static class StringHelpers
 {
     public static bool FirstCharactersAreEqual(ReadOnlySpan<char> a, ReadOnlySpan<char> b)
     {

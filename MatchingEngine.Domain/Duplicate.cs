@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MatchingEngine.Domain.Helpers;
 using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.Domain;
@@ -17,7 +18,7 @@ public static class Duplicate
             {
                 var tempRecord = records2[list2Index];
                 //check if the first character of the first name is equal
-                if (!Helpers.FirstCharactersAreEqual(primaryRecord.FirstName, tempRecord.FirstName) ||
+                if (!StringHelpers.FirstCharactersAreEqual(primaryRecord.FirstName, tempRecord.FirstName) ||
                     primaryRecord.RecordId == tempRecord.RecordId) return;
                 //get the distance vector for the ith vector of the first table and the jth record of the second table
                 var distanceVector = DistanceVector.CalculateDistance(primaryRecord, tempRecord);
