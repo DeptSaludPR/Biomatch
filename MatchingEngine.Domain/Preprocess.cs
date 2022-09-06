@@ -1,9 +1,9 @@
 using MatchingEngine.Domain.Helpers;
 using MatchingEngine.Domain.Models;
 
-namespace MatchingEngine.CLI.Services;
+namespace MatchingEngine.Domain;
 
-public static class PreprocessService
+public static class Preprocess
 {
     public static IEnumerable<PatientRecord> PreprocessData(IEnumerable<PatientRecord> patientRecords)
     {

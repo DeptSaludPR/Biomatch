@@ -1,7 +1,7 @@
 using System.CommandLine;
 using System.Globalization;
 using CsvHelper;
-using MatchingEngine.CLI.Services;
+using MatchingEngine.Domain;
 using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.CLI.Commands;
@@ -15,7 +15,7 @@ public static partial class MatchingCommand
 
         var outputOption = new Option<string>
             (name: "--output", description: "Output file path",
-                getDefaultValue: () => "./");
+                getDefaultValue: () => "./ProcessedRecords.csv");
         outputOption.AddAlias("-o");
 
         var command = new Command("preprocess", "Prepare a file for matching")
@@ -32,9 +32,9 @@ public static partial class MatchingCommand
                 var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
                 var records1 = records1FromCsv.ToArray();
 
-                var processedRecords = PreprocessService.PreprocessData(records1);
+                var processedRecords = Preprocess.PreprocessData(records1);
                 
-                await using var writer = new StreamWriter(outputOptionValue + "ProcessedRecords.csv");
+                await using var writer = new StreamWriter(outputOptionValue);
                 await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 await csv.WriteRecordsAsync(processedRecords);
             },
