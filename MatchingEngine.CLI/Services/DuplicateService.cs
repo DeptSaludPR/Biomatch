@@ -1,12 +1,13 @@
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using CsvHelper;
-using MatchingEngine.Models;
+using MatchingEngine.CLI.Csv;
+using MatchingEngine.Domain;
+using MatchingEngine.Domain.Models;
 
-namespace MatchingEngine;
+namespace MatchingEngine.CLI.Services;
 
-public static class Run
+public class DuplicateService
 {
     public static async Task RunFileComparisons(PatientRecord[] records1, PatientRecord[] records2,
         string outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
@@ -45,8 +46,8 @@ public static class Run
         //check for whether the exact matches are allowed, and set the upper threshold accordingly 
         var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
 
-        var potentialDuplicates = GetPotentialDuplicates(records1, records2, startIndex1, endIndex1, startIndex2,
-            endIndex2, lowerScoreThreshold, upperScoreThreshold);
+        var potentialDuplicates = Duplicate.GetPotentialDuplicates(records1, records2, startIndex1, endIndex1,
+            startIndex2, endIndex2, lowerScoreThreshold, upperScoreThreshold);
 
         //write the total elapsed time on the log
         logTime.Stop();
@@ -66,37 +67,10 @@ public static class Run
 
         log.Close();
         var urlDocs = potentialDuplicates
-            .Select(e => new UrlDoc(e));
+            .Select(e => new DuplicateRecord(e));
         await using var writer = new StreamWriter(outputFileName + "_url_doc.csv");
         await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        csv.Context.RegisterClassMap<UrlDocMap>();
+        csv.Context.RegisterClassMap<DuplicateRecordMap>();
         await csv.WriteRecordsAsync(urlDocs);
-    }
-
-    public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(IReadOnlyList<PatientRecord> records1,
-        IReadOnlyList<PatientRecord> records2, int startIndex1, int endIndex1, int startIndex2, int endIndex2,
-        double lowerScoreThreshold, double upperScoreThreshold)
-    {
-        var potentialDuplicates = new ConcurrentBag<PotentialDuplicate>();
-        Parallel.For(startIndex1, endIndex1, list1Index =>
-        {
-            var primaryRecord = records1[list1Index];
-            Parallel.For(startIndex2, endIndex2, list2Index =>
-            {
-                var tempRecord = records2[list2Index];
-                //check if the first character of the first name is equal
-                if (!Helpers.FirstCharactersAreEqual(primaryRecord.FirstName, tempRecord.FirstName) ||
-                    primaryRecord.RecordId == tempRecord.RecordId) return;
-                //get the distance vector for the ith vector of the first table and the jth record of the second table
-                var distanceVector = DistanceVector.CalculateDistance(primaryRecord, tempRecord);
-                var tempScore = Score.allFieldsScore_StepMode(ref distanceVector);
-                if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
-                {
-                    potentialDuplicates.Add(new PotentialDuplicate(primaryRecord, tempRecord, distanceVector, tempScore));
-                }
-            });
-        });
-
-        return potentialDuplicates;
     }
 }
