@@ -10,15 +10,15 @@ public static partial class MatchingCommand
 {
     public static Command GetFindDuplicatesCommand()
     {
-        var filePath1Argument = new Argument<string>
+        var filePath1Argument = new Argument<FileInfo>
             (name: "filePath1", description: "The path to the first file to be compared");
 
-        var filePath2Argument = new Argument<string>
+        var filePath2Argument = new Argument<FileInfo>
             (name: "filePath2", description: "The path to the second file to be compared");
 
-        var outputOption = new Option<string>
+        var outputOption = new Option<FileInfo>
             (name: "--output", description: "Output file path",
-                getDefaultValue: () => "./Duplicates.csv");
+                getDefaultValue: () => new FileInfo("Duplicates.csv"));
         outputOption.AddAlias("-o");
 
         var scoreOption = new Option<double>
@@ -37,12 +37,12 @@ public static partial class MatchingCommand
         command.SetHandler(
             async (filePath1ArgumentValue, filePath2ArgumentValue, outputOptionValue, scoreOptionValue) =>
             {
-                using var readerFile1 = new StreamReader(filePath1ArgumentValue);
+                using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
                 using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
                 var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
                 var records1 = records1FromCsv.ToArray();
 
-                using var reader = new StreamReader(filePath2ArgumentValue);
+                using var reader = new StreamReader(filePath2ArgumentValue.FullName);
                 using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
                 var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
                 var records2 = records2FromCsv.ToArray();

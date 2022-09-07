@@ -8,7 +8,6 @@ public static class Preprocess
     public static IEnumerable<PatientRecord> PreprocessData(IEnumerable<PatientRecord> patientRecords)
     {
         return patientRecords
-            .OrderBy(e => e.FirstName)
             .Select(e => new PatientRecord
             (
                 e.RecordId,
@@ -19,6 +18,7 @@ public static class Preprocess
                 e.BirthDate.Trim(),
                 e.City.SanitizeName(),
                 e.PhoneNumber.ToLowerInvariant().Trim()
-            ));
+            ))
+            .OrderBy(e => e.FirstName);
     }
 }
