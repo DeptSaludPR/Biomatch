@@ -6,8 +6,8 @@ var preprocessCommand = MatchingCommand.GetPreprocessCommand();
 
 var rootCommand = new RootCommand
 {
+    preprocessCommand,
     findDuplicatesCommand,
-    preprocessCommand
 };
 
 await rootCommand.InvokeAsync(args);

@@ -10,7 +10,7 @@ namespace MatchingEngine.CLI.Services;
 public static class DuplicateService
 {
     public static async Task RunFileComparisons(PatientRecord[] records1, PatientRecord[] records2,
-        string outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
+        FileInfo outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
         bool searchAllFile2 = true, int startIndexFile2 = 1, int endIndexFile2 = 100, bool exactMatchesAllowed = false,
         double lowerScoreThreshold = 0.65)
     {
@@ -68,7 +68,7 @@ public static class DuplicateService
         log.Close();
         var urlDocs = potentialDuplicates
             .Select(e => new DuplicateRecord(e));
-        await using var writer = new StreamWriter(outputFileName);
+        await using var writer = new StreamWriter(outputFileName.FullName);
         await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csv.Context.RegisterClassMap<DuplicateRecordMap>();
         await csv.WriteRecordsAsync(urlDocs);
