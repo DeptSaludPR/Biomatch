@@ -5,9 +5,24 @@ namespace MatchingEngine.Domain.Helpers;
 
 public static class StringExtensions
 {
-    public static string SanitizeName(this string name)
+    public static List<string> SanitizeName(this string name)
     {
-        var normalizedString = name.Normalize(NormalizationForm.FormD);
+        var sanitizedWords = new List<string>();
+        var words = name.Split(' ');
+        foreach (var word in words)
+        {
+            var sanitizedWord = word.SanitizeWord();
+            if (string.IsNullOrEmpty(sanitizedWord)) continue;
+
+            sanitizedWords.Add(sanitizedWord);
+        }
+
+        return sanitizedWords;
+    }
+
+    public static string SanitizeWord(this string word)
+    {
+        var normalizedString = word.Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder();
 
         ReadOnlySpan<char> spanValue = normalizedString;
