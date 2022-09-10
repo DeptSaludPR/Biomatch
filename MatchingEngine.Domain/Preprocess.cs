@@ -21,12 +21,12 @@ public static class Preprocess
             {
                 if (firstNames.Count > 1)
                 {
-                    middleName = firstNames.Count > 1 ? string.Join(' ', firstNames) : firstNames[1];
+                    middleName = string.Join(' ', firstNames.Skip(1));
                 }
             }
             else
             {
-                firstName = string.Join(" ", firstNames);
+                firstName = string.Join(' ', firstNames);
             }
 
             var lastName = lastNames.FirstOrDefault();
@@ -35,12 +35,12 @@ public static class Preprocess
             {
                 if (lastNames.Count > 1)
                 {
-                    secondLastName = lastNames.Count > 1 ? string.Join(' ', lastNames) : lastNames[1];
+                    secondLastName = string.Join(' ', lastNames.Skip(1));
                 }
             }
             else
             {
-                lastName = string.Join(" ", lastNames.Skip(1));
+                lastName = string.Join(' ', lastNames.Skip(1));
             }
 
             processedPatientRecords.Add(new PatientRecord
