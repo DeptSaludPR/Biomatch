@@ -1,3 +1,4 @@
+using MatchingEngine.Domain.Enums;
 using MatchingEngine.Domain.Helpers;
 using MatchingEngine.Domain.Models;
 
@@ -21,11 +22,11 @@ public static class Preprocess
                 .RemoveSuffixes()
                 .ToList();
             var lastNames = patientRecord.LastName
-                .SanitizeName()
+                .SanitizeName(NameType.LastName)
                 .RemovePrepositions()
                 .ToList();
             var secondLastNames = patientRecord.SecondLastName
-                .SanitizeName()
+                .SanitizeName(NameType.LastName)
                 .RemovePrepositions()
                 .ToList();
 
@@ -35,12 +36,12 @@ public static class Preprocess
             {
                 if (firstNames.Count > 1)
                 {
-                    middleName = string.Join(' ', firstNames.Skip(1));
+                    middleName = string.Concat(firstNames.Skip(1));
                 }
             }
             else
             {
-                firstName = string.Join(' ', firstNames);
+                firstName = string.Concat(firstNames);
             }
 
             var lastName = lastNames.FirstOrDefault();
@@ -49,12 +50,12 @@ public static class Preprocess
             {
                 if (lastNames.Count > 1)
                 {
-                    secondLastName = string.Join(' ', lastNames.Skip(1));
+                    secondLastName = string.Concat(lastNames.Skip(1));
                 }
             }
             else
             {
-                lastName = string.Join(' ', lastNames);
+                lastName = string.Concat(lastNames);
             }
 
             processedPatientRecords.Add(new PatientRecord
