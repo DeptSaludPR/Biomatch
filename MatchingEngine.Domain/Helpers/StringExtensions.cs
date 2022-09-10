@@ -1,14 +1,21 @@
 using System.Globalization;
 using System.Text;
+using MatchingEngine.Domain.Enums;
 
 namespace MatchingEngine.Domain.Helpers;
 
 public static class StringExtensions
 {
-    public static IEnumerable<string> SanitizeName(this string name)
+    public static IEnumerable<string> SanitizeName(this string name, NameType nameType = NameType.FirstName)
     {
         var sanitizedWords = new List<string>();
-        var words = name.Split(' ');
+        var separators = nameType switch
+        {
+            NameType.LastName => new[] {' ', '-', '_'},
+            _ => new[] {' '}
+        };
+
+        var words = name.Split(separators);
         foreach (var word in words)
         {
             var sanitizedWord = word.SanitizeWord();
@@ -48,12 +55,12 @@ public static class StringExtensions
 
         return words.Where(w => !prepositions.Contains(w));
     }
-    
+
     public static IEnumerable<string> RemoveSuffixes(this IEnumerable<string> words)
     {
         var suffixes = new List<string>
         {
-            "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii"
+            "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms"
         };
 
         return words.Where(w => !suffixes.Contains(w));
