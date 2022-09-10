@@ -40,7 +40,7 @@ public static class Preprocess
             }
             else
             {
-                lastName = string.Join(' ', lastNames.Skip(1));
+                lastName = string.Join(' ', lastNames);
             }
 
             processedPatientRecords.Add(new PatientRecord
