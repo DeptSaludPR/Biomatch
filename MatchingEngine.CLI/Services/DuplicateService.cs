@@ -18,6 +18,9 @@ public static class DuplicateService
         var timer = new Stopwatch();
         timer.Start();
 
+        var preprocessedRecords1 = Preprocess.PreprocessData(records1).ToArray();
+        var preprocessedRecords2 = Preprocess.PreprocessData(records2).ToArray();
+        
         //check if the user wants to search among all entities from record 1. 
         //If true, set start_index1 to 0. Else, use the provided start index
         var startIndex1 = searchAllFile1 ? 0 : startIndexFile1;
@@ -32,12 +35,9 @@ public static class DuplicateService
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
-        var endIndex2 = searchAllFile2 ? records2.Length : endIndexFile2;
+        var endIndex2 = searchAllFile2 ? preprocessedRecords2.Length : endIndexFile2;
         //check for whether the exact matches are allowed, and set the upper threshold accordingly 
         var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
-
-        var preprocessedRecords1 = Preprocess.PreprocessData(records1).ToArray();
-        var preprocessedRecords2 = Preprocess.PreprocessData(records2).ToArray();
 
         var potentialDuplicates = Duplicate.GetPotentialDuplicates(preprocessedRecords1, preprocessedRecords2,
             startIndex1, endIndex1, startIndex2, endIndex2, lowerScoreThreshold, upperScoreThreshold);

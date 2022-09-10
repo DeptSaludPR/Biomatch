@@ -52,7 +52,7 @@ public static partial class MatchingCommand
                 using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
                 var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
 
-                await DuplicateService.RunFileComparisons(records1, records2,
+                await DuplicateService.RunFileComparisons(records1FromCsv, records2FromCsv,
                     outputOptionValue, true, 1, 100, true, 1, 100, false, scoreOptionValue, logPathValue);
             },
             filePath1Argument, filePath2Argument, outputOption, scoreOption, logPathOption);
