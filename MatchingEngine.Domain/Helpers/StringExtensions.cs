@@ -5,7 +5,7 @@ namespace MatchingEngine.Domain.Helpers;
 
 public static class StringExtensions
 {
-    public static List<string> SanitizeName(this string name)
+    public static IEnumerable<string> SanitizeName(this string name)
     {
         var sanitizedWords = new List<string>();
         var words = name.Split(' ');
@@ -37,5 +37,25 @@ public static class StringExtensions
         }
 
         return sb.ToString();
+    }
+
+    public static IEnumerable<string> RemovePrepositions(this IEnumerable<string> words)
+    {
+        var prepositions = new List<string>
+        {
+            "el", "la", "los", "las", "de", "del", "en", "y", "a", "di", "da", "le", "san"
+        };
+
+        return words.Where(w => !prepositions.Contains(w));
+    }
+    
+    public static IEnumerable<string> RemoveSuffixes(this IEnumerable<string> words)
+    {
+        var suffixes = new List<string>
+        {
+            "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii"
+        };
+
+        return words.Where(w => !suffixes.Contains(w));
     }
 }

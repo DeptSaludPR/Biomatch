@@ -10,10 +10,24 @@ public static class Preprocess
         var processedPatientRecords = new List<PatientRecord>();
         foreach (var patientRecord in patientRecords)
         {
-            var firstNames = patientRecord.FirstName.SanitizeName();
-            var middleNames = patientRecord.MiddleName.SanitizeName();
-            var lastNames = patientRecord.LastName.SanitizeName();
-            var secondLastNames = patientRecord.SecondLastName.SanitizeName();
+            var firstNames = patientRecord.FirstName
+                .SanitizeName()
+                .RemovePrepositions()
+                .RemoveSuffixes()
+                .ToList();
+            var middleNames = patientRecord.MiddleName
+                .SanitizeName()
+                .RemovePrepositions()
+                .RemoveSuffixes()
+                .ToList();
+            var lastNames = patientRecord.LastName
+                .SanitizeName()
+                .RemovePrepositions()
+                .ToList();
+            var secondLastNames = patientRecord.SecondLastName
+                .SanitizeName()
+                .RemovePrepositions()
+                .ToList();
 
             var firstName = firstNames.FirstOrDefault();
             var middleName = middleNames.FirstOrDefault();
