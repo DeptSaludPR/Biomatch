@@ -28,8 +28,7 @@ public static partial class MatchingCommand
 
         var logPathOption = new Option<FileInfo?>
         (name: "--log",
-            description: "Log file path",
-            getDefaultValue: () => null);
+            description: "Log file path. If not provided log file will not be generated.");
         logPathOption.AddAlias("-l");
 
         var command = new Command("find-duplicates", "Find duplicates records in two files")
