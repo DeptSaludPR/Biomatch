@@ -9,10 +9,10 @@ namespace MatchingEngine.CLI.Services;
 
 public static class DuplicateService
 {
-    public static async Task RunFileComparisons(PatientRecord[] records1, PatientRecord[] records2,
-        FileInfo outputFileName, bool searchAllFile1 = true, int startIndexFile1 = 1, int endIndexFile1 = 100,
-        bool searchAllFile2 = true, int startIndexFile2 = 1, int endIndexFile2 = 100, bool exactMatchesAllowed = false,
-        double lowerScoreThreshold = 0.65)
+    public static async Task RunFileComparisons(IEnumerable<PatientRecord> records1,
+        IEnumerable<PatientRecord> records2, FileInfo outputFileName, bool searchAllFile1 = true,
+        int startIndexFile1 = 1, int endIndexFile1 = 100, bool searchAllFile2 = true, int startIndexFile2 = 1,
+        int endIndexFile2 = 100, bool exactMatchesAllowed = false, double lowerScoreThreshold = 0.65)
     {
         //start a stopwatch
         var logTime = new Stopwatch();
@@ -28,13 +28,19 @@ public static class DuplicateService
             "\nThe variable 'exact_matches_allowed' is set to: " + exactMatchesAllowed);
         await log.WriteLineAsync("\nFor this run, we are using a score threshold of: " + lowerScoreThreshold);
 
+        //check for whether the exact matches are allowed, and set the upper threshold accordingly 
+        var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
+
+        var preprocessedRecords1 = Preprocess.PreprocessData(records1).ToArray();
+        var preprocessedRecords2 = Preprocess.PreprocessData(records2).ToArray();
+
         //check if the user wants to search among all entities from record 1. 
         //If true, set start_index1 to 0. Else, use the provided start index
         var startIndex1 = searchAllFile1 ? 0 : startIndexFile1;
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
-        var endIndex1 = searchAllFile1 ? records1.Length : endIndexFile1;
+        var endIndex1 = searchAllFile1 ? preprocessedRecords1.Length : endIndexFile1;
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set start_index1 to 0. Else, use the provided start index
@@ -42,16 +48,10 @@ public static class DuplicateService
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set end_index1 to Records1.Length. Else, use the provided end index
-        var endIndex2 = searchAllFile2 ? records2.Length : endIndexFile2;
-        //check for whether the exact matches are allowed, and set the upper threshold accordingly 
-        var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
-
-        var preprocessedRecords1 = Preprocess.PreprocessData(records1).ToArray();
-        var preprocessedRecords2 = Preprocess.PreprocessData(records2).ToArray();
+        var endIndex2 = searchAllFile2 ? preprocessedRecords2.Length : endIndexFile2;
 
         var potentialDuplicates = Duplicate.GetPotentialDuplicates(preprocessedRecords1, preprocessedRecords2,
-            startIndex1, endIndex1,
-            startIndex2, endIndex2, lowerScoreThreshold, upperScoreThreshold);
+            startIndex1, endIndex1, startIndex2, endIndex2, lowerScoreThreshold, upperScoreThreshold);
 
         //write the total elapsed time on the log
         logTime.Stop();

@@ -30,9 +30,8 @@ public static partial class MatchingCommand
                 using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
                 using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
                 var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
-                var records1 = records1FromCsv.ToArray();
 
-                var processedRecords = Preprocess.PreprocessData(records1);
+                var processedRecords = Preprocess.PreprocessData(records1FromCsv);
                 
                 await using var writer = new StreamWriter(outputOptionValue.FullName);
                 await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);

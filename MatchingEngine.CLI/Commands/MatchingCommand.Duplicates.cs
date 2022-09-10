@@ -40,14 +40,12 @@ public static partial class MatchingCommand
                 using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
                 using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
                 var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
-                var records1 = records1FromCsv.ToArray();
 
                 using var reader = new StreamReader(filePath2ArgumentValue.FullName);
                 using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
                 var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
-                var records2 = records2FromCsv.ToArray();
 
-                await DuplicateService.RunFileComparisons(records1, records2,
+                await DuplicateService.RunFileComparisons(records1FromCsv, records2FromCsv,
                     outputOptionValue, true, 1, 100, true, 1, 100, false, scoreOptionValue);
             },
             filePath1Argument, filePath2Argument, outputOption, scoreOption);
