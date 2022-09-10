@@ -7,7 +7,11 @@ public static class StringDistance
     public static int GeneralDemographicFieldDistance(ReadOnlySpan<char> a, ReadOnlySpan<char> b)
     {
         int distance;
-        if (a.IsEmpty || b.IsEmpty)
+        if (a.IsEmpty && b.IsEmpty)
+        {
+            distance = 0;
+        }
+        else if (a.IsEmpty || b.IsEmpty)
         {
             distance = -1;
         }
