@@ -52,8 +52,7 @@ public static class DuplicateService
                 $"{logTs.Hours:00}:{logTs.Minutes:00}:{logTs.Seconds:00}.{logTs.Milliseconds / 10:00}";
         
             //open a new log document 
-            var outputLog = outputFileName + "_log.txt";
-            var log = new StreamWriter(outputLog);
+            var log = new StreamWriter(logFilePath.FullName);
 
             //write the log start time and settings 
             await log.WriteLineAsync("Log start time: " + DateTime.UtcNow.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
@@ -61,15 +60,15 @@ public static class DuplicateService
                 "\nThe variable 'exact_matches_allowed' is set to: " + exactMatchesAllowed);
             await log.WriteLineAsync("\nFor this run, we are using a score threshold of: " + lowerScoreThreshold);
             await log.WriteLineAsync("\nThe whole process took: " + logElapsedTime);
-            await log.WriteLineAsync($"\nThere are {preprocessedRecords1.Length} provided records to find duplicates for.");
+            await log.WriteLineAsync($"\nThere are {preprocessedRecords1.Length} provided records for the sample.");
             await log.WriteLineAsync($"\nThere are {preprocessedRecords2.Length} records to search for duplicates.");
-            await log.WriteLineAsync($"\nThere are {potentialDuplicates.Count} potential duplicates in the provided files.");
+            await log.WriteLineAsync($"\nThere are {potentialDuplicates.Count} potential duplicates in the provided files. This represents {potentialDuplicates.Count / (double) preprocessedRecords2.Length:P2} of the provided records.");
             await log.WriteLineAsync(
-                $"\n{potentialDuplicates.Count(x => x.Score >= 0.9)} have a score of 0.9 or higher.");
+                $"\n{potentialDuplicates.Count(x => x.Score >= 0.9)} have a score of 0.9 or higher. ({potentialDuplicates.Count(x => x.Score >= 0.9) / (double) potentialDuplicates.Count:P2})");
             await log.WriteLineAsync(
-                $"\n{potentialDuplicates.Count(x => x.Score is >= 0.8 and < 0.9)} have a score of >= 0.8 and < 0.9.");
+                $"\n{potentialDuplicates.Count(x => x.Score is >= 0.8 and < 0.9)} have a score of >= 0.8 and < 0.9. ({potentialDuplicates.Count(x => x.Score is >= 0.8 and < 0.9) / (double) potentialDuplicates.Count:P2})");
             await log.WriteLineAsync(
-                $"\n{potentialDuplicates.Count(x => x.Score is >= 0.7 and < 0.8)} have a score of >= 0.7 and < 0.8.");
+                $"\n{potentialDuplicates.Count(x => x.Score is >= 0.7 and < 0.8)} have a score of >= 0.7 and < 0.8. ({potentialDuplicates.Count(x => x.Score is >= 0.7 and < 0.8) / (double) potentialDuplicates.Count:P2})");
 
             //get the current time 
             await log.WriteLineAsync("\nLog close time: " + DateTime.UtcNow.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));
