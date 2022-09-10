@@ -1,14 +1,14 @@
 ﻿using System.CommandLine;
 using MatchingEngine.CLI.Commands;
 
-var findDuplicatesCommand = MatchingCommand.GetFindDuplicatesCommand();
+var duplicatesCommand = MatchingCommand.GetDuplicatesCommand();
 var preprocessCommand = MatchingCommand.GetPreprocessCommand();
 var templateCommand = MatchingCommand.GetTemplateCommand();
 
 var rootCommand = new RootCommand("Contains utilities for matching data")
 {
     preprocessCommand,
-    findDuplicatesCommand,
+    duplicatesCommand,
     templateCommand
 };
 

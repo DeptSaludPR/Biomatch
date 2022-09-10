@@ -8,7 +8,18 @@ namespace MatchingEngine.CLI.Commands;
 
 public static partial class MatchingCommand
 {
-    public static Command GetFindDuplicatesCommand()
+    public static Command GetDuplicatesCommand()
+    {
+        var findDuplicatesCommand = GetFindDuplicatesCommand();
+
+        var command = new Command("duplicates", "Duplicate records operations")
+        {
+            findDuplicatesCommand,
+        };
+
+        return command;
+    }
+    private static Command GetFindDuplicatesCommand()
     {
         var filePath1Argument = new Argument<FileInfo>
             (name: "filePath1", description: "The path to the first file to be compared");
@@ -31,7 +42,7 @@ public static partial class MatchingCommand
             description: "Log file path. If not provided log file will not be generated.");
         logPathOption.AddAlias("-l");
 
-        var command = new Command("find-duplicates", "Find duplicates records in two files")
+        var command = new Command("find", "Find duplicates records in two files")
         {
             filePath1Argument,
             filePath2Argument,
