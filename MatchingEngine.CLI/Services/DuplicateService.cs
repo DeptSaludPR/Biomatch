@@ -14,14 +14,15 @@ public static class DuplicateService
         IEnumerable<PatientRecord> records2, FileInfo outputFileName, bool searchAllFile1 = true,
         int startIndexFile1 = 1, int endIndexFile1 = 100, bool searchAllFile2 = true, int startIndexFile2 = 1,
         int endIndexFile2 = 100, bool exactMatchesAllowed = false, double lowerScoreThreshold = 0.65,
-        FileInfo? logFilePath = null)
+        WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
+        WordDictionary? lastNamesDictionary = null, FileInfo? logFilePath = null)
     {
         //start a stopwatch
         var timer = new Stopwatch();
         timer.Start();
 
-        var preprocessedRecords1 = Preprocess.PreprocessData(records1).ToArray();
-        var preprocessedRecords2 = Preprocess.PreprocessData(records2).ToArray();
+        var preprocessedRecords1 = records1.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
+        var preprocessedRecords2 = records2.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
 
         //check if the user wants to search among all entities from record 1. 
         //If true, set start_index1 to 0. Else, use the provided start index
@@ -50,7 +51,7 @@ public static class DuplicateService
         if (logFilePath is not null)
         {
             await WriteLogFile(logFilePath, timer.Elapsed, exactMatchesAllowed, lowerScoreThreshold,
-                preprocessedRecords1.Length, preprocessedRecords2.Length, potentialDuplicates);
+                preprocessedRecords2.Length, preprocessedRecords1.Length, potentialDuplicates);
         }
 
         var urlDocs = potentialDuplicates
@@ -82,11 +83,15 @@ public static class DuplicateService
         await log.WriteLineAsync(
             $"\nThere are {potentialDuplicates.Count:N0} potential duplicates in the provided files. This represents {potentialDuplicates.Count / (double) recordsToSearchTotal:P2} of the provided records.");
         await log.WriteLineAsync(
-            $"\n{potentialDuplicates.Count(x => x.Score >= 0.9):N0} have a score of 0.9 or higher. ({potentialDuplicates.Count(x => x.Score >= 0.9) / (double) potentialDuplicates.Count:P2})");
+            $"\n{potentialDuplicates.Count(x => x.Score >= 0.95):N0} have a score of 0.95 or higher. ({potentialDuplicates.Count(x => x.Score >= 0.95) / (double) potentialDuplicates.Count:P2})");
         await log.WriteLineAsync(
-            $"\n{potentialDuplicates.Count(x => x.Score is >= 0.8 and < 0.9):N0} have a score of >= 0.8 and < 0.9. ({potentialDuplicates.Count(x => x.Score is >= 0.8 and < 0.9) / (double) potentialDuplicates.Count:P2})");
+            $"\n{potentialDuplicates.Count(x => x.Score is >= 0.9 and < 0.95):N0} have a score of 0.9 and < 0.95. ({potentialDuplicates.Count(x => x.Score is >= 0.9 and < 0.95) / (double) potentialDuplicates.Count:P2})");
         await log.WriteLineAsync(
-            $"\n{potentialDuplicates.Count(x => x.Score is >= 0.7 and < 0.8):N0} have a score of >= 0.7 and < 0.8. ({potentialDuplicates.Count(x => x.Score is >= 0.7 and < 0.8) / (double) potentialDuplicates.Count:P2})");
+            $"\n{potentialDuplicates.Count(x => x.Score is >= 0.85 and < 0.9):N0} have a score of >= 0.85 and < 0.9. ({potentialDuplicates.Count(x => x.Score is >= 0.85 and < 0.9) / (double) potentialDuplicates.Count:P2})");
+        await log.WriteLineAsync(
+            $"\n{potentialDuplicates.Count(x => x.Score is >= 0.8 and < 0.85):N0} have a score of >= 0.8 and < 0.85. ({potentialDuplicates.Count(x => x.Score is >= 0.8 and < 0.85) / (double) potentialDuplicates.Count:P2})");
+        await log.WriteLineAsync(
+            $"\n{potentialDuplicates.Count(x => x.Score is >= 0.75 and < 0.8):N0} have a score of >= 0.75 and < 0.8. ({potentialDuplicates.Count(x => x.Score is >= 0.75 and < 0.8) / (double) potentialDuplicates.Count:P2})");
 
         //get the current time 
         await log.WriteLineAsync("\nLog close time: " + DateTime.UtcNow.ToString("yyyy-MM-dd hh:mm:ss zzzzzz"));

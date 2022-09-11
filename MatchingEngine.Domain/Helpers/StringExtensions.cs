@@ -6,7 +6,8 @@ namespace MatchingEngine.Domain.Helpers;
 
 public static class StringExtensions
 {
-    public static IEnumerable<string> SanitizeName(this string name, NameType nameType = NameType.FirstName)
+    public static IEnumerable<string> SanitizeName(this string name, NameType nameType = NameType.Name,
+        WordDictionary? wordDictionary = null)
     {
         var sanitizedWords = new List<string>();
         var separators = nameType switch
@@ -18,10 +19,16 @@ public static class StringExtensions
         var words = name.Split(separators);
         foreach (var word in words)
         {
-            var sanitizedWord = word.SanitizeWord();
+            var sanitizedWord = word.NormalizeWord();
             if (string.IsNullOrEmpty(sanitizedWord)) continue;
+            if (wordDictionary is not null)
+            {
+                var suggestItems = wordDictionary.TrySpellCheck(sanitizedWord);
+                if (suggestItems.Count == 1)
+                    sanitizedWord = suggestItems[0].term;
+            }
 
-            sanitizedWords.Add(sanitizedWord);
+            sanitizedWords.Add(sanitizedWord.SanitizeWord());
         }
 
         return sanitizedWords;
@@ -39,6 +46,24 @@ public static class StringExtensions
 
             if (unicodeCategory == UnicodeCategory.NonSpacingMark) continue;
             if (!char.IsAsciiLetter(c)) continue;
+
+            sb.Append(char.ToLowerInvariant(c));
+        }
+
+        return sb.ToString();
+    }
+    
+    public static string NormalizeWord(this string word)
+    {
+        var normalizedString = word.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+
+        ReadOnlySpan<char> spanValue = normalizedString;
+        foreach (var c in spanValue)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+
+            if (unicodeCategory == UnicodeCategory.NonSpacingMark) continue;
 
             sb.Append(char.ToLowerInvariant(c));
         }

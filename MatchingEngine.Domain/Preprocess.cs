@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using MatchingEngine.Domain.Enums;
 using MatchingEngine.Domain.Helpers;
 using MatchingEngine.Domain.Models;
@@ -6,35 +7,49 @@ namespace MatchingEngine.Domain;
 
 public static class Preprocess
 {
-    public static IEnumerable<PatientRecord> PreprocessData(IEnumerable<PatientRecord> patientRecords)
+    public static IEnumerable<PatientRecord> PreprocessData(this IEnumerable<PatientRecord> patientRecords,
+        WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
+        WordDictionary? lastNamesDictionary = null)
     {
-        var processedPatientRecords = new List<PatientRecord>();
-        foreach (var patientRecord in patientRecords)
+        var patientRecordsList = patientRecords.ToList();
+        return patientRecordsList
+            .SanitizeRecords(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary)
+            .OrderBy(e => e.FirstName);
+    }
+
+    private static IEnumerable<PatientRecord> SanitizeRecords(this IEnumerable<PatientRecord> patientRecords,
+        WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
+        WordDictionary? lastNamesDictionary = null)
+    {
+        var patientRecordsList = patientRecords.ToArray();
+        var processedPatientRecords = new ConcurrentBag<PatientRecord>();
+        Parallel.For(0, patientRecordsList.Length, index =>
         {
+            var patientRecord = patientRecordsList[index];
             var firstNames = patientRecord.FirstName
-                .SanitizeName()
+                .SanitizeName(NameType.Name, firstNamesDictionary)
                 .RemovePrepositions()
                 .RemoveSuffixes()
-                .ToList();
+                .ToArray();
             var middleNames = patientRecord.MiddleName
-                .SanitizeName()
+                .SanitizeName(NameType.Name, middleNamesDictionary)
                 .RemovePrepositions()
                 .RemoveSuffixes()
-                .ToList();
+                .ToArray();
             var lastNames = patientRecord.LastName
-                .SanitizeName(NameType.LastName)
+                .SanitizeName(NameType.LastName, lastNamesDictionary)
                 .RemovePrepositions()
-                .ToList();
+                .ToArray();
             var secondLastNames = patientRecord.SecondLastName
-                .SanitizeName(NameType.LastName)
+                .SanitizeName(NameType.LastName, lastNamesDictionary)
                 .RemovePrepositions()
-                .ToList();
+                .ToArray();
 
             var firstName = firstNames.FirstOrDefault();
             var middleName = middleNames.FirstOrDefault();
-            if (middleNames.Count == 0)
+            if (middleNames.Length == 0)
             {
-                if (firstNames.Count > 1)
+                if (firstNames.Length > 1)
                 {
                     middleName = string.Concat(firstNames.Skip(1));
                 }
@@ -46,9 +61,9 @@ public static class Preprocess
 
             var lastName = lastNames.FirstOrDefault();
             var secondLastName = secondLastNames.FirstOrDefault();
-            if (secondLastNames.Count == 0)
+            if (secondLastNames.Length == 0)
             {
-                if (lastNames.Count > 1)
+                if (lastNames.Length > 1)
                 {
                     secondLastName = string.Concat(lastNames.Skip(1));
                 }
@@ -58,20 +73,18 @@ public static class Preprocess
                 lastName = string.Concat(lastNames);
             }
 
-            processedPatientRecords.Add(new PatientRecord
-            (
-                patientRecord.RecordId,
-                firstName ?? string.Empty,
-                middleName ?? string.Empty,
-                lastName ?? string.Empty,
-                secondLastName ?? string.Empty,
-                patientRecord.BirthDate.Trim(),
-                patientRecord.City.SanitizeWord(),
-                patientRecord.PhoneNumber.Trim()
-            ));
-        }
+            processedPatientRecords.Add(patientRecord with
+            {
+                FirstName = firstName ?? string.Empty,
+                MiddleName = middleName ?? string.Empty,
+                LastName = lastName ?? string.Empty,
+                SecondLastName = secondLastName ?? string.Empty,
+                BirthDate = patientRecord.BirthDate.Trim(),
+                City = patientRecord.City.SanitizeWord(),
+                PhoneNumber = patientRecord.PhoneNumber.Trim()
+            });
+        });
 
-        return processedPatientRecords
-            .OrderBy(e => e.FirstName);
+        return processedPatientRecords;
     }
 }

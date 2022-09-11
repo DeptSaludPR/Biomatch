@@ -15,7 +15,7 @@ public class PreprocessBenchmark
     
     public PreprocessBenchmark()
     {
-        using var readerFile1 = new StreamReader("./Data/testPatients.csv");
+        using var readerFile1 = new StreamReader("./Data/persons.csv");
         using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
         var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
         RecordsToMatch = records1FromCsv.ToArray();
@@ -24,6 +24,6 @@ public class PreprocessBenchmark
     [Benchmark]
     public void PreprocessData()
     {
-        Preprocess.PreprocessData(RecordsToMatch);
+        RecordsToMatch.PreprocessData();
     }
 }
