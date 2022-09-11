@@ -29,13 +29,45 @@ public static class Duplicate
                 endIndex = i - 1;
                 break;
             }
+
             if (startIndex == null) continue;
             characterIndex.TryAdd(letter, new[] {startIndex.Value, endIndex ?? records.Count - 1});
         }
 
         return characterIndex;
     }
-    
+
+    public static Dictionary<char, int[]> GetCharactersStartAndEndIndex(IReadOnlyList<string> records)
+    {
+        var characterIndex = new Dictionary<char, int[]>();
+
+        var currentIndex = 0;
+        for (var letter = 'a'; letter <= 'z'; letter++)
+        {
+            int? startIndex = null;
+            int? endIndex = null;
+            for (var i = currentIndex; i < records.Count; i++)
+            {
+                if (startIndex == null && records[i].StartsWith(letter))
+                {
+                    startIndex = i;
+                    continue;
+                }
+
+                if (startIndex == null || records[i].StartsWith(letter)) continue;
+
+                currentIndex = i;
+                endIndex = i - 1;
+                break;
+            }
+
+            if (startIndex == null) continue;
+            characterIndex.TryAdd(letter, new[] {startIndex.Value, endIndex ?? records.Count - 1});
+        }
+
+        return characterIndex;
+    }
+
     public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(IReadOnlyList<PatientRecord> records1,
         IReadOnlyList<PatientRecord> records2, int startIndex1, int endIndex1, int startIndex2, int endIndex2,
         double lowerScoreThreshold, double upperScoreThreshold)
@@ -66,7 +98,7 @@ public static class Duplicate
                     }
                 });
         });
-        
+
 
         return potentialDuplicates;
     }
