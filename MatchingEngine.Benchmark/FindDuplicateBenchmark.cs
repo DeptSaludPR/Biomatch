@@ -9,7 +9,7 @@ namespace MatchingEngine.Benchmark;
 
 [SimpleJob(RunStrategy.Throughput, warmupCount: 5, targetCount: 10)]
 [MemoryDiagnoser]
-public class FindDuplicateBenchmark
+public sealed class FindDuplicateBenchmark
 {
     private PatientRecord[] RecordsToMatch { get; }
     private PatientRecord[] SampleRecords { get; }

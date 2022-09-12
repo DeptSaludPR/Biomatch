@@ -1,6 +1,6 @@
 namespace MatchingEngine.Domain;
 
-public class WordDictionary
+public sealed class WordDictionary
 {
     private readonly SymSpell _symSpell;
 

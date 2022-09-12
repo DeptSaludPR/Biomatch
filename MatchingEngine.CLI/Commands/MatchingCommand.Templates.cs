@@ -75,7 +75,7 @@ public static partial class MatchingCommand
 
         return command;
     }
-    
+
     private static Command GetPreprocessCommand()
     {
         var filePath1Argument = new Argument<FileInfo>
@@ -97,8 +97,8 @@ public static partial class MatchingCommand
         lastNamesDictionaryFilePathOption.AddAlias("-dl");
 
         var outputOption = new Option<FileInfo>
-            (name: "--output", description: "Output file path",
-                getDefaultValue: () => new FileInfo("ProcessedRecords.csv"));
+        (name: "--output", description: "Output file path",
+            getDefaultValue: () => new FileInfo("ProcessedRecords.csv"));
         outputOption.AddAlias("-o");
 
         var command = new Command("preprocess", "Executes the preprocessing pipeline on a template")
@@ -128,7 +128,8 @@ public static partial class MatchingCommand
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("FirstNames dictionary not loaded, generate dictionary files to improve preprocessing.");
+                    Console.WriteLine(
+                        "FirstNames dictionary not loaded, generate dictionary files to improve preprocessing.");
                     Console.ResetColor();
                 }
 
@@ -142,9 +143,11 @@ public static partial class MatchingCommand
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("MiddleNames dictionary not loaded, generate dictionary files to improve preprocessing.");
+                    Console.WriteLine(
+                        "MiddleNames dictionary not loaded, generate dictionary files to improve preprocessing.");
                     Console.ResetColor();
                 }
+
                 WordDictionary? lastNamesDictionary = null;
                 if (lastNamesDictionaryFilePathOptionValue.Exists)
                 {
@@ -155,12 +158,14 @@ public static partial class MatchingCommand
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("LastNames dictionary not loaded, generate dictionary files to improve preprocessing.");
+                    Console.WriteLine(
+                        "LastNames dictionary not loaded, generate dictionary files to improve preprocessing.");
                     Console.ResetColor();
                 }
 
-                var processedRecords = records1FromCsv.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
-                
+                var processedRecords =
+                    records1FromCsv.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
+
                 await using var writer = new StreamWriter(outputOptionValue.FullName);
                 await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 await csv.WriteRecordsAsync(processedRecords);
@@ -204,36 +209,37 @@ public static partial class MatchingCommand
 
                 var differences = records1FromCsv.Except(records2FromCsv);
 
-                var newDifferences = new List<PatientRecord>();
+                var newDifferences = new List<PatientRecordForDifference>();
                 foreach (var difference in differences)
                 {
                     var differentRecord = records2FromCsv.Find(e => e.RecordId == difference.RecordId);
                     if (differentRecord != null)
                     {
-                        newDifferences.Add(difference with
-                        {
-                            FirstName = difference.FirstName != differentRecord.FirstName
+                        newDifferences.Add(new PatientRecordForDifference
+                        (
+                            difference.RecordId,
+                            difference.FirstName != differentRecord.FirstName
                                 ? $"{difference.FirstName} -> {differentRecord.FirstName}"
                                 : difference.FirstName,
-                            MiddleName = difference.MiddleName != differentRecord.MiddleName
+                            difference.MiddleName != differentRecord.MiddleName
                                 ? $"{difference.MiddleName} -> {differentRecord.MiddleName}"
                                 : difference.MiddleName,
-                            LastName = difference.LastName != differentRecord.LastName
+                            difference.LastName != differentRecord.LastName
                                 ? $"{difference.LastName} -> {differentRecord.LastName}"
                                 : difference.LastName,
-                            SecondLastName = difference.SecondLastName != differentRecord.SecondLastName
+                            difference.SecondLastName != differentRecord.SecondLastName
                                 ? $"{difference.SecondLastName} -> {differentRecord.SecondLastName}"
                                 : difference.SecondLastName,
-                            BirthDate = difference.BirthDate != differentRecord.BirthDate
+                            difference.BirthDate != differentRecord.BirthDate
                                 ? $"{difference.BirthDate} -> {differentRecord.BirthDate}"
-                                : difference.BirthDate,
-                            City = difference.City != differentRecord.City
+                                : difference.BirthDate?.ToShortDateString() ?? "",
+                            difference.City != differentRecord.City
                                 ? $"{difference.City} -> {differentRecord.City}"
                                 : difference.City,
-                            PhoneNumber = difference.PhoneNumber != differentRecord.PhoneNumber
+                            difference.PhoneNumber != differentRecord.PhoneNumber
                                 ? $"{difference.PhoneNumber} -> {differentRecord.PhoneNumber}"
-                                : difference.PhoneNumber,
-                        });
+                                : difference.PhoneNumber
+                        ));
                     }
                 }
 

@@ -79,7 +79,7 @@ public static class Preprocess
                 MiddleName = middleName ?? string.Empty,
                 LastName = lastName ?? string.Empty,
                 SecondLastName = secondLastName ?? string.Empty,
-                BirthDate = patientRecord.BirthDate.Trim(),
+                BirthDate = patientRecord.BirthDate.SanitizeBirthDate(),
                 City = patientRecord.City.SanitizeWord(),
                 PhoneNumber = patientRecord.PhoneNumber.Trim()
             });

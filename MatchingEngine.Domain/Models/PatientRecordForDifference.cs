@@ -1,13 +1,13 @@
 namespace MatchingEngine.Domain.Models;
 
-public sealed record PatientRecord
+public sealed record PatientRecordForDifference
 (
     Guid RecordId,
     string FirstName,
     string MiddleName,
     string LastName,
     string SecondLastName,
-    DateTime? BirthDate,
+    string BirthDate,
     string City,
     string PhoneNumber
 );
