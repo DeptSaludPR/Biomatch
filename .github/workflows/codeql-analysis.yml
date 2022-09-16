@@ -68,13 +68,14 @@ jobs:
     #   echo "Run, Build Application using script"
     #   ./location_of_script_within_repo/buildscript.sh
     
-    - name: Build Application
+    - name: Set up .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '7.0.x'
         include-prerelease: true
-      run: |
-        dotnet build --configuration Release
+        
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
