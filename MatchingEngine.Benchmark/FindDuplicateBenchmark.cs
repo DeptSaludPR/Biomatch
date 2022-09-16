@@ -7,21 +7,21 @@ using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.Benchmark;
 
-[SimpleJob(RunStrategy.Throughput, warmupCount: 5, targetCount: 10)]
+[SimpleJob(RunStrategy.Throughput, warmupCount: 2, targetCount: 5)]
 [MemoryDiagnoser]
-public sealed class FindDuplicateBenchmark
+public class FindDuplicateBenchmark
 {
     private PatientRecord[] RecordsToMatch { get; }
     private PatientRecord[] SampleRecords { get; }
 
     public FindDuplicateBenchmark()
     {
-        using var readerFile1 = new StreamReader("./Data/Sample100.csv");
+        using var readerFile1 = new StreamReader("./Data/persons_to_match.csv");
         using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
         var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
         RecordsToMatch = records1FromCsv.ToArray();
 
-        using var reader = new StreamReader("./Data/ProcessedRecords.csv");
+        using var reader = new StreamReader("./Data/persons.csv");
         using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
         var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
         SampleRecords = records2FromCsv.ToArray();

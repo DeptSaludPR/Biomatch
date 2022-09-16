@@ -16,9 +16,10 @@ public static class StringExtensions
             _ => new[] {' '}
         };
 
-        var words = name.Split(separators);
-        foreach (var word in words)
+        ReadOnlySpan<string> words = name.Split(separators);
+        for (var i = 0; i < words.Length; i++)
         {
+            var word = words[i];
             var sanitizedWord = word.NormalizeWord();
             if (string.IsNullOrEmpty(sanitizedWord)) continue;
             if (wordDictionary is not null)

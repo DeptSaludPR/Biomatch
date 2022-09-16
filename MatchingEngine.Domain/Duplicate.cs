@@ -6,7 +6,7 @@ namespace MatchingEngine.Domain;
 
 public static class Duplicate
 {
-    private static Dictionary<char, int[]> GetCharactersStartAndEndIndex(IReadOnlyList<PatientRecord> records)
+    private static Dictionary<char, int[]> GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
     {
         var characterIndex = new Dictionary<char, int[]>();
 
@@ -15,7 +15,7 @@ public static class Duplicate
         {
             int? startIndex = null;
             int? endIndex = null;
-            for (var i = currentIndex; i < records.Count; i++)
+            for (var i = currentIndex; i < records.Length; i++)
             {
                 if (startIndex == null && records[i].FirstName.StartsWith(letter))
                 {
@@ -31,45 +31,14 @@ public static class Duplicate
             }
 
             if (startIndex == null) continue;
-            characterIndex.TryAdd(letter, new[] {startIndex.Value, endIndex ?? records.Count - 1});
-        }
-
-        return characterIndex;
-    }
-
-    public static Dictionary<char, int[]> GetCharactersStartAndEndIndex(IReadOnlyList<string> records)
-    {
-        var characterIndex = new Dictionary<char, int[]>();
-
-        var currentIndex = 0;
-        for (var letter = 'a'; letter <= 'z'; letter++)
-        {
-            int? startIndex = null;
-            int? endIndex = null;
-            for (var i = currentIndex; i < records.Count; i++)
-            {
-                if (startIndex == null && records[i].StartsWith(letter))
-                {
-                    startIndex = i;
-                    continue;
-                }
-
-                if (startIndex == null || records[i].StartsWith(letter)) continue;
-
-                currentIndex = i;
-                endIndex = i - 1;
-                break;
-            }
-
-            if (startIndex == null) continue;
-            characterIndex.TryAdd(letter, new[] {startIndex.Value, endIndex ?? records.Count - 1});
+            characterIndex.TryAdd(letter, new[] {startIndex.Value, endIndex ?? records.Length - 1});
         }
 
         return characterIndex;
     }
 
     public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(IReadOnlyList<PatientRecord> records1,
-        IReadOnlyList<PatientRecord> records2, int startIndex1, int endIndex1, int startIndex2, int endIndex2,
+        PatientRecord[] records2, int startIndex1, int endIndex1, int startIndex2, int endIndex2,
         double lowerScoreThreshold, double upperScoreThreshold)
     {
         var characterStartAndEndIndex = GetCharactersStartAndEndIndex(records2);

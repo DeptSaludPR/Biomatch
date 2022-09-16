@@ -3,4 +3,4 @@
 using BenchmarkDotNet.Running;
 using MatchingEngine.Benchmark;
 
-BenchmarkRunner.Run<PreprocessBenchmark>();
+BenchmarkRunner.Run<FindDuplicateBenchmark>();

@@ -7,9 +7,9 @@ using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.Benchmark;
 
-[SimpleJob(RunStrategy.Throughput, warmupCount: 5, targetCount: 10)]
+[SimpleJob(RunStrategy.Throughput, warmupCount: 2, targetCount: 5)]
 [MemoryDiagnoser]
-public sealed class PreprocessBenchmark
+public class PreprocessBenchmark
 {
     private PatientRecord[] RecordsToMatch { get; }
     
