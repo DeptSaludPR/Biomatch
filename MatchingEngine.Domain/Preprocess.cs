@@ -11,8 +11,7 @@ public static class Preprocess
         WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
         WordDictionary? lastNamesDictionary = null)
     {
-        var patientRecordsList = patientRecords.ToList();
-        return patientRecordsList
+        return patientRecords
             .SanitizeRecords(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary)
             .OrderBy(e => e.FirstName);
     }
