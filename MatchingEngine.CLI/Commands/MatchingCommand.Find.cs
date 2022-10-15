@@ -130,7 +130,7 @@ public static partial class MatchingCommand
                 }
 
                 await DuplicateService.RunFileComparisons(records1FromCsv, records2FromCsv,
-                    outputOptionValue, false,
+                    outputOptionValue, true,
                     scoreOptionValue, firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, logPathValue);
             },
             filePath1Argument, filePath2Argument, firstNamesDictionaryFilePathOption,
