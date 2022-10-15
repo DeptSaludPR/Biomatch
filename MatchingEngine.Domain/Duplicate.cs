@@ -38,20 +38,19 @@ public static class Duplicate
     }
 
     public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(IReadOnlyList<PatientRecord> records1,
-        PatientRecord[] records2, int startIndex1, int endIndex1, int startIndex2, int endIndex2,
-        double lowerScoreThreshold, double upperScoreThreshold)
+        PatientRecord[] records2, double lowerScoreThreshold, double upperScoreThreshold)
     {
         var characterStartAndEndIndex = GetCharactersStartAndEndIndex(records2);
         var potentialDuplicates = new ConcurrentBag<PotentialDuplicate>();
-        Parallel.For(startIndex1, endIndex1, list1Index =>
+        Parallel.For(0, records1.Count, list1Index =>
         {
             var primaryRecord = records1[list1Index];
             int[]? indices = null;
             _ = primaryRecord.FirstName.Length > 0 &&
                 characterStartAndEndIndex.TryGetValue(primaryRecord.FirstName[0], out indices);
 
-            Parallel.For(indices != null ? indices[0] : startIndex2,
-                indices != null ? indices[1] : endIndex2, list2Index =>
+            Parallel.For(indices != null ? indices[0] : 0,
+                indices != null ? indices[1] : records2.Length, list2Index =>
                 {
                     var tempRecord = records2[list2Index];
                     //check if the first character of the first name is equal

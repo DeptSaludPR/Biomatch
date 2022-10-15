@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Globalization;
+using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
 using MatchingEngine.Domain;
@@ -114,7 +115,7 @@ public static partial class MatchingCommand
         {
             Delimiter = "\t",
         };
-        await using var writer = new StreamWriter(directoryInfo.FullName + fileName);
+        await using var writer = new StreamWriter(directoryInfo.FullName + fileName, false, Encoding.UTF8);
         await using var csv = new CsvWriter(writer, config);
         foreach (var word in frequencyDictionary)
         {

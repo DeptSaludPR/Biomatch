@@ -2,7 +2,7 @@ namespace MatchingEngine.Domain.Models;
 
 public sealed record PatientRecordForDifference
 (
-    Guid RecordId,
+    string RecordId,
     string FirstName,
     string MiddleName,
     string LastName,

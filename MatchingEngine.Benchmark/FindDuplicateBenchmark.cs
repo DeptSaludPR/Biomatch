@@ -30,7 +30,6 @@ public class FindDuplicateBenchmark
     [Benchmark]
     public void DuplicateBenchmark()
     {
-        Duplicate.GetPotentialDuplicates(RecordsToMatch, SampleRecords, 0, RecordsToMatch.Length, 0, SampleRecords.Length,
-            0.8, 0.99999);
+        Duplicate.GetPotentialDuplicates(RecordsToMatch, SampleRecords, 0.8, 1.0);
     }
 }
