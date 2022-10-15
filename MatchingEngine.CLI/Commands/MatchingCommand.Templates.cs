@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Globalization;
+using System.Text;
 using CsvHelper;
 using MatchingEngine.Domain;
 using MatchingEngine.Domain.Models;
@@ -36,7 +37,7 @@ public static partial class MatchingCommand
         command.SetHandler(
             async (outputOptionValue) =>
             {
-                await using var writer = new StreamWriter(outputOptionValue.FullName);
+                await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
                 await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 csv.WriteHeader<PatientRecord>();
             }, outputOption);
@@ -114,7 +115,7 @@ public static partial class MatchingCommand
             async (filePath1ArgumentValue, firstNamesDictionaryFilePathOptionValue,
                 middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue) =>
             {
-                using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
+                using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName, Encoding.UTF8);
                 using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
                 var records1FromCsv = csvRecords1.GetRecords<PatientRecord>().ToList();
 
@@ -166,7 +167,7 @@ public static partial class MatchingCommand
                 var processedRecords =
                     records1FromCsv.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
 
-                await using var writer = new StreamWriter(outputOptionValue.FullName);
+                await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
                 await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 await csv.WriteRecordsAsync(processedRecords);
             },
@@ -243,7 +244,7 @@ public static partial class MatchingCommand
                     }
                 }
 
-                await using var writer = new StreamWriter(outputOptionValue.FullName);
+                await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
                 await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 await csv.WriteRecordsAsync(newDifferences);
             }, filePathTemplate1Argument, filePathTemplate2Argument, outputOption);

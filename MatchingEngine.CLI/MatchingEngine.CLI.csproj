@@ -13,7 +13,6 @@
         <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
 <!--        <PublishTrimmed>true</PublishTrimmed>-->
 <!--        <TrimMode>partial</TrimMode>-->
-        <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>

@@ -25,59 +25,43 @@ public static class Preprocess
         Parallel.For(0, patientRecordsList.Length, index =>
         {
             var patientRecord = patientRecordsList[index];
-            var firstNames = patientRecord.FirstName
-                .SanitizeName(NameType.Name, firstNamesDictionary)
-                .RemovePrepositions()
-                .RemoveSuffixes()
-                .ToArray();
-            var middleNames = patientRecord.MiddleName
-                .SanitizeName(NameType.Name, middleNamesDictionary)
-                .RemovePrepositions()
-                .RemoveSuffixes()
-                .ToArray();
-            var lastNames = patientRecord.LastName
-                .SanitizeName(NameType.LastName, lastNamesDictionary)
-                .RemovePrepositions()
-                .ToArray();
-            var secondLastNames = patientRecord.SecondLastName
-                .SanitizeName(NameType.LastName, lastNamesDictionary)
-                .RemovePrepositions()
-                .ToArray();
 
-            var firstName = firstNames.FirstOrDefault();
-            var middleName = middleNames.FirstOrDefault();
-            if (middleNames.Length == 0)
-            {
-                if (firstNames.Length > 1)
-                {
-                    middleName = string.Concat(firstNames.Skip(1));
-                }
-            }
-            else
-            {
-                firstName = string.Concat(firstNames);
-            }
+            var normalizedFirstNames = patientRecord.FirstName
+                .NormalizeNames(NameType.Name)
+                .RemovePrepositions()
+                .RemoveSuffixes();
+            var normalizedMiddleNames = patientRecord.MiddleName
+                .NormalizeNames(NameType.Name)
+                .RemovePrepositions()
+                .RemoveSuffixes();
+            var normalizedLastNames = patientRecord.LastName
+                .NormalizeNames(NameType.LastName)
+                .RemovePrepositions();
+            var normalizedSecondLastNames = patientRecord.SecondLastName
+                .NormalizeNames(NameType.LastName)
+                .RemovePrepositions();
 
-            var lastName = lastNames.FirstOrDefault();
-            var secondLastName = secondLastNames.FirstOrDefault();
-            if (secondLastNames.Length == 0)
-            {
-                if (lastNames.Length > 1)
-                {
-                    secondLastName = string.Concat(lastNames.Skip(1));
-                }
-            }
-            else
-            {
-                lastName = string.Concat(lastNames);
-            }
+            var personName = OrganizeNames(normalizedFirstNames, normalizedMiddleNames.ToList(),
+                normalizedLastNames, normalizedSecondLastNames, middleNamesDictionary);
+
+            var firstNames = personName.FirstName
+                .SanitizeName(NameType.Name, firstNamesDictionary);
+
+            var middleNames = personName.MiddleName
+                .SanitizeName(NameType.Name, middleNamesDictionary);
+
+            var lastNames = personName.LastName
+                .SanitizeName(NameType.LastName, lastNamesDictionary);
+
+            var secondLastNames = personName.SecondLastName
+                .SanitizeName(NameType.LastName, lastNamesDictionary);
 
             processedPatientRecords.Add(patientRecord with
             {
-                FirstName = firstName ?? string.Empty,
-                MiddleName = middleName ?? string.Empty,
-                LastName = lastName ?? string.Empty,
-                SecondLastName = secondLastName ?? string.Empty,
+                FirstName = string.Concat(firstNames),
+                MiddleName = string.Concat(middleNames),
+                LastName = string.Concat(lastNames),
+                SecondLastName = string.Concat(secondLastNames),
                 BirthDate = patientRecord.BirthDate.SanitizeBirthDate(),
                 City = patientRecord.City.SanitizeWord(),
                 PhoneNumber = patientRecord.PhoneNumber.Trim()
@@ -85,5 +69,69 @@ public static class Preprocess
         });
 
         return processedPatientRecords;
+    }
+
+    private static PersonName OrganizeNames(IEnumerable<string> firstNames, IReadOnlyCollection<string> middleNames,
+        IEnumerable<string> lastNames, IEnumerable<string> secondLastNames,
+        WordDictionary? middleNamesDictionary = null)
+    {
+        var names = firstNames.Concat(middleNames).Concat(lastNames).Concat(secondLastNames).ToArray();
+        var firstName = string.Empty;
+        var middleName = string.Empty;
+        var lastName = string.Empty;
+        var secondLastName = string.Empty;
+
+        switch (names.Length)
+        {
+            case > 3:
+                firstName = names[0];
+                middleName = names[1];
+                lastName = names[2];
+                secondLastName = string.Join(' ', names.Skip(3));
+                break;
+            case 3:
+            {
+                var trySpellCheckLastName = middleNamesDictionary?.TrySpellCheck(names[1]);
+                firstName = names[0];
+
+                if (trySpellCheckLastName?.Count > 0)
+                {
+                    lastName = names[1];
+                    secondLastName = names[2];
+                }
+                else if (middleNames.Count == 1 || names[1].Length <= 3)
+                {
+                    middleName = names[1];
+                    lastName = names[2];
+                }
+                else
+                {
+                    lastName = names[1];
+                    secondLastName = names[2];
+                }
+
+                break;
+            }
+            case 2:
+                firstName = names[0];
+                middleName = string.Empty;
+                lastName = names[1];
+                secondLastName = string.Empty;
+                break;
+            case 1:
+                firstName = names[0];
+                middleName = string.Empty;
+                lastName = string.Empty;
+                secondLastName = string.Empty;
+                break;
+        }
+
+        return new PersonName
+        (
+            firstName,
+            middleName,
+            lastName,
+            secondLastName
+        );
     }
 }

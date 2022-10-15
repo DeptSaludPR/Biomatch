@@ -6,6 +6,28 @@ namespace MatchingEngine.Domain.Helpers;
 
 public static class StringExtensions
 {
+    public static IEnumerable<string> NormalizeNames(this string name, NameType nameType)
+    {
+        var normalizedWords = new List<string>();
+        var separators = nameType switch
+        {
+            NameType.LastName => new[] {' ', '-', '_'},
+            _ => new[] {' '}
+        };
+
+        ReadOnlySpan<string> words = name.Split(separators);
+        for (var i = 0; i < words.Length; i++)
+        {
+            var word = words[i];
+            var normalizedWord = word.NormalizeWord();
+            if (string.IsNullOrEmpty(normalizedWord)) continue;
+
+            normalizedWords.Add(normalizedWord);
+        }
+
+        return normalizedWords;
+    }
+
     public static IEnumerable<string> SanitizeName(this string name, NameType nameType = NameType.Name,
         WordDictionary? wordDictionary = null)
     {
@@ -20,16 +42,14 @@ public static class StringExtensions
         for (var i = 0; i < words.Length; i++)
         {
             var word = words[i];
-            var sanitizedWord = word.NormalizeWord();
-            if (string.IsNullOrEmpty(sanitizedWord)) continue;
             if (wordDictionary is not null)
             {
-                var suggestItems = wordDictionary.TrySpellCheck(sanitizedWord);
+                var suggestItems = wordDictionary.TrySpellCheck(word);
                 if (suggestItems.Count == 1)
-                    sanitizedWord = suggestItems[0].term;
+                    word = suggestItems[0].term;
             }
 
-            sanitizedWords.Add(sanitizedWord.SanitizeWord());
+            sanitizedWords.Add(word.SanitizeWord());
         }
 
         return sanitizedWords;
@@ -37,15 +57,11 @@ public static class StringExtensions
 
     public static string SanitizeWord(this string word)
     {
-        var normalizedString = word.Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder();
 
-        ReadOnlySpan<char> spanValue = normalizedString;
+        ReadOnlySpan<char> spanValue = word;
         foreach (var c in spanValue)
         {
-            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-
-            if (unicodeCategory == UnicodeCategory.NonSpacingMark) continue;
             if (!char.IsAsciiLetter(c)) continue;
 
             sb.Append(char.ToLowerInvariant(c));
@@ -53,23 +69,22 @@ public static class StringExtensions
 
         return sb.ToString();
     }
-    
+
     public static string NormalizeWord(this string word)
     {
         var normalizedString = word.Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder();
-
-        ReadOnlySpan<char> spanValue = normalizedString;
-        foreach (var c in spanValue)
+        
+        foreach (var c in normalizedString.EnumerateRunes())
         {
-            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-
+            var unicodeCategory = Rune.GetUnicodeCategory(c);
+        
             if (unicodeCategory == UnicodeCategory.NonSpacingMark) continue;
-
-            sb.Append(char.ToLowerInvariant(c));
+        
+            sb.Append(Rune.ToLowerInvariant(c));
         }
-
-        return sb.ToString();
+        
+        return sb.ToString().Normalize(NormalizationForm.FormC);
     }
 
     public static IEnumerable<string> RemovePrepositions(this IEnumerable<string> words)
