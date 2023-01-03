@@ -6,7 +6,6 @@ public static class Score
     {
         //Experimental version for now, assigns 1 if the distance is 0, and lowers in increments to 
         //0.7 
-
         double singleFieldScore;
 
         //If the distance > threshold, assign 0

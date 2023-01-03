@@ -42,7 +42,7 @@ public static class Preprocess
                 .RemovePrepositions();
 
             var personName = OrganizeNames(normalizedFirstNames, normalizedMiddleNames.ToList(),
-                normalizedLastNames, normalizedSecondLastNames, middleNamesDictionary);
+                normalizedLastNames, normalizedSecondLastNames, lastNamesDictionary);
 
             var firstNames = personName.FirstName
                 .SanitizeName(NameType.Name, firstNamesDictionary);
@@ -73,7 +73,7 @@ public static class Preprocess
 
     private static PersonName OrganizeNames(IEnumerable<string> firstNames, IReadOnlyCollection<string> middleNames,
         IEnumerable<string> lastNames, IEnumerable<string> secondLastNames,
-        WordDictionary? middleNamesDictionary = null)
+        WordDictionary? lastNamesDictionary = null)
     {
         var names = firstNames.Concat(middleNames).Concat(lastNames).Concat(secondLastNames).ToArray();
         var firstName = string.Empty;
@@ -91,7 +91,7 @@ public static class Preprocess
                 break;
             case 3:
             {
-                var trySpellCheckLastName = middleNamesDictionary?.TrySpellCheck(names[1]);
+                var trySpellCheckLastName = lastNamesDictionary?.TrySpellCheck(names[1]);
                 firstName = names[0];
 
                 if (trySpellCheckLastName?.Count > 0)
