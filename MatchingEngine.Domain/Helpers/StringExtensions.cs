@@ -20,7 +20,7 @@ public static class StringExtensions
         {
             var word = words[i];
             var normalizedWord = word.NormalizeWord();
-            if (string.IsNullOrEmpty(normalizedWord)) continue;
+            if (string.IsNullOrWhiteSpace(normalizedWord)) continue;
 
             normalizedWords.Add(normalizedWord);
         }
@@ -101,7 +101,7 @@ public static class StringExtensions
     {
         var suffixes = new List<string>
         {
-            "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms"
+            "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms", "mrs"
         };
 
         return words.Where(w => !suffixes.Contains(w));

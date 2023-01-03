@@ -76,7 +76,7 @@ public static partial class MatchingCommand
 
         return command;
     }
-
+    
     private static Command GetPreprocessCommand()
     {
         var filePath1Argument = new Argument<FileInfo>
