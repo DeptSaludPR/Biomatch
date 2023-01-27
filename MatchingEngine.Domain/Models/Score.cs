@@ -30,7 +30,7 @@ public static class Score
         return singleFieldScore;
     }
 
-    public static double allFieldsScore_StepMode(ref DistanceVector d,
+    public static double CalculateFinalScore(ref DistanceVector d,
         int fnThreshold = 2, int mnThreshold = 1, int lnThreshold = 2, int slnThreshold = 2,
         int birthDateThreshold = 1, int cityThreshold = 2, int pnThreshold = 1,
         double fnWeight = 0.18, double mnWeight = 0.1, double lnWeight = 0.17, double slnWeight = 0.17,
