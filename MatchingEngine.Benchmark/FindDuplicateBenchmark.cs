@@ -7,7 +7,7 @@ using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.Benchmark;
 
-[SimpleJob(RunStrategy.Throughput, warmupCount: 2, invocationCount: 5)]
+[SimpleJob(RunStrategy.Throughput, warmupCount: 1, iterationCount: 1)]
 [MemoryDiagnoser]
 public class FindDuplicateBenchmark
 {
@@ -19,12 +19,15 @@ public class FindDuplicateBenchmark
         using var readerFile1 = new StreamReader("./Data/persons_to_match.csv");
         using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
         var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
-        RecordsToMatch = records1FromCsv.ToArray();
+        RecordsToMatch = records1FromCsv.PreprocessData().ToArray();
 
         using var reader = new StreamReader("./Data/persons.csv");
         using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
         var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
-        SampleRecords = records2FromCsv.ToArray();
+        SampleRecords = records2FromCsv.PreprocessData().ToArray();
+        
+        Console.WriteLine($"Records to match: {RecordsToMatch.Length}");
+        Console.WriteLine($"Sample records: {SampleRecords.Length}");
     }
 
     [Benchmark]

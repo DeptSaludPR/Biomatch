@@ -21,6 +21,14 @@ public static class Preprocess
         WordDictionary? lastNamesDictionary = null)
     {
         var patientRecordsList = patientRecords.ToArray();
+        var prepositions =  new HashSet<string>
+        {
+            "el", "la", "los", "las", "de", "del", "en", "y", "a", "di", "da", "le", "san"
+        };
+        var suffixes = new HashSet<string>
+        {
+            "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms", "mrs"
+        };
         var processedPatientRecords = new ConcurrentBag<PatientRecord>();
         Parallel.For(0, patientRecordsList.Length, index =>
         {
@@ -28,18 +36,18 @@ public static class Preprocess
 
             var normalizedFirstNames = patientRecord.FirstName
                 .NormalizeNames(NameType.Name)
-                .RemovePrepositions()
-                .RemoveSuffixes();
+                .RemoveWords(prepositions)
+                .RemoveWords(suffixes);
             var normalizedMiddleNames = patientRecord.MiddleName
                 .NormalizeNames(NameType.Name)
-                .RemovePrepositions()
-                .RemoveSuffixes();
+                .RemoveWords(prepositions)
+                .RemoveWords(suffixes);
             var normalizedLastNames = patientRecord.LastName
                 .NormalizeNames(NameType.LastName)
-                .RemovePrepositions();
+                .RemoveWords(prepositions);
             var normalizedSecondLastNames = patientRecord.SecondLastName
                 .NormalizeNames(NameType.LastName)
-                .RemovePrepositions();
+                .RemoveWords(prepositions);
 
             var personName = OrganizeNames(normalizedFirstNames, normalizedMiddleNames.ToList(),
                 normalizedLastNames, normalizedSecondLastNames, lastNamesDictionary);

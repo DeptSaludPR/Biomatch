@@ -7,7 +7,7 @@ using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.Benchmark;
 
-[SimpleJob(RunStrategy.Throughput, warmupCount: 2, invocationCount: 5)]
+[SimpleJob(RunStrategy.Throughput, warmupCount: 1, iterationCount: 1)]
 [MemoryDiagnoser]
 public class PreprocessBenchmark
 {

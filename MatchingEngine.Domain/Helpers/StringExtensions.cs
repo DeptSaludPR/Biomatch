@@ -74,36 +74,28 @@ public static class StringExtensions
     {
         var normalizedString = word.Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder();
-        
+
         foreach (var c in normalizedString.EnumerateRunes())
         {
             var unicodeCategory = Rune.GetUnicodeCategory(c);
-        
+
             if (unicodeCategory == UnicodeCategory.NonSpacingMark) continue;
-        
+
             sb.Append(Rune.ToLowerInvariant(c));
         }
-        
+
         return sb.ToString().Normalize(NormalizationForm.FormC);
     }
 
-    public static IEnumerable<string> RemovePrepositions(this IEnumerable<string> words)
+    public static IEnumerable<string> RemoveWords(this IEnumerable<string> words, HashSet<string> wordsToRemove)
     {
-        var prepositions = new List<string>
+        foreach (var word in words)
         {
-            "el", "la", "los", "las", "de", "del", "en", "y", "a", "di", "da", "le", "san"
-        };
-
-        return words.Where(w => !prepositions.Contains(w));
-    }
-
-    public static IEnumerable<string> RemoveSuffixes(this IEnumerable<string> words)
-    {
-        var suffixes = new List<string>
-        {
-            "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms", "mrs"
-        };
-
-        return words.Where(w => !suffixes.Contains(w));
+            var hasWord = wordsToRemove.Contains(word);
+            if (!hasWord)
+            {
+                yield return word;
+            }
+        }
     }
 }
