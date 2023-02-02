@@ -1,3 +1,4 @@
+using System.Buffers;
 using Quickenshtein;
 
 namespace MatchingEngine.Domain.Models;
@@ -23,7 +24,7 @@ public static class StringDistance
         return distance;
     }
 
-    public static int GeneralDemographicFieldDistance(DateTime? date1, DateTime? date2)
+    public static int GeneralDemographicFieldDistance(DateOnly? date1, DateOnly? date2)
     {
         int distance;
         if (date1 is null && date2 is null)
@@ -43,9 +44,53 @@ public static class StringDistance
         }
         else
         {
-            distance = Levenshtein.GetDistance(date1.Value.ToShortDateString(), date2.Value.ToShortDateString());
+            var date1Buffer = ArrayPool<char>.Shared.Rent(9);
+            var date2Buffer = ArrayPool<char>.Shared.Rent(9);
+            distance = Levenshtein.GetDistance(ToShortDateReadOnlySpan(date1.Value, date1Buffer),
+                ToShortDateReadOnlySpan(date2.Value, date2Buffer));
+            ArrayPool<char>.Shared.Return(date1Buffer);
+            ArrayPool<char>.Shared.Return(date2Buffer);
         }
 
         return distance;
+    }
+
+    private static ReadOnlySpan<char> ToShortDateReadOnlySpan(DateOnly date, char[] buffer)
+    {
+        var written = 0;
+
+        var month = date.Month;
+        if (month < 10)
+        {
+            buffer[written++] = '0';
+            buffer[written++] = (char) (month + '0');
+        }
+        else
+        {
+            buffer[written++] = (char) (month / 10 + '0');
+            buffer[written++] = (char) (month % 10 + '0');
+        }
+
+        var day = date.Day;
+        if (day < 10)
+        {
+            buffer[written++] = '0';
+            buffer[written++] = (char) (day + '0');
+        }
+        else
+        {
+            buffer[written++] = (char) (day / 10 + '0');
+            buffer[written++] = (char) (day % 10 + '0');
+        }
+
+        var year = date.Year;
+        buffer[written++] = (char) (year / 1000 + '0');
+        year %= 1000;
+        buffer[written++] = (char) (year / 100 + '0');
+        year %= 100;
+        buffer[written++] = (char) (year / 10 + '0');
+        buffer[written++] = (char) (year % 10 + '0');
+
+        return buffer.AsSpan(0, written);
     }
 }

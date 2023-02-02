@@ -60,9 +60,11 @@ public static class Duplicate
         int[]? indices = null;
         _ = primaryRecord.FirstName.Length > 0 &&
             characterStartAndEndIndex.TryGetValue(primaryRecord.FirstName[0], out indices);
+        
+        var start = indices != null ? indices[0] : 0;
+        var end = indices != null ? indices[1] : recordsToCompare.Length;
 
-        Parallel.For(indices != null ? indices[0] : 0,
-            indices != null ? indices[1] : recordsToCompare.Length, list2Index =>
+        Parallel.For(start, end, list2Index =>
             {
                 CompareRecordsInnerLoop(potentialDuplicates, primaryRecord, list2Index, recordsToCompare,
                     lowerScoreThreshold, upperScoreThreshold);

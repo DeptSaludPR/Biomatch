@@ -7,7 +7,7 @@ public sealed record PatientRecord
     string MiddleName,
     string LastName,
     string SecondLastName,
-    DateTime? BirthDate,
+    DateOnly? BirthDate,
     string City,
     string PhoneNumber
 );
