@@ -6,9 +6,9 @@ namespace MatchingEngine.Domain;
 
 public static class Duplicate
 {
-    private static ConcurrentDictionary<char, int[]> GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
+    private static Dictionary<char, int[]> GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
     {
-        var characterIndex = new ConcurrentDictionary<char, int[]>();
+        var characterIndex = new Dictionary<char, int[]>();
 
         var currentIndex = 0;
         for (var letter = 'a'; letter <= 'z'; letter++)
@@ -37,24 +37,24 @@ public static class Duplicate
         return characterIndex;
     }
 
-    public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(PatientRecord[] records1,
-        PatientRecord[] records2, double lowerScoreThreshold, double upperScoreThreshold)
+    public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(Memory<PatientRecord> records1,
+        Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold)
     {
         var potentialDuplicates = new ConcurrentBag<PotentialDuplicate>();
 
-        var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1);
-        var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2);
+        var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1.Span);
+        var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2.Span);
 
         Parallel.ForEach(records1CharacterStartAndEndIndex, record1StartAndEnd =>
         {
             var records2StartAndEndFound =
                 records2CharacterStartAndEndIndex.TryGetValue(record1StartAndEnd.Key, out var records2StartAndEnd);
 
-            var records1ToCompare = records1.AsMemory(record1StartAndEnd.Value[0],
+            var records1ToCompare = records1.Slice(record1StartAndEnd.Value[0],
                 record1StartAndEnd.Value[1] - record1StartAndEnd.Value[0]);
 
             var records2ToCompare = records2StartAndEndFound && records2StartAndEnd != null
-                ? records2.AsMemory(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0])
+                ? records2.Slice(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0])
                 : records2;
 
             Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
