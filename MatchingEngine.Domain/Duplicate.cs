@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using MatchingEngine.Domain.Helpers;
 using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.Domain;
@@ -60,12 +59,12 @@ public static class Duplicate
             Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
             {
                 var primaryRecord = records1ToCompare.Span[recordToCompareIndex];
-                Parallel.For(0, records2ToCompare.Length, list2Index =>
+                for (var i = 0; i < records2ToCompare.Length; i++)
                 {
-                    var secondaryRecord = records2ToCompare.Span[list2Index];
+                    var secondaryRecord = records2ToCompare.Span[i];
                     CompareRecords(potentialDuplicates, ref primaryRecord, ref secondaryRecord,
                         lowerScoreThreshold, upperScoreThreshold);
-                });
+                }
             });
         });
 
@@ -76,9 +75,7 @@ public static class Duplicate
         ref PatientRecord primaryRecord, ref PatientRecord secondaryRecord,
         double lowerScoreThreshold, double upperScoreThreshold)
     {
-        //check if the first character of the first name is equal
-        if (!StringHelpers.FirstCharactersAreEqual(primaryRecord.FirstName, secondaryRecord.FirstName) ||
-            primaryRecord.RecordId == secondaryRecord.RecordId) return;
+        if (primaryRecord.RecordId == secondaryRecord.RecordId) return;
         //get the distance vector for the ith vector of the first table and the jth record of the second table
         var distanceVector = DistanceVector.CalculateDistance(ref primaryRecord, ref secondaryRecord);
         var tempScore = Score.CalculateFinalScore(ref distanceVector);
