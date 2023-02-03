@@ -6,9 +6,9 @@ namespace MatchingEngine.Domain;
 
 public static class Duplicate
 {
-    private static Dictionary<char, int[]> GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
+    private static ConcurrentDictionary<char, int[]> GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
     {
-        var characterIndex = new Dictionary<char, int[]>();
+        var characterIndex = new ConcurrentDictionary<char, int[]>();
 
         var currentIndex = 0;
         for (var letter = 'a'; letter <= 'z'; letter++)
@@ -45,32 +45,30 @@ public static class Duplicate
         var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1);
         var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2);
 
-        Parallel.For(0, records1CharacterStartAndEndIndex.Count,
-            primaryRecordIndex =>
+        Parallel.ForEach(records1CharacterStartAndEndIndex, record1StartAndEnd =>
+        {
+            var records2StartAndEndFound =
+                records2CharacterStartAndEndIndex.TryGetValue(record1StartAndEnd.Key, out var records2StartAndEnd);
+
+            var records1ToCompare = records1.AsMemory(record1StartAndEnd.Value[0],
+                record1StartAndEnd.Value[1] - record1StartAndEnd.Value[0]);
+
+            var records2ToCompare = records2StartAndEndFound && records2StartAndEnd != null
+                ? records2.AsMemory(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0])
+                : records2;
+
+            Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
             {
-                var record1StartAndEnd = records1CharacterStartAndEndIndex.ElementAt(primaryRecordIndex);
-                var records2StartAndEndFound =
-                    records2CharacterStartAndEndIndex.TryGetValue(record1StartAndEnd.Key, out var records2StartAndEnd);
-
-                var records1ToCompare = records1.AsMemory(record1StartAndEnd.Value[0],
-                    record1StartAndEnd.Value[1] - record1StartAndEnd.Value[0]);
-
-                var records2ToCompare = records2StartAndEndFound && records2StartAndEnd != null
-                    ? records2.AsMemory(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0])
-                    : records2;
-
-                Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
+                var primaryRecord = records1ToCompare.Span[recordToCompareIndex];
+                Parallel.For(0, records2ToCompare.Length, list2Index =>
                 {
-                    var primaryRecord = records1ToCompare.Span[recordToCompareIndex];
-                    Parallel.For(0, records2ToCompare.Length, list2Index =>
-                    {
-                        var secondaryRecord = records2ToCompare.Span[list2Index];
-                        CompareRecords(potentialDuplicates, primaryRecord, secondaryRecord,
-                            lowerScoreThreshold, upperScoreThreshold);
-                    });
+                    var secondaryRecord = records2ToCompare.Span[list2Index];
+                    CompareRecords(potentialDuplicates, primaryRecord, secondaryRecord,
+                        lowerScoreThreshold, upperScoreThreshold);
                 });
             });
-        
+        });
+
         return potentialDuplicates;
     }
 
