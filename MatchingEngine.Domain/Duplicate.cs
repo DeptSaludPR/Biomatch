@@ -40,52 +40,54 @@ public static class Duplicate
     public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(PatientRecord[] records1,
         PatientRecord[] records2, double lowerScoreThreshold, double upperScoreThreshold)
     {
-        var characterStartAndEndIndex = GetCharactersStartAndEndIndex(records2);
         var potentialDuplicates = new ConcurrentBag<PotentialDuplicate>();
-        Parallel.For(0, records1.Length,
+
+        var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1);
+        var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2);
+
+        Parallel.For(0, records1CharacterStartAndEndIndex.Count,
             primaryRecordIndex =>
             {
-                CompareRecords(potentialDuplicates, primaryRecordIndex, records1, records2, characterStartAndEndIndex,
-                    lowerScoreThreshold, upperScoreThreshold);
+                var record1StartAndEnd = records1CharacterStartAndEndIndex.ElementAt(primaryRecordIndex);
+                var records2StartAndEndFound =
+                    records2CharacterStartAndEndIndex.TryGetValue(record1StartAndEnd.Key, out var records2StartAndEnd);
+
+                var records1ToCompare = records1.AsMemory(record1StartAndEnd.Value[0],
+                    record1StartAndEnd.Value[1] - record1StartAndEnd.Value[0]);
+
+                var records2ToCompare = records2StartAndEndFound && records2StartAndEnd != null
+                    ? records2.AsMemory(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0])
+                    : records2;
+
+                Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
+                {
+                    var primaryRecord = records1ToCompare.Span[recordToCompareIndex];
+                    Parallel.For(0, records2ToCompare.Length, list2Index =>
+                    {
+                        var secondaryRecord = records2ToCompare.Span[list2Index];
+                        CompareRecords(potentialDuplicates, primaryRecord, secondaryRecord,
+                            lowerScoreThreshold, upperScoreThreshold);
+                    });
+                });
             });
+        
         return potentialDuplicates;
     }
 
-    private static void CompareRecords(ConcurrentBag<PotentialDuplicate> potentialDuplicates, int primaryIndex,
-        ReadOnlySpan<PatientRecord> primaryRecords, PatientRecord[] recordsToCompare,
-        IReadOnlyDictionary<char, int[]> characterStartAndEndIndex, double lowerScoreThreshold,
-        double upperScoreThreshold)
-    {
-        var primaryRecord = primaryRecords[primaryIndex];
-        int[]? indices = null;
-        _ = primaryRecord.FirstName.Length > 0 &&
-            characterStartAndEndIndex.TryGetValue(primaryRecord.FirstName[0], out indices);
-        
-        var start = indices != null ? indices[0] : 0;
-        var end = indices != null ? indices[1] : recordsToCompare.Length;
-
-        Parallel.For(start, end, list2Index =>
-            {
-                CompareRecordsInnerLoop(potentialDuplicates, primaryRecord, list2Index, recordsToCompare,
-                    lowerScoreThreshold, upperScoreThreshold);
-            });
-    }
-
-    private static void CompareRecordsInnerLoop(ConcurrentBag<PotentialDuplicate> potentialDuplicates,
-        PatientRecord primaryRecord, int recordToCompareIndex, ReadOnlySpan<PatientRecord> recordsToCompare,
+    private static void CompareRecords(ConcurrentBag<PotentialDuplicate> potentialDuplicates,
+        PatientRecord primaryRecord, PatientRecord secondaryRecord,
         double lowerScoreThreshold, double upperScoreThreshold)
     {
-        var tempRecord = recordsToCompare[recordToCompareIndex];
         //check if the first character of the first name is equal
-        if (!StringHelpers.FirstCharactersAreEqual(primaryRecord.FirstName, tempRecord.FirstName) ||
-            primaryRecord.RecordId == tempRecord.RecordId) return;
+        if (!StringHelpers.FirstCharactersAreEqual(primaryRecord.FirstName, secondaryRecord.FirstName) ||
+            primaryRecord.RecordId == secondaryRecord.RecordId) return;
         //get the distance vector for the ith vector of the first table and the jth record of the second table
-        var distanceVector = DistanceVector.CalculateDistance(primaryRecord, tempRecord);
+        var distanceVector = DistanceVector.CalculateDistance(primaryRecord, secondaryRecord);
         var tempScore = Score.CalculateFinalScore(ref distanceVector);
         if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
         {
             potentialDuplicates.Add(
-                new PotentialDuplicate(primaryRecord, tempRecord, distanceVector, tempScore));
+                new PotentialDuplicate(primaryRecord, secondaryRecord, distanceVector, tempScore));
         }
     }
 }
