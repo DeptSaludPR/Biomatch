@@ -10,7 +10,7 @@ public readonly record struct DistanceVector
     public int CityDistance { get; private init; }
     public int PhoneNumberDistance { get; private init; }
 
-    public static DistanceVector CalculateDistance(PatientRecord firstRecord, PatientRecord secondRecord)
+    public static DistanceVector CalculateDistance(ref PatientRecord firstRecord, ref PatientRecord secondRecord)
     {
         return new DistanceVector
         {

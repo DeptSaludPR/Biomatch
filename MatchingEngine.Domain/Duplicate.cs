@@ -63,7 +63,7 @@ public static class Duplicate
                 Parallel.For(0, records2ToCompare.Length, list2Index =>
                 {
                     var secondaryRecord = records2ToCompare.Span[list2Index];
-                    CompareRecords(potentialDuplicates, primaryRecord, secondaryRecord,
+                    CompareRecords(potentialDuplicates, ref primaryRecord, ref secondaryRecord,
                         lowerScoreThreshold, upperScoreThreshold);
                 });
             });
@@ -73,14 +73,14 @@ public static class Duplicate
     }
 
     private static void CompareRecords(ConcurrentBag<PotentialDuplicate> potentialDuplicates,
-        PatientRecord primaryRecord, PatientRecord secondaryRecord,
+        ref PatientRecord primaryRecord, ref PatientRecord secondaryRecord,
         double lowerScoreThreshold, double upperScoreThreshold)
     {
         //check if the first character of the first name is equal
         if (!StringHelpers.FirstCharactersAreEqual(primaryRecord.FirstName, secondaryRecord.FirstName) ||
             primaryRecord.RecordId == secondaryRecord.RecordId) return;
         //get the distance vector for the ith vector of the first table and the jth record of the second table
-        var distanceVector = DistanceVector.CalculateDistance(primaryRecord, secondaryRecord);
+        var distanceVector = DistanceVector.CalculateDistance(ref primaryRecord, ref secondaryRecord);
         var tempScore = Score.CalculateFinalScore(ref distanceVector);
         if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
         {
