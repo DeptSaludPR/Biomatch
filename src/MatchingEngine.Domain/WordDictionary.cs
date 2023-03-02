@@ -10,7 +10,7 @@ public sealed class WordDictionary
             throw new FileNotFoundException($"Dictionary file not found: {dictionaryFilePath.FullName}", dictionaryFilePath.FullName);
         //create object
         const int initialCapacity = 82765;
-        const int maxEditDistanceDictionary = 2; //maximum edit distance per dictionary precalculation
+        const int maxEditDistanceDictionary = 2; //maximum edit distance per dictionary pre-calculation
         _symSpell = new SymSpell(initialCapacity, maxEditDistanceDictionary);
 
         //load dictionary
