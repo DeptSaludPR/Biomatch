@@ -12,9 +12,9 @@ public static class PhoneNumberHelpers
         try
         {
             var parsedPhoneNumber = phoneNumberUtil.Parse(phoneNumber, "US");
+            if (!phoneNumberUtil.IsValidNumber(parsedPhoneNumber))
+                return string.Empty;
             parsedPhoneNumberString = phoneNumberUtil.Format(parsedPhoneNumber, PhoneNumberFormat.INTERNATIONAL);
-            if (parsedPhoneNumberString == "+1 NA")
-                parsedPhoneNumberString = string.Empty;
         }
         catch
         {
