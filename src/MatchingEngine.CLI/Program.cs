@@ -7,9 +7,9 @@ var templateCommand = MatchingCommand.GetTemplateCommand();
 
 var rootCommand = new RootCommand("Contains utilities for matching data")
 {
-    findCommand,
-    dictionaryCommand,
-    templateCommand,
+  findCommand,
+  dictionaryCommand,
+  templateCommand,
 };
 
 await rootCommand.InvokeAsync(args);
