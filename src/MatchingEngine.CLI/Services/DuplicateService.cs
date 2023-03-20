@@ -29,7 +29,7 @@ public static class DuplicateService
     //check for whether the exact matches are allowed, and set the upper threshold accordingly
     var upperScoreThreshold = exactMatchesAllowed ? 1.0 : 0.99999;
 
-    var potentialDuplicates = Duplicate.GetPotentialDuplicates(preprocessedRecords1, preprocessedRecords2,
+    var potentialDuplicates = Match.GetPotentialMatches(preprocessedRecords1, preprocessedRecords2,
       lowerScoreThreshold, upperScoreThreshold);
 
     //write the total elapsed time on the log

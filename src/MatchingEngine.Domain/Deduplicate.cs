@@ -2,7 +2,7 @@ using MatchingEngine.Domain.Models;
 
 namespace MatchingEngine.Domain;
 
-public class Deduplicate
+public static class Deduplicate
 {
   public static IEnumerable<RecordMatchResult> TryDeduplicate(IEnumerable<PatientRecord> records,
     double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
@@ -12,7 +12,7 @@ public class Deduplicate
       records.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
 
     var potentialDuplicates =
-      Duplicate.GetPotentialDuplicates(preprocessedRecords, preprocessedRecords, matchScoreThreshold, 1.0);
+      Match.GetPotentialMatches(preprocessedRecords, preprocessedRecords, matchScoreThreshold, 1.0);
 
     var potentialMatches = potentialDuplicates
       .GroupBy(x => x.Value)
