@@ -4,7 +4,7 @@
     <Version>0.6.0</Version>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
-    <AssemblyName>matching</AssemblyName>
+    <AssemblyName>biomatch</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>

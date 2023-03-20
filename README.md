@@ -1,4 +1,4 @@
-# MatchingEngine
+# Biomatch
 
 System to match records utilizing demographic data.
 
@@ -8,12 +8,12 @@ To build the project you need the .NET 7 SDK. You can download it from [here](ht
 
 Build the cli tool utilizing the following command:
 ```zsh
-dotnet publish -c Release src/MatchingEngine.CLI
+dotnet publish -c Release src/Biomatch.CLI
 ```
 
 This will create a "**matching**" executable file for Linux-x64 systems. To build for other architectures, pass the -r parameter as the following example:
 ```zsh
-dotnet publish -c Release -r linux-x64 src/MatchingEngine.CLI -o matching
+dotnet publish -c Release -r linux-x64 src/Biomatch.CLI -o biomatch
 ```
 
 For more information on the -r parameter, see the [dotnet publish documentation](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish).
@@ -23,7 +23,7 @@ For a list of supported runtimes, see the [dotnet RID catalog](https://docs.micr
 
 The cli tool has a help command that will list all available commands and their parameters.
 ```zsh
-matching --help
+biomatch --help
 ```
 
 ### Template
@@ -43,25 +43,25 @@ The template file is used for most matching commands. The template file has the 
 | PhoneNumber    | string   | Primary phone number of person.            |
 
 ```zsh
-matching template generate -o <output file path>
+biomatch template generate -o <output file path>
 ```
 
 ### Find matches between 2 files
 
-Create or use an existing template. (See [Template](#Template) section for more information)
+Create or use an existing template. (See [Template](#template) section for more information)
 ```zsh
-matching template generate -o <output file path>
+biomatch template generate -o <output file path>
 ```
 
 Create word frequency dictionary based on sample data to improve matching accuracy.
 ```zsh
-matching dictionary generate <templateFilePath> -o <output folder path>
+biomatch dictionary generate <templateFilePath> -o <output folder path>
 ```
 
 Find matches between 2 files with a score threshold of 0.85.
 The following command assumes that the Dictionary has already been generated and is located in the same directory as the executable.
 ```zsh
-matching find matches <templateFilePath1> <templateFilePath2> -o <output file path> --score 0.85
+biomatch find matches <templateFilePath1> <templateFilePath2> -o <output file path> --score 0.85
 ```
 
 This will generate a file with all matches found and scores for each one. The higher the score, the more likely the records match.
@@ -70,18 +70,18 @@ This will generate a file with all matches found and scores for each one. The hi
 
 Create or use an existing template. (See [Template](#Template) section for more information)
 ```zsh
-matching template generate -o <output file path>
+biomatch template generate -o <output file path>
 ```
 
 Create word frequency dictionary based on sample data to improve matching accuracy.
 ```zsh
-matching dictionary generate <templateFilePath> -o <output folder path>
+biomatch dictionary generate <templateFilePath> -o <output folder path>
 ```
 
 Find duplicates between 2 files with a score threshold of 0.85.
 The following command assumes that the Dictionary has already been generated and is located in the same directory as the executable.
 ```zsh
-matching find duplicates <templateFilePath1> <templateFilePath2> -o <output file path>  --score 0.85
+biomatch find duplicates <templateFilePath1> <templateFilePath2> -o <output file path>  --score 0.85
 ```
 
 This will generate a file with all duplicates found and scores for each one. The higher the score, the more likely the records are duplicates.
