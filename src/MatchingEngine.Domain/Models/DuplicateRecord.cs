@@ -16,14 +16,14 @@ public readonly record struct DuplicateRecord
   public readonly string Date;
 
   //Constructors
-  public DuplicateRecord(PotentialDuplicate duplicate)
+  public DuplicateRecord(PotentialMatch match)
   {
     Patient1Url =
-      $"https://bioportal.salud.gov.pr/administration/patients/{duplicate.Value.RecordId}/profile/general";
+      $"https://bioportal.salud.gov.pr/administration/patients/{match.Value.RecordId}/profile/general";
     Patient2Url =
-      $"https://bioportal.salud.gov.pr/administration/patients/{duplicate.Match.RecordId}/profile/general";
-    Distance = duplicate.Distance.ToString();
-    Score = duplicate.Score;
+      $"https://bioportal.salud.gov.pr/administration/patients/{match.Match.RecordId}/profile/general";
+    Distance = match.Distance.ToString();
+    Score = match.Score;
     //The rest are blank
     DuplicateStatus = string.Empty;
     Error1 = string.Empty;

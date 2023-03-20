@@ -36,10 +36,10 @@ public static class Duplicate
     return characterIndex;
   }
 
-  public static ConcurrentBag<PotentialDuplicate> GetPotentialDuplicates(Memory<PatientRecord> records1,
+  public static ConcurrentBag<PotentialMatch> GetPotentialDuplicates(Memory<PatientRecord> records1,
     Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold)
   {
-    var potentialDuplicates = new ConcurrentBag<PotentialDuplicate>();
+    var potentialMatches = new ConcurrentBag<PotentialMatch>();
 
     var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1.Span);
     var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2.Span);
@@ -50,28 +50,27 @@ public static class Duplicate
         records2CharacterStartAndEndIndex.TryGetValue(record1StartAndEnd.Key, out var records2StartAndEnd);
 
       var records1ToCompare = records1.Slice(record1StartAndEnd.Value[0],
-        record1StartAndEnd.Value[1] - record1StartAndEnd.Value[0]);
+        record1StartAndEnd.Value[1] - record1StartAndEnd.Value[0] + 1);
 
       var records2ToCompare = records2StartAndEndFound && records2StartAndEnd != null
-        ? records2.Slice(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0])
+        ? records2.Slice(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0] + 1)
         : records2;
-
       Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
       {
         var primaryRecord = records1ToCompare.Span[recordToCompareIndex];
         for (var i = 0; i < records2ToCompare.Length; i++)
         {
           var secondaryRecord = records2ToCompare.Span[i];
-          CompareRecords(potentialDuplicates, ref primaryRecord, ref secondaryRecord,
+          CompareRecords(potentialMatches, ref primaryRecord, ref secondaryRecord,
             lowerScoreThreshold, upperScoreThreshold);
         }
       });
     });
 
-    return potentialDuplicates;
+    return potentialMatches;
   }
 
-  private static void CompareRecords(ConcurrentBag<PotentialDuplicate> potentialDuplicates,
+  private static void CompareRecords(ConcurrentBag<PotentialMatch> potentialMatches,
     ref PatientRecord primaryRecord, ref PatientRecord secondaryRecord,
     double lowerScoreThreshold, double upperScoreThreshold)
   {
@@ -81,8 +80,8 @@ public static class Duplicate
     var tempScore = Score.CalculateFinalScore(ref distanceVector);
     if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
     {
-      potentialDuplicates.Add(
-        new PotentialDuplicate(primaryRecord, secondaryRecord, distanceVector, tempScore));
+      potentialMatches.Add(
+        new PotentialMatch(primaryRecord, secondaryRecord, distanceVector, tempScore));
     }
   }
 }
