@@ -33,6 +33,6 @@ public class FindDuplicateBenchmark
   [Benchmark]
   public void DuplicateBenchmark()
   {
-    Duplicate.GetPotentialDuplicates(RecordsToMatch, SampleRecords, 0.8, 1.0);
+    Match.GetPotentialMatches(RecordsToMatch, SampleRecords, 0.8, 1.0);
   }
 }

@@ -242,7 +242,7 @@ public static partial class MatchingCommand
           Console.ResetColor();
         }
 
-        var possibleMatches = Match.TryMatch(records1FromCsv, records2FromCsv, scoreOptionValue,
+        var possibleMatches = Match.TryMatchSingleRecord(records1FromCsv, records2FromCsv, scoreOptionValue,
           firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
         await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
         await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
