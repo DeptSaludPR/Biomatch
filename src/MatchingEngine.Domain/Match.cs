@@ -4,7 +4,7 @@ namespace MatchingEngine.Domain;
 
 public static class Match
 {
-  public static IEnumerable<PotentialDuplicate> TryMatch(IEnumerable<PatientRecord> records1,
+  public static IEnumerable<PotentialMatch> TryMatch(IEnumerable<PatientRecord> records1,
     IEnumerable<PatientRecord> records2, double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null)
   {

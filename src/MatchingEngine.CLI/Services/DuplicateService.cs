@@ -51,7 +51,7 @@ public static class DuplicateService
 
   private static async Task WriteLogFile(FileSystemInfo logFilePath, TimeSpan timeSpan, bool exactMatchesAllowed,
     double lowerScoreThreshold, int sampleRecordsTotal, int recordsToSearchTotal,
-    ConcurrentBag<PotentialDuplicate> potentialDuplicates)
+    ConcurrentBag<PotentialMatch> potentialDuplicates)
   {
     var logElapsedTime =
       $"{timeSpan.Hours:00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}.{timeSpan.Milliseconds / 10:00}";
