@@ -25,7 +25,7 @@ public class PreprocessTests
       new
       (
         "1235",
-        "Maria 789 Del Pueblo Del Valle",
+        "Maria 789 Del Puéblo Del Valle",
         "",
         "",
         "",
