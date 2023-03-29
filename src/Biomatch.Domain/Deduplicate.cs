@@ -14,43 +14,41 @@ public static class Deduplicate
     var potentialDuplicates =
       Match.GetPotentialMatches(preprocessedRecords, preprocessedRecords, matchScoreThreshold, 1.0);
 
-    var potentialMatches = potentialDuplicates
-      .GroupBy(x => x.Value)
-      .ToDictionary(x => x.Key, x => x.OrderByDescending(y => y.Score)
-        .Select(e => new PotentialMatch
-          (
-            x.Key,
-            e.Match,
-            e.Distance,
-            e.Score
-          )
-        )
-        .ToArray());
+    var potentialDuplicatesGrouped = potentialDuplicates
+      .GroupBy(x => x.Value);
 
-    var potentialMatchesList = new List<RecordMatchResult>();
+    var potentialMatchesList = new Dictionary<PatientRecord, RecordMatchResult>();
+    var innerRecordsAdded = new HashSet<PatientRecord>();
 
-    foreach (var record in preprocessedRecords)
+    foreach (var potentialDuplicate in potentialDuplicatesGrouped)
     {
-      if (potentialMatches.TryGetValue(record, out var matches))
+      if (innerRecordsAdded.Contains(potentialDuplicate.Key)) continue;
+
+      if (potentialMatchesList.TryGetValue(potentialDuplicate.Key, out var recordMatchResult))
       {
-        potentialMatchesList.Add(new RecordMatchResult(record, matches));
-        potentialMatches.Remove(record);
-        var innerMatchesToRemove = potentialMatches.Where(x => x.Value.Any(y => y.Value == record)).ToList();
-        foreach (var innerMatch in innerMatchesToRemove)
+        recordMatchResult.Matches.AddRange(potentialDuplicate.ToList());
+        foreach (var innerMatch in potentialDuplicate)
         {
-          potentialMatches.Remove(innerMatch.Key);
+          innerRecordsAdded.Add(innerMatch.Match);
         }
-      }
-      else if (potentialMatchesList.Any(x => x.Matches.Any(y => y.Value == record)))
-      {
-        // Do nothing
       }
       else
       {
-        potentialMatchesList.Add(new RecordMatchResult(record, Array.Empty<PotentialMatch>()));
+        potentialMatchesList.Add(potentialDuplicate.Key, new RecordMatchResult
+          (
+            potentialDuplicate.Key,
+            potentialDuplicate.ToList()
+          )
+        );
+        innerRecordsAdded.Add(potentialDuplicate.Key);
+        foreach (var innerMatch in potentialDuplicate)
+        {
+          innerRecordsAdded.Add(innerMatch.Match);
+        }
       }
     }
 
-    return potentialMatchesList;
+    return potentialMatchesList.Values;
   }
+
 }
