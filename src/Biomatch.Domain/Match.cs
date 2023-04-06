@@ -34,17 +34,19 @@ public static class Match
     var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1.Span);
     var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2.Span);
 
+    // Maximum of 27 iterations because of letters in the alphabet
     Parallel.ForEach(records1CharacterStartAndEndIndex, record1StartAndEnd =>
     {
       var records2StartAndEndFound =
         records2CharacterStartAndEndIndex.TryGetValue(record1StartAndEnd.Key, out var records2StartAndEnd);
 
-      var records1ToCompare = records1.Slice(record1StartAndEnd.Value[0],
-        record1StartAndEnd.Value[1] - record1StartAndEnd.Value[0] + 1);
+      var records1ToCompare = records1.Slice(record1StartAndEnd.Value.Item1,
+        record1StartAndEnd.Value.Item2 - record1StartAndEnd.Value.Item1 + 1);
 
-      var records2ToCompare = records2StartAndEndFound && records2StartAndEnd != null
-        ? records2.Slice(records2StartAndEnd[0], records2StartAndEnd[1] - records2StartAndEnd[0] + 1)
+      var records2ToCompare = records2StartAndEndFound
+        ? records2.Slice(records2StartAndEnd.Item1, records2StartAndEnd.Item2 - records2StartAndEnd.Item1 + 1)
         : records2;
+      // For each record in the first table, compare it to all records in the second table
       Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
       {
         var primaryRecord = records1ToCompare.Span[recordToCompareIndex];
@@ -75,9 +77,9 @@ public static class Match
     }
   }
 
-  private static Dictionary<char, int[]> GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
+  private static Dictionary<char, (int, int)> GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
   {
-    var characterIndex = new Dictionary<char, int[]>();
+    var characterIndex = new Dictionary<char, (int, int)>();
 
     var currentIndex = 0;
     for (var letter = 'a'; letter <= 'z'; letter++)
@@ -100,7 +102,7 @@ public static class Match
       }
 
       if (startIndex == null) continue;
-      characterIndex.TryAdd(letter, new[] {startIndex.Value, endIndex ?? records.Length - 1});
+      characterIndex.TryAdd(letter, (startIndex.Value, endIndex ?? records.Length - 1));
     }
 
     return characterIndex;
