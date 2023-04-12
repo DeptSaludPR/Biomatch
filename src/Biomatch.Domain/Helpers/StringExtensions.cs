@@ -8,83 +8,80 @@ public static class StringExtensions
 {
   public static IEnumerable<string> NormalizeNames(this string name, NameType nameType)
   {
-    var normalizedWords = new List<string>();
     var separators = nameType switch
     {
       NameType.LastName => new[] {' ', '-', '_'},
       _ => new[] {' '}
     };
 
-    ReadOnlySpan<string> words = name.Split(separators);
-    for (var i = 0; i < words.Length; i++)
+    var words = name.Split(separators);
+    foreach (var word in words)
     {
-      var word = words[i];
+      if (word.Length == 0) continue;
       var normalizedWord = word.NormalizeWord();
-      if (string.IsNullOrWhiteSpace(normalizedWord)) continue;
+      if (normalizedWord.Length == 0) continue;
 
-      normalizedWords.Add(normalizedWord);
+      yield return normalizedWord.ToString();
     }
-
-    return normalizedWords;
   }
 
   public static IEnumerable<string> SanitizeName(this string name, NameType nameType = NameType.Name,
     WordDictionary? wordDictionary = null)
   {
-    var sanitizedWords = new List<string>();
     var separators = nameType switch
     {
       NameType.LastName => new[] {' ', '-', '_'},
       _ => new[] {' '}
     };
 
-    ReadOnlySpan<string> words = name.Split(separators);
-    for (var i = 0; i < words.Length; i++)
+    var words = name.Split(separators);
+    foreach (var word in words)
     {
-      var word = words[i];
+      if (word.Length == 0) continue;
+
+      var wordToSanitize = word;
       if (wordDictionary is not null)
       {
         var suggestItems = wordDictionary.TrySpellCheck(word);
         if (suggestItems.Count == 1)
-          word = suggestItems[0].term;
+          wordToSanitize = suggestItems[0].term;
       }
 
-      sanitizedWords.Add(word.SanitizeWord());
+      var sanitizedWord = wordToSanitize.SanitizeWord();
+      if (sanitizedWord.Length == 0) continue;
+      yield return sanitizedWord.ToString();
     }
-
-    return sanitizedWords;
   }
 
-  public static string SanitizeWord(this string word)
+  public static StringBuilder SanitizeWord(this string word)
   {
     var sb = new StringBuilder();
 
-    ReadOnlySpan<char> spanValue = word;
-    foreach (var c in spanValue)
+    foreach (var c in word.AsSpan())
     {
       if (!char.IsAsciiLetter(c)) continue;
 
       sb.Append(char.ToLowerInvariant(c));
     }
 
-    return sb.ToString();
+    return sb;
   }
 
-  public static string NormalizeWord(this string word)
+  public static StringBuilder NormalizeWord(this string word)
   {
     var normalizedString = word.Normalize(NormalizationForm.FormD);
     var sb = new StringBuilder();
 
-    foreach (var c in normalizedString.EnumerateRunes())
+    foreach (var c in normalizedString.AsSpan().EnumerateRunes())
     {
       var unicodeCategory = Rune.GetUnicodeCategory(c);
 
-      if (unicodeCategory == UnicodeCategory.NonSpacingMark) continue;
+      if (unicodeCategory is UnicodeCategory.NonSpacingMark or UnicodeCategory.SpaceSeparator) continue;
 
       sb.Append(Rune.ToLowerInvariant(c));
     }
 
-    return sb.ToString().Normalize(NormalizationForm.FormC);
+    return sb;
   }
 
   public static IEnumerable<string> RemoveWords(this IEnumerable<string> words, HashSet<string> wordsToRemove)

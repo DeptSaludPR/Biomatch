@@ -13,7 +13,7 @@ public class DeduplicateTests
       {
         new
         (
-          "1234",
+          "3688374",
           "Juan",
           "",
           "Del Pueblo",
@@ -24,7 +24,7 @@ public class DeduplicateTests
         ),
         new
         (
-          "1235",
+          "3697831",
           "Juan Del Puéblo",
           "",
           "",
@@ -67,8 +67,7 @@ public class DeduplicateTests
           "7875982789"
         ),
       }
-      .PreprocessData()
-      .ToList();
+      .PreprocessData();
 
     // Act
     var deduplicatedRecords = Deduplicate

@@ -7,7 +7,7 @@ using Biomatch.Domain.Models;
 
 namespace Biomatch.Benchmark;
 
-[SimpleJob(RunStrategy.Throughput, warmupCount: 1, iterationCount: 1)]
+[SimpleJob(RunStrategy.Throughput, warmupCount: 1, iterationCount: 3)]
 [MemoryDiagnoser]
 public class FindDuplicateBenchmark
 {
@@ -16,12 +16,12 @@ public class FindDuplicateBenchmark
 
   public FindDuplicateBenchmark()
   {
-    using var readerFile1 = new StreamReader("./Data/persons_to_match.csv");
+    using var readerFile1 = new StreamReader("./Data/records-to-match.csv");
     using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
     var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
     RecordsToMatch = records1FromCsv.PreprocessData().ToArray();
 
-    using var reader = new StreamReader("./Data/persons.csv");
+    using var reader = new StreamReader("./Data/records.csv");
     using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
     var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
     SampleRecords = records2FromCsv.PreprocessData().ToArray();

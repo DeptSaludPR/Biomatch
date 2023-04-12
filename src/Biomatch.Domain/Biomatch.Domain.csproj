@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsTrimmable>true</IsTrimmable>
     <PackageId>Biomatch.Domain</PackageId>
-    <Version>0.8.0</Version>
+    <Version>0.9.0</Version>
     <Authors>Elvis Nieves Miranda</Authors>
     <Company>Puerto Rico Department of Health</Company>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.8" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.9" />
     <PackageReference Include="Quickenshtein" Version="1.5.1" />
     <PackageReference Include="SymSpell" Version="6.7.2" />
   </ItemGroup>

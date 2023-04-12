@@ -71,7 +71,7 @@ public static class Preprocess
         LastName = string.Concat(lastNames),
         SecondLastName = string.Concat(secondLastNames),
         BirthDate = patientRecord.BirthDate.SanitizeBirthDate(),
-        City = patientRecord.City.SanitizeWord(),
+        City = patientRecord.City.SanitizeWord().ToString(),
         PhoneNumber = PhoneNumberHelpers.Parse(patientRecord.PhoneNumber)
       });
     });
