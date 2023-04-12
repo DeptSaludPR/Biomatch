@@ -9,7 +9,9 @@ public static class Deduplicate
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null)
   {
     var preprocessedRecords =
-      records.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
+      records
+        .PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary)
+        .ToArray();
 
     var potentialDuplicates =
       Match.GetPotentialMatches(preprocessedRecords, preprocessedRecords, matchScoreThreshold, 1.0);
