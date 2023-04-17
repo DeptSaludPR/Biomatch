@@ -7,7 +7,8 @@ public static class Match
 {
   public static IEnumerable<PotentialMatch> TryMatchSingleRecord(IEnumerable<PatientRecord> records1,
     IEnumerable<PatientRecord> records2, double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
-    WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null)
+    WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null,
+    IProgress<int>? progress = null)
   {
     var preprocessedRecords1 =
       records1.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
@@ -15,7 +16,7 @@ public static class Match
       records2.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
 
     var recordMatchResults =
-      GetPotentialMatches(preprocessedRecords1, preprocessedRecords2, matchScoreThreshold, 1.0);
+      GetPotentialMatches(preprocessedRecords1, preprocessedRecords2, matchScoreThreshold, 1.0, progress);
 
     var matchedRecords = recordMatchResults
       .GroupBy(x => x.Value)
@@ -27,7 +28,8 @@ public static class Match
   }
 
   public static ConcurrentBag<PotentialMatch> GetPotentialMatches(Memory<PatientRecord> records1,
-    Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold)
+    Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold,
+    IProgress<int>? progress = null)
   {
     var potentialMatches = new ConcurrentBag<PotentialMatch>();
 
@@ -49,13 +51,14 @@ public static class Match
       // For each record in the first table, compare it to all records in the second table
       Parallel.For(0, records1ToCompare.Length, recordToCompareIndex =>
       {
-        var primaryRecord = records1ToCompare.Span[recordToCompareIndex];
         for (var i = 0; i < records2ToCompare.Length; i++)
         {
-          var secondaryRecord = records2ToCompare.Span[i];
-          CompareRecords(potentialMatches, ref primaryRecord, ref secondaryRecord,
+          CompareRecords(potentialMatches, ref records1ToCompare.Span[recordToCompareIndex],
+            ref records2ToCompare.Span[i],
             lowerScoreThreshold, upperScoreThreshold);
         }
+
+        progress?.Report(1);
       });
     });
 
