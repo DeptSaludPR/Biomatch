@@ -1,7 +1,7 @@
 using System.CommandLine;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Biomatch.CLI.Progress;
 using Biomatch.CLI.Services;
 using CsvHelper;
 using Biomatch.Domain;
@@ -243,50 +243,11 @@ public static partial class MatchingCommand
           Console.ResetColor();
         }
 
+        var matchProgressReport = MatchingProgress.GetMatchingProgressReport(records1FromCsv.Length);
 
-        var totalRecordsToMatch = records1FromCsv.Length;
-        var completedOperations = 0;
-        var lastReportedPercentage = -1;
-        var lastReportedTime = DateTime.MinValue;
-        var cursorPosition = Console.GetCursorPosition();
-        Console.ForegroundColor = ConsoleColor.Yellow;
+        var possibleMatches = Match.FindBestMatches(records1FromCsv, records2FromCsv, scoreOptionValue,
+          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, matchProgressReport);
 
-        // Create a lock object for synchronization
-        var progressLock = new object();
-
-        // Initialize a Stopwatch to measure elapsed time
-        var stopwatch = Stopwatch.StartNew();
-
-        var progress = new Progress<int>(increment =>
-        {
-          lock (progressLock)
-          {
-            completedOperations += increment;
-            var currentPercentage = (int) ((double) completedOperations / totalRecordsToMatch * 100);
-            if (currentPercentage != lastReportedPercentage &&
-                (DateTime.UtcNow - lastReportedTime).TotalSeconds >= 1)
-            {
-              lastReportedPercentage = currentPercentage;
-              lastReportedTime = DateTime.UtcNow;
-              var elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
-              var estimatedTotalSeconds = elapsedSeconds * totalRecordsToMatch / completedOperations;
-              var remainingSeconds = estimatedTotalSeconds - elapsedSeconds;
-
-              var remainingTime = TimeSpan.FromSeconds(remainingSeconds);
-              var remainingTimeString = $"{remainingTime.Minutes:D2}m {remainingTime.Seconds:D2}s";
-
-              Console.SetCursorPosition(0, cursorPosition.Top);
-              Console.Write($"Progress: {currentPercentage,3}% | Record match operations completed: {completedOperations}\n");
-              Console.Write($"Total time: {stopwatch.Elapsed} | Estimated time remaining: {remainingTimeString}\n");
-            }
-          }
-        });
-
-        var possibleMatches = Match.TryMatchSingleRecord(records1FromCsv, records2FromCsv, scoreOptionValue,
-          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, progress);
-
-        Console.ResetColor();
-        Console.WriteLine($"Elapsed time: {stopwatch.Elapsed}");
         await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
         await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         await csv.WriteRecordsAsync(possibleMatches);
