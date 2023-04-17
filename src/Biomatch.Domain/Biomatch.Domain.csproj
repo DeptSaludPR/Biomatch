@@ -25,6 +25,7 @@
     <PackageReference Include="libphonenumber-csharp" Version="8.13.9" />
     <PackageReference Include="Quickenshtein" Version="1.5.1" />
     <PackageReference Include="SymSpell" Version="6.7.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
   </ItemGroup>
 
 </Project>
