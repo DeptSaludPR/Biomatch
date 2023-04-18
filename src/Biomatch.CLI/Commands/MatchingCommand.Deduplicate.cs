@@ -1,8 +1,5 @@
 using System.CommandLine;
-using System.Globalization;
-using System.Text;
 using Biomatch.CLI.Csv;
-using CsvHelper;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
 
@@ -60,9 +57,12 @@ public partial class MatchingCommand
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
         scoreOptionValue) =>
       {
-        using var readerFile = new StreamReader(filePathArgumentValue.FullName);
-        using var csvRecords = new CsvReader(readerFile, CultureInfo.InvariantCulture);
-        var recordsFromCsv = csvRecords.GetRecords<PatientRecord>();
+        var records1FromCsv = PatientRecordParser.ParseCsv(filePathArgumentValue.FullName);
+        List<PatientRecord> records1 = new();
+        await foreach (var record in records1FromCsv)
+        {
+          records1.Add(record);
+        }
 
         WordDictionary? firstNamesDictionary = null;
         if (firstNamesDictionaryFilePathOptionValue.Exists)
@@ -109,7 +109,7 @@ public partial class MatchingCommand
           Console.ResetColor();
         }
 
-        var deduplicatedRecords = Deduplicate.TryDeduplicate(recordsFromCsv, scoreOptionValue,
+        var deduplicatedRecords = Deduplicate.TryDeduplicate(records1, scoreOptionValue,
           firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
 
         var deduplicatedResult = deduplicatedRecords
@@ -119,9 +119,7 @@ public partial class MatchingCommand
               string.Join('|', x.Matches.Select(m => m.Value.RecordId))
             )
           );
-        await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
-        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        await csv.WriteRecordsAsync(deduplicatedResult);
+        await DeduplicatedRecordTemplate.WriteToCsv(deduplicatedResult, outputOptionValue.FullName);
       },
       filePathArgument, firstNamesDictionaryFilePathOption,
       middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption);

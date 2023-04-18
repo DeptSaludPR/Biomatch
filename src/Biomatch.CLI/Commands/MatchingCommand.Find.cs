@@ -1,10 +1,8 @@
 using System.CommandLine;
-using System.Globalization;
-using System.Text;
 using Biomatch.CLI.Progress;
 using Biomatch.CLI.Services;
-using CsvHelper;
 using Biomatch.Domain;
+using Biomatch.CLI.Csv;
 using Biomatch.Domain.Models;
 
 namespace Biomatch.CLI.Commands;
@@ -82,13 +80,18 @@ public static partial class MatchingCommand
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
         scoreOptionValue, sameDataSetOptionValue) =>
       {
-        using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
-        using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-        var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
-
-        using var reader = new StreamReader(filePath2ArgumentValue.FullName);
-        using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
-        var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
+        var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
+        List<PatientRecord> records1 = new();
+        await foreach (var record in records1FromCsv)
+        {
+          records1.Add(record);
+        }
+        var records2FromCsv = PatientRecordParser.ParseCsv(filePath2ArgumentValue.FullName);
+        List<PatientRecord> records2 = new();
+        await foreach (var record in records2FromCsv)
+        {
+          records2.Add(record);
+        }
 
         WordDictionary? firstNamesDictionary = null;
         if (firstNamesDictionaryFilePathOptionValue.Exists)
@@ -135,7 +138,7 @@ public static partial class MatchingCommand
           Console.ResetColor();
         }
 
-        await DuplicateService.RunFileComparisons(records1FromCsv, records2FromCsv,
+        await DuplicateService.RunFileComparisons(records1, records2,
           outputOptionValue, true,
           scoreOptionValue, firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue);
       },
@@ -200,13 +203,18 @@ public static partial class MatchingCommand
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
         scoreOptionValue, sameDataSetOptionValue) =>
       {
-        using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
-        using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-        var records1FromCsv = csvRecords1.GetRecords<PatientRecord>().ToArray();
-
-        using var reader = new StreamReader(filePath2ArgumentValue.FullName);
-        using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
-        var records2FromCsv = csvRecords2.GetRecords<PatientRecord>();
+        var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
+        List<PatientRecord> records1 = new();
+        await foreach (var record in records1FromCsv)
+        {
+          records1.Add(record);
+        }
+        var records2FromCsv = PatientRecordParser.ParseCsv(filePath2ArgumentValue.FullName);
+        List<PatientRecord> records2 = new();
+        await foreach (var record in records2FromCsv)
+        {
+          records2.Add(record);
+        }
 
         WordDictionary? firstNamesDictionary = null;
         if (firstNamesDictionaryFilePathOptionValue.Exists)
@@ -253,14 +261,12 @@ public static partial class MatchingCommand
           Console.ResetColor();
         }
 
-        var matchProgressReport = MatchingProgress.GetMatchingProgressReport(records1FromCsv.Length);
+        var matchProgressReport = MatchingProgress.GetMatchingProgressReport(records1.Count);
 
-        var possibleMatches = Match.FindBestMatches(records1FromCsv, records2FromCsv, scoreOptionValue,
+        var possibleMatches = Match.FindBestMatches(records1, records2, scoreOptionValue,
           firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue, matchProgressReport);
 
-        await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
-        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        await csv.WriteRecordsAsync(possibleMatches);
+        await PotentialMatchTemplate.WriteToCsv(possibleMatches, outputOptionValue.FullName);
       },
       filePath1Argument, filePath2Argument, firstNamesDictionaryFilePathOption,
       middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption, sameDataSetOption);

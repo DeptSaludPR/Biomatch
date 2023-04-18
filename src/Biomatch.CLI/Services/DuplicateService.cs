@@ -1,9 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Globalization;
-using System.Text;
 using Biomatch.CLI.Csv;
-using CsvHelper;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
 
@@ -46,9 +43,6 @@ public static class DuplicateService
 
     var urlDocs = potentialDuplicates
       .Select(e => new DuplicateRecord(e));
-    await using var writer = new StreamWriter(outputFileName.FullName, false, Encoding.UTF8);
-    await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-    csv.Context.RegisterClassMap<DuplicateRecordMap>();
-    await csv.WriteRecordsAsync(urlDocs);
+    await DuplicateRecordTemplate.WriteToCsv(urlDocs, outputFileName.FullName);
   }
 }

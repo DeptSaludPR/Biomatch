@@ -1,13 +1,13 @@
 using System.Globalization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
-using CsvHelper;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
+using CsvHelper;
 
 namespace Biomatch.Benchmark;
 
-[SimpleJob(RunStrategy.Throughput, warmupCount: 1, iterationCount: 3)]
+[SimpleJob(RunStrategy.Throughput, warmupCount: 2, iterationCount: 5)]
 [MemoryDiagnoser]
 public class FindDuplicateBenchmark
 {
@@ -31,8 +31,14 @@ public class FindDuplicateBenchmark
   }
 
   [Benchmark]
-  public void DuplicateBenchmark()
+  public void DuplicateBenchmarkSameDataSet()
   {
-    Match.GetPotentialMatches(RecordsToMatch, SampleRecords, 0.8, 1.0);
+    Match.GetPotentialMatchesFromSameDataSet(RecordsToMatch, SampleRecords, 0.85, 1.0);
+  }
+
+  [Benchmark]
+  public void DuplicateBenchmarkDifferentDataSet()
+  {
+    Match.GetPotentialMatchesFromDifferentDataSet(RecordsToMatch, SampleRecords, 0.85, 1.0);
   }
 }

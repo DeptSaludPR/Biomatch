@@ -1,7 +1,5 @@
 using System.CommandLine;
-using System.Globalization;
-using System.Text;
-using CsvHelper;
+using Biomatch.CLI.Csv;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
 
@@ -15,8 +13,7 @@ public static partial class MatchingCommand
     {
       GetTemplateGenerateCommand(),
       GetTemplateValidateCommand(),
-      GetPreprocessCommand(),
-      GetTemplateDifferenceCommand()
+      GetPreprocessCommand()
     };
 
     return command;
@@ -37,9 +34,7 @@ public static partial class MatchingCommand
     command.SetHandler(
       async (outputOptionValue) =>
       {
-        await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
-        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        csv.WriteHeader<PatientRecord>();
+        await PatientRecordWriter.WriteToCsv(Array.Empty<PatientRecord>(), outputOptionValue.FullName);
       }, outputOption);
 
     return command;
@@ -56,15 +51,18 @@ public static partial class MatchingCommand
     };
 
     command.SetHandler(
-      (templateFilePathArgumentValue) =>
+      async (templateFilePathArgumentValue) =>
       {
         try
         {
-          using var readerFile1 = new StreamReader(templateFilePathArgumentValue.FullName);
-          using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-          var records = csvRecords1.GetRecords<PatientRecord>();
+          var records1FromCsv = PatientRecordParser.ParseCsv(templateFilePathArgumentValue.FullName);
+          List<PatientRecord> records = new();
+          await foreach (var record in records1FromCsv)
+          {
+            records.Add(record);
+          }
           Console.ForegroundColor = ConsoleColor.Green;
-          Console.WriteLine($"Template file is valid, and contains {records.Count():N0} records.");
+          Console.WriteLine($"Template file is valid, and contains {records.Count:N0} records.");
         }
         catch (Exception)
         {
@@ -115,9 +113,12 @@ public static partial class MatchingCommand
       async (filePath1ArgumentValue, firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue) =>
       {
-        using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName, Encoding.UTF8);
-        using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-        var records1FromCsv = csvRecords1.GetRecords<PatientRecord>().ToList();
+        var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
+        List<PatientRecord> records = new();
+        await foreach (var record in records1FromCsv)
+        {
+          records.Add(record);
+        }
 
         WordDictionary? firstNamesDictionary = null;
         if (firstNamesDictionaryFilePathOptionValue.Exists)
@@ -164,90 +165,11 @@ public static partial class MatchingCommand
           Console.ResetColor();
         }
 
-        var processedRecords =
-          records1FromCsv.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
-
-        await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
-        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        await csv.WriteRecordsAsync(processedRecords);
+        var processedRecords = records.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
+        await PatientRecordWriter.WriteToCsv(processedRecords, outputOptionValue.FullName);
       },
       filePath1Argument, firstNamesDictionaryFilePathOption,
       middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption);
-
-    return command;
-  }
-
-  private static Command GetTemplateDifferenceCommand()
-  {
-    var filePathTemplate1Argument = new Argument<FileInfo>
-      (name: "templateFilePath1", description: "The path of the first file");
-
-    var filePathTemplate2Argument = new Argument<FileInfo>
-      (name: "templateFilePath2", description: "The path of the second file");
-
-    var outputOption = new Option<FileInfo>
-    (name: "--output", description: "Output file path",
-      getDefaultValue: () => new FileInfo("Differences.csv"));
-    outputOption.AddAlias("-o");
-
-    var command = new Command("difference", "Gets the difference between two templates duplicate records")
-    {
-      filePathTemplate1Argument,
-      filePathTemplate2Argument,
-      outputOption,
-    };
-
-    command.SetHandler(
-      async (filePathTemplate1ArgumentValue, filePathTemplate2ArgumentValue, outputOptionValue) =>
-      {
-        using var readerFile1 = new StreamReader(filePathTemplate1ArgumentValue.FullName);
-        using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-        var records1FromCsv = csvRecords1.GetRecords<PatientRecord>().ToList();
-
-        using var reader = new StreamReader(filePathTemplate2ArgumentValue.FullName);
-        using var csvRecords2 = new CsvReader(reader, CultureInfo.InvariantCulture);
-        var records2FromCsv = csvRecords2.GetRecords<PatientRecord>().ToList();
-
-        var differences = records1FromCsv.Except(records2FromCsv);
-
-        var newDifferences = new List<PatientRecordForDifference>();
-        foreach (var difference in differences)
-        {
-          var differentRecord = records2FromCsv.Find(e => e.RecordId == difference.RecordId);
-          if (differentRecord != null)
-          {
-            newDifferences.Add(new PatientRecordForDifference
-            (
-              difference.RecordId,
-              difference.FirstName != differentRecord.FirstName
-                ? $"{difference.FirstName} -> {differentRecord.FirstName}"
-                : difference.FirstName,
-              difference.MiddleName != differentRecord.MiddleName
-                ? $"{difference.MiddleName} -> {differentRecord.MiddleName}"
-                : difference.MiddleName,
-              difference.LastName != differentRecord.LastName
-                ? $"{difference.LastName} -> {differentRecord.LastName}"
-                : difference.LastName,
-              difference.SecondLastName != differentRecord.SecondLastName
-                ? $"{difference.SecondLastName} -> {differentRecord.SecondLastName}"
-                : difference.SecondLastName,
-              difference.BirthDate != differentRecord.BirthDate
-                ? $"{difference.BirthDate} -> {differentRecord.BirthDate}"
-                : difference.BirthDate?.ToShortDateString() ?? "",
-              difference.City != differentRecord.City
-                ? $"{difference.City} -> {differentRecord.City}"
-                : difference.City,
-              difference.PhoneNumber != differentRecord.PhoneNumber
-                ? $"{difference.PhoneNumber} -> {differentRecord.PhoneNumber}"
-                : difference.PhoneNumber
-            ));
-          }
-        }
-
-        await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
-        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        await csv.WriteRecordsAsync(newDifferences);
-      }, filePathTemplate1Argument, filePathTemplate2Argument, outputOption);
 
     return command;
   }

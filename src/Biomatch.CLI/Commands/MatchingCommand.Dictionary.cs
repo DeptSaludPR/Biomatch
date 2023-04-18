@@ -1,8 +1,5 @@
 using System.CommandLine;
-using System.Globalization;
-using System.Text;
-using CsvHelper;
-using CsvHelper.Configuration;
+using Biomatch.CLI.Csv;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
 
@@ -40,13 +37,14 @@ public static partial class MatchingCommand
     command.SetHandler(
       async (filePathTemplateArgumentValue, outputOptionValue) =>
       {
-        using var readerFile1 = new StreamReader(filePathTemplateArgumentValue.FullName);
-        using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-        var records1FromCsv = csvRecords1.GetRecords<PatientRecord>()
-          .PreprocessData()
-          .ToList();
+        var records1FromCsv = PatientRecordParser.ParseCsv(filePathTemplateArgumentValue.FullName);
+        List<PatientRecord> records1 = new();
+        await foreach (var record in records1FromCsv)
+        {
+          records1.Add(record);
+        }
 
-        var firstNameFrequencyDictionary = records1FromCsv
+        var firstNameFrequencyDictionary = records1
           .GroupBy(e => e.FirstName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
           .Select(e => new FrequencyDictionary
@@ -57,7 +55,7 @@ public static partial class MatchingCommand
           .OrderByDescending(e => e.Frequency)
           .ToList();
 
-        var middleNameFrequencyDictionary = records1FromCsv
+        var middleNameFrequencyDictionary = records1
           .PreprocessData()
           .GroupBy(e => e.MiddleName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
@@ -69,7 +67,7 @@ public static partial class MatchingCommand
           .OrderByDescending(e => e.Frequency)
           .ToList();
 
-        var firstLastNameFrequencyDictionary = records1FromCsv
+        var firstLastNameFrequencyDictionary = records1
           .GroupBy(e => e.LastName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
           .Select(e => new FrequencyDictionary
@@ -78,7 +76,7 @@ public static partial class MatchingCommand
             e.Count()
           ));
 
-        var secondLastNameFrequencyDictionary = records1FromCsv
+        var secondLastNameFrequencyDictionary = records1
           .GroupBy(e => e.LastName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
           .Select(e => new FrequencyDictionary
@@ -108,20 +106,11 @@ public static partial class MatchingCommand
     return command;
   }
 
-  private static async Task CreateDictionaryFile(List<FrequencyDictionary> frequencyDictionary,
+  private static async Task CreateDictionaryFile(IEnumerable<FrequencyDictionary> frequencyDictionary,
     DirectoryInfo directoryInfo, string fileName)
   {
-    var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-    {
-      Delimiter = "\t",
-    };
-    await using var writer = new StreamWriter(directoryInfo.FullName + fileName, false, Encoding.UTF8);
-    await using var csv = new CsvWriter(writer, config);
-    foreach (var word in frequencyDictionary)
-    {
-      csv.WriteRecord(word);
-      await csv.NextRecordAsync();
-    }
+    await FrequencyDictionaryTemplate.WriteToTabDelimitedFile(frequencyDictionary,
+      Path.Combine(directoryInfo.FullName, fileName));
   }
 
   private static Command GetDictionaryTestCommand()

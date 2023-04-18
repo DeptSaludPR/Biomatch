@@ -1,9 +1,9 @@
 using System.Globalization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
-using CsvHelper;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
+using CsvHelper;
 
 namespace Biomatch.Benchmark;
 
