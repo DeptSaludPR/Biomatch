@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using Biomatch.Domain.Models;
 
 namespace Biomatch.Domain;
@@ -9,15 +8,22 @@ public static class Match
   public static IEnumerable<PotentialMatch> FindBestMatches(IEnumerable<PatientRecord> records1,
     IEnumerable<PatientRecord> records2, double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null,
-    IProgress<int>? matchProgressReport = null)
+    bool recordsFromSameDataSet = false, IProgress<int>? matchProgressReport = null)
   {
     var preprocessedRecords1 =
       records1.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
     var preprocessedRecords2 =
       records2.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
 
-    var recordMatchResults =
-      GetPotentialMatches(preprocessedRecords1, preprocessedRecords2, matchScoreThreshold, 1.0, matchProgressReport);
+    ConcurrentBag<PotentialMatch> recordMatchResults;
+    if (recordsFromSameDataSet)
+      recordMatchResults =
+        GetPotentialMatchesFromSameDataSet(preprocessedRecords1, preprocessedRecords2, matchScoreThreshold, 1.0,
+          matchProgressReport);
+    else
+      recordMatchResults =
+        GetPotentialMatchesFromDifferentDataSet(preprocessedRecords1, preprocessedRecords2, matchScoreThreshold, 1.0,
+          matchProgressReport);
 
     var matchedRecords = recordMatchResults
       .GroupBy(x => x.Value)
@@ -28,7 +34,7 @@ public static class Match
     return matchedRecords;
   }
 
-  public static ConcurrentBag<PotentialMatch> GetPotentialMatches(Memory<PatientRecord> records1,
+  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromDifferentDataSet(Memory<PatientRecord> records1,
     Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold,
     IProgress<int>? matchProgressReport = null)
   {
@@ -58,9 +64,10 @@ public static class Match
       {
         for (var i = 0; i < records2ToCompare.Length; i++)
         {
-          CompareRecords(potentialMatches, ref records1ToCompare.Span[recordToCompareIndex],
-            ref records2ToCompare.Span[i],
-            lowerScoreThreshold, upperScoreThreshold);
+          ref var primaryRecord = ref records1ToCompare.Span[recordToCompareIndex];
+          ref var secondaryRecord = ref records2ToCompare.Span[i];
+          CompareRecords(potentialMatches, ref primaryRecord, ref secondaryRecord, lowerScoreThreshold,
+            upperScoreThreshold);
         }
 
         matchProgressReport?.Report(1);
@@ -70,19 +77,16 @@ public static class Match
     return potentialMatches;
   }
 
-  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesV2(Memory<PatientRecord> records1,
+  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromSameDataSet(Memory<PatientRecord> records1,
     Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold,
-    IProgress<int>? progress = null)
+    IProgress<int>? matchProgressReport = null)
   {
     var potentialMatches = new ConcurrentBag<PotentialMatch>();
 
     var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1.Span);
     var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2.Span);
 
-    ConcurrentDictionary<PatientRecord, Memory<PatientRecord>> recordSlicesToCompare = new();
-
     var parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount};
-
     // Maximum of 26 iterations because of letters in the alphabet
     Parallel.For(0, records1CharacterStartAndEndIndex.Length, parallelOptions, record1Index =>
     {
@@ -99,23 +103,19 @@ public static class Match
         : records2.Slice(records2StartAndEnd.Item1, records2StartAndEnd.Item2 - records2StartAndEnd.Item1 + 1);
 
       // For each record in the first table, compare it to all records in the second table
-      for (var recordToCompareIndex = 0; recordToCompareIndex < records1ToCompare.Length; recordToCompareIndex++)
+      Parallel.For(0, records1ToCompare.Length, parallelOptions, recordToCompareIndex =>
       {
-        recordSlicesToCompare.TryAdd(Unsafe.AsRef(records1ToCompare.Span[recordToCompareIndex]), records2ToCompare);
-      }
-    });
+        for (var i = 0; i < records2ToCompare.Length; i++)
+        {
+          ref var primaryRecord = ref records1ToCompare.Span[recordToCompareIndex];
+          ref var secondaryRecord = ref records2ToCompare.Span[i];
+          if (primaryRecord.RecordId == secondaryRecord.RecordId) return;
+          CompareRecords(potentialMatches, ref primaryRecord, ref secondaryRecord, lowerScoreThreshold,
+            upperScoreThreshold);
+        }
 
-
-    var partitionerRecordsToCompare = Partitioner.Create(recordSlicesToCompare);
-    Parallel.ForEach(partitionerRecordsToCompare, parallelOptions, recordToCompare =>
-    {
-      for (var i = 0; i < recordToCompare.Value.Length; i++)
-      {
-        CompareRecords(potentialMatches, ref Unsafe.AsRef(recordToCompare.Key), ref recordToCompare.Value.Span[i],
-          lowerScoreThreshold, upperScoreThreshold);
-      }
-
-      progress?.Report(1);
+        matchProgressReport?.Report(1);
+      });
     });
 
     return potentialMatches;
@@ -125,7 +125,6 @@ public static class Match
     ref PatientRecord primaryRecord, ref PatientRecord secondaryRecord,
     double lowerScoreThreshold, double upperScoreThreshold)
   {
-    if (primaryRecord.RecordId == secondaryRecord.RecordId) return;
     //get the distance vector for the ith vector of the first table and the jth record of the second table
     var distanceVector = DistanceVector.CalculateDistance(ref primaryRecord, ref secondaryRecord);
     var tempScore = Score.CalculateFinalScore(ref distanceVector);

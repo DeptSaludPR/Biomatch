@@ -53,7 +53,12 @@ public static partial class MatchingCommand
     var scoreOption = new Option<double>
     (name: "--score",
       description: "Score for matching",
-      getDefaultValue: () => 0.8);
+      getDefaultValue: () => 0.85);
+
+    var sameDataSetOption = new Option<bool>
+    (name: "--same-data-set",
+      description: "If true, records with the same ID will be considered as matches and skipped",
+      getDefaultValue: () => false);
 
     var logPathOption = new Option<FileInfo?>
     (name: "--log",
@@ -69,13 +74,13 @@ public static partial class MatchingCommand
       lastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
-      logPathOption
+      sameDataSetOption
     };
 
     command.SetHandler(
       async (filePath1ArgumentValue, filePath2ArgumentValue, firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
-        scoreOptionValue, logPathValue) =>
+        scoreOptionValue, sameDataSetOptionValue) =>
       {
         using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
         using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
@@ -132,11 +137,10 @@ public static partial class MatchingCommand
 
         await DuplicateService.RunFileComparisons(records1FromCsv, records2FromCsv,
           outputOptionValue, true,
-          scoreOptionValue, firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, logPathValue);
+          scoreOptionValue, firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue);
       },
       filePath1Argument, filePath2Argument, firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption,
-      logPathOption);
+      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption, sameDataSetOption);
 
     return command;
   }
@@ -166,13 +170,18 @@ public static partial class MatchingCommand
 
     var outputOption = new Option<FileInfo>
     (name: "--output", description: "Output file path",
-      getDefaultValue: () => new FileInfo("Duplicates.csv"));
+      getDefaultValue: () => new FileInfo("Matches.csv"));
     outputOption.AddAlias("-o");
 
     var scoreOption = new Option<double>
     (name: "--score",
       description: "Score for matching",
-      getDefaultValue: () => 0.8);
+      getDefaultValue: () => 0.85);
+
+    var sameDataSetOption = new Option<bool>
+    (name: "--same-data-set",
+      description: "If true, records with the same ID will be considered as matches and skipped",
+      getDefaultValue: () => false);
 
     var command = new Command("matches", "Match records in two files")
     {
@@ -183,12 +192,13 @@ public static partial class MatchingCommand
       lastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
+      sameDataSetOption
     };
 
     command.SetHandler(
       async (filePath1ArgumentValue, filePath2ArgumentValue, firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
-        scoreOptionValue) =>
+        scoreOptionValue, sameDataSetOptionValue) =>
       {
         using var readerFile1 = new StreamReader(filePath1ArgumentValue.FullName);
         using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
@@ -246,14 +256,14 @@ public static partial class MatchingCommand
         var matchProgressReport = MatchingProgress.GetMatchingProgressReport(records1FromCsv.Length);
 
         var possibleMatches = Match.FindBestMatches(records1FromCsv, records2FromCsv, scoreOptionValue,
-          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, matchProgressReport);
+          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue, matchProgressReport);
 
         await using var writer = new StreamWriter(outputOptionValue.FullName, false, Encoding.UTF8);
         await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         await csv.WriteRecordsAsync(possibleMatches);
       },
       filePath1Argument, filePath2Argument, firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption);
+      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption, sameDataSetOption);
 
     return command;
   }
