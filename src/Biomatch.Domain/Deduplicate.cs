@@ -14,7 +14,7 @@ public static class Deduplicate
         .ToArray();
 
     var potentialDuplicates =
-      Match.GetPotentialMatches(preprocessedRecords, preprocessedRecords, matchScoreThreshold, 1.0);
+      Match.GetPotentialMatchesFromSameDataSet(preprocessedRecords, preprocessedRecords, matchScoreThreshold, 1.0);
 
     var potentialDuplicatesGrouped = potentialDuplicates
       .GroupBy(x => x.Value);
