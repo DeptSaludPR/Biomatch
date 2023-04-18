@@ -4,14 +4,14 @@ System to match records utilizing demographic data.
 
 ## CLI Installation
 
-To build the project you need the .NET 7 SDK. You can download it from [here](https://dotnet.microsoft.com/download/dotnet/7.0).
+To build the project you need the .NET 8 SDK. You can download it from [here](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 Build the cli tool utilizing the following command:
 ```zsh
 dotnet publish -c Release src/Biomatch.CLI
 ```
 
-This will create a "**matching**" executable file for Linux-x64 systems. To build for other architectures, pass the -r parameter as the following example:
+This will create a "**matching**" executable file for your current architecture. To build for other architectures, pass the -r parameter as the following example:
 ```zsh
 dotnet publish -c Release -r linux-x64 src/Biomatch.CLI -o biomatch
 ```
