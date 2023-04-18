@@ -109,7 +109,7 @@ public static class Match
         {
           ref var primaryRecord = ref records1ToCompare.Span[recordToCompareIndex];
           ref var secondaryRecord = ref records2ToCompare.Span[i];
-          if (primaryRecord.RecordId == secondaryRecord.RecordId) return;
+          if (primaryRecord.RecordId == secondaryRecord.RecordId) continue;
           CompareRecords(potentialMatches, ref primaryRecord, ref secondaryRecord, lowerScoreThreshold,
             upperScoreThreshold);
         }
