@@ -1,4 +1,3 @@
-using System.Buffers;
 using Quickenshtein;
 
 namespace Biomatch.Domain.Models;
@@ -7,90 +6,55 @@ public static class StringDistance
 {
   public static int GeneralDemographicFieldDistance(ReadOnlySpan<char> a, ReadOnlySpan<char> b)
   {
-    int distance;
     if (a.IsEmpty && b.IsEmpty)
     {
-      distance = 0;
-    }
-    else if (a.IsEmpty || b.IsEmpty)
-    {
-      distance = -1;
-    }
-    else
-    {
-      distance = Levenshtein.GetDistance(a, b);
+      return 0;
     }
 
-    return distance;
+    if (a.IsEmpty || b.IsEmpty)
+    {
+      return -1;
+    }
+
+    return Levenshtein.GetDistance(a, b);
   }
 
-  public static int GeneralDemographicFieldDistance(DateOnly? date1, DateOnly? date2)
+  public static int DateDemographicFieldDistance(ReadOnlySpan<byte> date1, ReadOnlySpan<byte> date2)
   {
-    int distance;
-    if (date1 is null && date2 is null)
+    if (date1.IsEmpty && date2.IsEmpty)
     {
-      distance = 0;
+      return 0;
     }
-    else if (date1 is null || date2 is null)
+
+    if (date1.IsEmpty || date2.IsEmpty)
     {
-      distance = -1;
+      return -1;
     }
+
     // Check for inverted day and month
-    else if (date1.Value.Year == date2.Value.Year &&
-             date1.Value.Month == date2.Value.Day &&
-             date1.Value.Day == date2.Value.Month)
+    var month1 = date1[..2];
+    var day1 = date1.Slice(2, 2);
+    var month2 = date2[..2];
+    var day2 = date2.Slice(2, 2);
+    var date1Year = date1[4..];
+    var date2Year = date2[4..];
+
+    if (date1Year.SequenceEqual(date2Year) &&
+        month1.SequenceEqual(day2) &&
+        day1.SequenceEqual(month2))
     {
-      distance = 0;
+      return 0;
     }
-    else
+
+    var distance = 0;
+    for (var i = 0; i < 8; i++)
     {
-      var date1Buffer = ArrayPool<char>.Shared.Rent(9);
-      var date2Buffer = ArrayPool<char>.Shared.Rent(9);
-      distance = Levenshtein.GetDistance(ToShortDateReadOnlySpan(date1.Value, date1Buffer),
-        ToShortDateReadOnlySpan(date2.Value, date2Buffer));
-      ArrayPool<char>.Shared.Return(date1Buffer);
-      ArrayPool<char>.Shared.Return(date2Buffer);
+      if (date1[i] != date2[i])
+      {
+        distance++;
+      }
     }
 
     return distance;
-  }
-
-  private static ReadOnlySpan<char> ToShortDateReadOnlySpan(DateOnly date, char[] buffer)
-  {
-    var written = 0;
-
-    var month = date.Month;
-    if (month < 10)
-    {
-      buffer[written++] = '0';
-      buffer[written++] = (char) (month + '0');
-    }
-    else
-    {
-      buffer[written++] = (char) (month / 10 + '0');
-      buffer[written++] = (char) (month % 10 + '0');
-    }
-
-    var day = date.Day;
-    if (day < 10)
-    {
-      buffer[written++] = '0';
-      buffer[written++] = (char) (day + '0');
-    }
-    else
-    {
-      buffer[written++] = (char) (day / 10 + '0');
-      buffer[written++] = (char) (day % 10 + '0');
-    }
-
-    var year = date.Year;
-    buffer[written++] = (char) (year / 1000 + '0');
-    year %= 1000;
-    buffer[written++] = (char) (year / 100 + '0');
-    year %= 100;
-    buffer[written++] = (char) (year / 10 + '0');
-    buffer[written++] = (char) (year % 10 + '0');
-
-    return buffer.AsSpan(0, written);
   }
 }

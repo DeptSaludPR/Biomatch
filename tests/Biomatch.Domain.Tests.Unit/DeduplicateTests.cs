@@ -9,31 +9,31 @@ public class DeduplicateTests
   public void TryDeduplicate_ShouldReturnDuplicateRecords_WhenListOfRecordsIsPassedWithNoDictionary()
   {
     // Arrange
-    var patientRecords = new List<PatientRecord>
+    var patientRecords = new List<IPersonRecord>
       {
-        new
+        new PersonRecord
         (
           "3688374",
           "Juan",
           "",
           "Del Pueblo",
           "",
-          new DateOnly(1990, 01, 01),
+          new DateOnly(1990, 02, 01),
           "Aguada",
           "7875982789"
         ),
-        new
+        new PersonRecord
         (
           "3697831",
           "Juan Del Puéblo",
           "",
           "",
           "",
-          new DateOnly(1990, 01, 01),
+          new DateOnly(1990, 02, 01),
           "San Juan",
           "7875982789"
         ),
-        new
+        new PersonRecord
         (
           "1238",
           "Guillermo",
@@ -44,7 +44,7 @@ public class DeduplicateTests
           "San Juan",
           ""
         ),
-        new
+        new PersonRecord
         (
           "1230",
           "Clara",
@@ -55,19 +55,18 @@ public class DeduplicateTests
           "Adjuntas",
           ""
         ),
-        new
+        new PersonRecord
         (
           "1276",
           "Juan Del Puéblo",
           "",
           "",
           "",
-          new DateOnly(1990, 01, 01),
+          new DateOnly(1990, 01, 02),
           "San Juan",
           "7875982789"
         ),
-      }
-      .PreprocessData();
+      };
 
     // Act
     var deduplicatedRecords = Deduplicate

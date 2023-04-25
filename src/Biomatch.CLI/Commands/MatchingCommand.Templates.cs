@@ -34,7 +34,7 @@ public static partial class MatchingCommand
     command.SetHandler(
       async (outputOptionValue) =>
       {
-        await PatientRecordWriter.WriteToCsv(Array.Empty<PatientRecord>(), outputOptionValue.FullName);
+        await PersonRecordWriter.WriteToCsv(Array.Empty<IPersonRecord>(), outputOptionValue.FullName);
       }, outputOption);
 
     return command;
@@ -56,7 +56,7 @@ public static partial class MatchingCommand
         try
         {
           var records1FromCsv = PatientRecordParser.ParseCsv(templateFilePathArgumentValue.FullName);
-          List<PatientRecord> records = new();
+          List<PersonRecord> records = new();
           await foreach (var record in records1FromCsv)
           {
             records.Add(record);
@@ -114,7 +114,7 @@ public static partial class MatchingCommand
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue) =>
       {
         var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
-        List<PatientRecord> records = new();
+        List<IPersonRecord> records = new();
         await foreach (var record in records1FromCsv)
         {
           records.Add(record);
@@ -166,7 +166,7 @@ public static partial class MatchingCommand
         }
 
         var processedRecords = records.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
-        await PatientRecordWriter.WriteToCsv(processedRecords, outputOptionValue.FullName);
+        await PersonRecordWriter.WriteToCsv(processedRecords.OfType<IPersonRecord>(), outputOptionValue.FullName);
       },
       filePath1Argument, firstNamesDictionaryFilePathOption,
       middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption);

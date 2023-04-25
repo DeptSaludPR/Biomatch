@@ -2,6 +2,6 @@ namespace Biomatch.Domain.Models;
 
 public record RecordMatchResult
 (
-  PatientRecord Value,
+  IPersonRecord Value,
   List<PotentialMatch> Matches
 );

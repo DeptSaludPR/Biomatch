@@ -1,18 +1,18 @@
 using System.Text;
 using Biomatch.Domain.Models;
 
-namespace Biomatch.CLI.Csv;
+namespace Biomatch.Benchmark.Csv;
 
 public static class PatientRecordParser
 {
-  public static async IAsyncEnumerable<PersonRecord> ParseCsv(string csvFilePath)
+  public static IEnumerable<IPersonRecord> ParseCsv(string csvFilePath)
   {
     using var reader = new StreamReader(File.OpenRead(csvFilePath));
-    var headerLine = await reader.ReadLineAsync(); // Skip the header line
+    var headerLine = reader.ReadLine(); // Skip the header line
 
     while (!reader.EndOfStream)
     {
-      var line = await reader.ReadLineAsync();
+      var line = reader.ReadLine();
       if (string.IsNullOrWhiteSpace(line))
       {
         continue;
@@ -21,7 +21,7 @@ public static class PatientRecordParser
       var valuesCount = CountCsvLineValues(line);
       while (valuesCount < 8 && !reader.EndOfStream)
       {
-        var nextLine = await reader.ReadLineAsync();
+        var nextLine = reader.ReadLine();
         if (string.IsNullOrWhiteSpace(nextLine))
         {
           throw new Exception($"Missing values in line: {line}");

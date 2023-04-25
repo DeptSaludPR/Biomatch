@@ -81,13 +81,13 @@ public static partial class MatchingCommand
         scoreOptionValue, sameDataSetOptionValue) =>
       {
         var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
-        List<PatientRecord> records1 = new();
+        List<IPersonRecord> records1 = new();
         await foreach (var record in records1FromCsv)
         {
           records1.Add(record);
         }
         var records2FromCsv = PatientRecordParser.ParseCsv(filePath2ArgumentValue.FullName);
-        List<PatientRecord> records2 = new();
+        List<IPersonRecord> records2 = new();
         await foreach (var record in records2FromCsv)
         {
           records2.Add(record);
@@ -204,13 +204,13 @@ public static partial class MatchingCommand
         scoreOptionValue, sameDataSetOptionValue) =>
       {
         var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
-        List<PatientRecord> records1 = new();
+        List<IPersonRecord> records1 = new();
         await foreach (var record in records1FromCsv)
         {
           records1.Add(record);
         }
         var records2FromCsv = PatientRecordParser.ParseCsv(filePath2ArgumentValue.FullName);
-        List<PatientRecord> records2 = new();
+        List<IPersonRecord> records2 = new();
         await foreach (var record in records2FromCsv)
         {
           records2.Add(record);

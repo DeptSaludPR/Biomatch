@@ -38,7 +38,7 @@ public static partial class MatchingCommand
       async (filePathTemplateArgumentValue, outputOptionValue) =>
       {
         var records1FromCsv = PatientRecordParser.ParseCsv(filePathTemplateArgumentValue.FullName);
-        List<PatientRecord> records1 = new();
+        List<IPersonRecord> records1 = new();
         await foreach (var record in records1FromCsv)
         {
           records1.Add(record);

@@ -58,7 +58,7 @@ public partial class MatchingCommand
         scoreOptionValue) =>
       {
         var records1FromCsv = PatientRecordParser.ParseCsv(filePathArgumentValue.FullName);
-        List<PatientRecord> records1 = new();
+        List<IPersonRecord> records1 = new();
         await foreach (var record in records1FromCsv)
         {
           records1.Add(record);

@@ -2,7 +2,7 @@ namespace Biomatch.Domain.Models;
 
 public static class Score
 {
-  private static double singleFieldScore_StepMode(int dist, int threshold = 2, double step = 0.3)
+  private static double SingleFieldScoreStepMode(int dist, int threshold = 2, double step = 0.3)
   {
     //Experimental version for now, assigns 1 if the distance is 0, and lowers in increments to
     //0.7
@@ -37,13 +37,13 @@ public static class Score
     double birthDateWeight = 0.20, double cityWeight = 0.08, double pnWeight = 0.1)
   {
     //get the individual field score distances
-    var firstNameDistance = singleFieldScore_StepMode(d.FirstNameDistance, fnThreshold);
-    var middleNameDistance = singleFieldScore_StepMode(d.MiddleNameDistance, mnThreshold);
-    var lastNameDistance = singleFieldScore_StepMode(d.LastNameDistance, lnThreshold);
-    var secondLastNameDistance = singleFieldScore_StepMode(d.SecondLastNameDistance, slnThreshold);
-    var birthDateDistance = singleFieldScore_StepMode(d.BirthDateDistance, birthDateThreshold);
-    var cityDistance = singleFieldScore_StepMode(d.CityDistance, cityThreshold);
-    var phoneNumberDistance = singleFieldScore_StepMode(d.PhoneNumberDistance, pnThreshold);
+    var firstNameDistance = SingleFieldScoreStepMode(d.FirstNameDistance, fnThreshold);
+    var middleNameDistance = SingleFieldScoreStepMode(d.MiddleNameDistance, mnThreshold);
+    var lastNameDistance = SingleFieldScoreStepMode(d.LastNameDistance, lnThreshold);
+    var secondLastNameDistance = SingleFieldScoreStepMode(d.SecondLastNameDistance, slnThreshold);
+    var birthDateDistance = SingleFieldScoreStepMode(d.BirthDateDistance, birthDateThreshold);
+    var cityDistance = SingleFieldScoreStepMode(d.CityDistance, cityThreshold);
+    var phoneNumberDistance = SingleFieldScoreStepMode(d.PhoneNumberDistance, pnThreshold);
     //Then compute the weighted average
     var totalScore = fnWeight * firstNameDistance;
     totalScore += mnWeight * middleNameDistance;

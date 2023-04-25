@@ -1,9 +1,8 @@
-using System.Globalization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
+using Biomatch.Benchmark.Csv;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
-using CsvHelper;
 
 namespace Biomatch.Benchmark;
 
@@ -11,14 +10,12 @@ namespace Biomatch.Benchmark;
 [MemoryDiagnoser]
 public class DeduplicateBenchmark
 {
-  private PatientRecord[] RecordsToDeduplicate { get; }
+  private IPersonRecord[] RecordsToDeduplicate { get; }
 
   public DeduplicateBenchmark()
   {
-    using var readerFile1 = new StreamReader("./Data/records.csv");
-    using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-    var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
-    RecordsToDeduplicate = records1FromCsv.Take(60_000).PreprocessData().ToArray();
+    var records1FromCsv = PatientRecordParser.ParseCsv("./Data/records.csv");
+    RecordsToDeduplicate = records1FromCsv.Take(60_000).ToArray();
 
     Console.WriteLine($"Records to match: {RecordsToDeduplicate.Length}");
   }
