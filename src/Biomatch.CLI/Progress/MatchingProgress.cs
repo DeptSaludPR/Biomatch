@@ -17,7 +17,7 @@ public static class MatchingProgress
     var progressLock = new object();
 
     // Initialize a Stopwatch to measure elapsed time
-    var stopwatch = Stopwatch.StartNew();
+    Stopwatch? stopwatch = null;
 
     var textBuilder = new StringBuilder();
 
@@ -25,6 +25,7 @@ public static class MatchingProgress
     {
       lock (progressLock)
       {
+        stopwatch ??= Stopwatch.StartNew();
         completedOperations += increment;
 
         if ((DateTime.UtcNow - lastConsoleUpdateTime).TotalSeconds < 1 || completedOperations < 100) return;

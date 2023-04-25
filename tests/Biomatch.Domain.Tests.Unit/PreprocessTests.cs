@@ -9,9 +9,9 @@ public class PreprocessTests
   public void PreprocessData_ShouldPreprocessPatientRecord_WhenListOfRecordsIsPassedWithNoDictionary()
   {
     // Arrange
-    var patientRecords = new List<PatientRecord>
+    var patientRecords = new List<IPersonRecord>
     {
-      new
+      new PersonRecord
       (
         "1234",
         "Juan",
@@ -22,7 +22,7 @@ public class PreprocessTests
         "Aguada",
         "7875982789"
       ),
-      new
+      new PersonRecord
       (
         "1235",
         "Maria 789 Del Puéblo Del Valle",

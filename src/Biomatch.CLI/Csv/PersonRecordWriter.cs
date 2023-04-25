@@ -4,9 +4,9 @@ using Biomatch.Domain.Models;
 
 namespace Biomatch.CLI.Csv;
 
-public static class PatientRecordWriter
+public static class PersonRecordWriter
 {
-  public static async Task WriteToCsv(IEnumerable<PatientRecord> patientRecords, string csvFilePath)
+  public static async Task WriteToCsv(IEnumerable<IPersonRecord> patientRecords, string csvFilePath)
   {
     var csvContent = new StringBuilder();
     const string header = "RecordId,FirstName,MiddleName,LastName,SecondLastName,BirthDate,City,PhoneNumber";

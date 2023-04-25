@@ -7,7 +7,7 @@ namespace Biomatch.Domain;
 
 public static class Preprocess
 {
-  public static IEnumerable<PatientRecord> PreprocessData(this IEnumerable<PatientRecord> patientRecords,
+  public static IEnumerable<PersonRecordForMatch> PreprocessData(this IEnumerable<IPersonRecord> patientRecords,
     WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
     WordDictionary? lastNamesDictionary = null)
   {
@@ -16,7 +16,7 @@ public static class Preprocess
       .OrderBy(e => e.FirstName);
   }
 
-  private static IEnumerable<PatientRecord> SanitizeRecords(this IEnumerable<PatientRecord> patientRecords,
+  private static IEnumerable<PersonRecordForMatch> SanitizeRecords(this IEnumerable<IPersonRecord> patientRecords,
     WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
     WordDictionary? lastNamesDictionary = null)
   {
@@ -29,7 +29,7 @@ public static class Preprocess
     {
       "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms", "mrs"
     };
-    var processedPatientRecords = new ConcurrentBag<PatientRecord>();
+    var processedPatientRecords = new ConcurrentBag<PersonRecordForMatch>();
     Parallel.For(0, patientRecordsList.Length, index =>
     {
       var patientRecord = patientRecordsList[index];
@@ -64,16 +64,20 @@ public static class Preprocess
       var secondLastNames = personName.SecondLastName
         .SanitizeName(NameType.LastName, lastNamesDictionary);
 
-      processedPatientRecords.Add(patientRecord with
-      {
-        FirstName = string.Concat(firstNames),
-        MiddleName = string.Concat(middleNames),
-        LastName = string.Concat(lastNames),
-        SecondLastName = string.Concat(secondLastNames),
-        BirthDate = patientRecord.BirthDate.SanitizeBirthDate(),
-        City = patientRecord.City.SanitizeWord().ToString(),
-        PhoneNumber = PhoneNumberHelpers.Parse(patientRecord.PhoneNumber)
-      });
+      processedPatientRecords.Add(new PersonRecordForMatch
+      (
+        patientRecord.RecordId,
+        string.Concat(firstNames),
+        string.Concat(middleNames),
+        string.Concat(lastNames),
+        string.Concat(secondLastNames),
+        patientRecord.BirthDate.SanitizeBirthDate(),
+        patientRecord.BirthDate.HasValue
+          ? patientRecord.BirthDate.Value.ToByteArray()
+          : Array.Empty<byte>(),
+        patientRecord.City.SanitizeWord().ToString(),
+        PhoneNumberHelpers.Parse(patientRecord.PhoneNumber)
+      ));
     });
 
     return processedPatientRecords;

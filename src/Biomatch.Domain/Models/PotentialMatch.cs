@@ -2,8 +2,8 @@ namespace Biomatch.Domain.Models;
 
 public readonly record struct PotentialMatch
 (
-  PatientRecord Value,
-  PatientRecord Match,
+  IPersonRecord Value,
+  IPersonRecord Match,
   DistanceVector Distance,
   double Score
 );

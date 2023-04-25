@@ -1,9 +1,8 @@
-using System.Globalization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
+using Biomatch.Benchmark.Csv;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
-using CsvHelper;
 
 namespace Biomatch.Benchmark;
 
@@ -11,13 +10,11 @@ namespace Biomatch.Benchmark;
 [MemoryDiagnoser]
 public class PreprocessBenchmark
 {
-  private PatientRecord[] RecordsToMatch { get; }
+  private IPersonRecord[] RecordsToMatch { get; }
 
   public PreprocessBenchmark()
   {
-    using var readerFile1 = new StreamReader("./Data/records.csv");
-    using var csvRecords1 = new CsvReader(readerFile1, CultureInfo.InvariantCulture);
-    var records1FromCsv = csvRecords1.GetRecords<PatientRecord>();
+    var records1FromCsv = PatientRecordParser.ParseCsv("./Data/records.csv");
     RecordsToMatch = records1FromCsv.ToArray();
   }
 

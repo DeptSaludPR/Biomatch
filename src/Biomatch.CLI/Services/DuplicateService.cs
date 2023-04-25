@@ -8,8 +8,8 @@ namespace Biomatch.CLI.Services;
 
 public static class DuplicateService
 {
-  public static async Task RunFileComparisons(IEnumerable<PatientRecord> records1,
-    IEnumerable<PatientRecord> records2, FileInfo outputFileName, bool exactMatchesAllowed = false,
+  public static async Task RunFileComparisons(IEnumerable<IPersonRecord> records1,
+    IEnumerable<IPersonRecord> records2, FileInfo outputFileName, bool exactMatchesAllowed = false,
     double lowerScoreThreshold = 0.65, WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null,
     bool sameDataSetOptionValue = false)

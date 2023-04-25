@@ -1,6 +1,6 @@
 namespace Biomatch.Domain.Models;
 
-public readonly record struct PatientRecord
+public readonly record struct PersonRecordForMatch
 (
   string RecordId,
   string FirstName,
@@ -8,6 +8,7 @@ public readonly record struct PatientRecord
   string LastName,
   string SecondLastName,
   DateOnly? BirthDate,
+  byte[] BirthDateText,
   string City,
   string PhoneNumber
-);
+) : IPersonRecord;

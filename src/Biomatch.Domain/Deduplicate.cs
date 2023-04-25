@@ -4,7 +4,7 @@ namespace Biomatch.Domain;
 
 public static class Deduplicate
 {
-  public static IEnumerable<RecordMatchResult> TryDeduplicate(IEnumerable<PatientRecord> records,
+  public static IEnumerable<RecordMatchResult> TryDeduplicate(IEnumerable<IPersonRecord> records,
     double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null)
   {
@@ -19,8 +19,8 @@ public static class Deduplicate
     var potentialDuplicatesGrouped = potentialDuplicates
       .GroupBy(x => x.Value);
 
-    var potentialMatchesList = new Dictionary<PatientRecord, RecordMatchResult>();
-    var innerRecordsAdded = new HashSet<PatientRecord>();
+    var potentialMatchesList = new Dictionary<IPersonRecord, RecordMatchResult>();
+    var innerRecordsAdded = new HashSet<IPersonRecord>();
 
     foreach (var potentialDuplicate in potentialDuplicatesGrouped)
     {

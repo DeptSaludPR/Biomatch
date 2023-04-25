@@ -5,8 +5,8 @@ namespace Biomatch.Domain;
 
 public static class Match
 {
-  public static IEnumerable<PotentialMatch> FindBestMatches(IEnumerable<PatientRecord> records1,
-    IEnumerable<PatientRecord> records2, double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
+  public static IEnumerable<PotentialMatch> FindBestMatches(IEnumerable<IPersonRecord> records1,
+    IEnumerable<IPersonRecord> records2, double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null,
     bool recordsFromSameDataSet = false, IProgress<int>? matchProgressReport = null)
   {
@@ -34,8 +34,8 @@ public static class Match
     return matchedRecords;
   }
 
-  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromDifferentDataSet(Memory<PatientRecord> records1,
-    Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold,
+  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromDifferentDataSet(Memory<PersonRecordForMatch> records1,
+    Memory<PersonRecordForMatch> records2, double lowerScoreThreshold, double upperScoreThreshold,
     IProgress<int>? matchProgressReport = null)
   {
     var potentialMatches = new ConcurrentBag<PotentialMatch>();
@@ -77,8 +77,8 @@ public static class Match
     return potentialMatches;
   }
 
-  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromSameDataSet(Memory<PatientRecord> records1,
-    Memory<PatientRecord> records2, double lowerScoreThreshold, double upperScoreThreshold,
+  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromSameDataSet(Memory<PersonRecordForMatch> records1,
+    Memory<PersonRecordForMatch> records2, double lowerScoreThreshold, double upperScoreThreshold,
     IProgress<int>? matchProgressReport = null)
   {
     var potentialMatches = new ConcurrentBag<PotentialMatch>();
@@ -122,7 +122,7 @@ public static class Match
   }
 
   private static void CompareRecords(ConcurrentBag<PotentialMatch> potentialMatches,
-    ref PatientRecord primaryRecord, ref PatientRecord secondaryRecord,
+    ref PersonRecordForMatch primaryRecord, ref PersonRecordForMatch secondaryRecord,
     double lowerScoreThreshold, double upperScoreThreshold)
   {
     //get the distance vector for the ith vector of the first table and the jth record of the second table
@@ -131,11 +131,18 @@ public static class Match
     if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
     {
       potentialMatches.Add(
-        new PotentialMatch(primaryRecord, secondaryRecord, distanceVector, tempScore));
+        new PotentialMatch
+        (
+          primaryRecord,
+          secondaryRecord,
+          distanceVector,
+          tempScore
+        )
+      );
     }
   }
 
-  private static (int, int)[] GetCharactersStartAndEndIndex(ReadOnlySpan<PatientRecord> records)
+  private static (int, int)[] GetCharactersStartAndEndIndex(ReadOnlySpan<PersonRecordForMatch> records)
   {
     var characterIndex = new (int, int)[26]; // 26 letters in the alphabet
 
