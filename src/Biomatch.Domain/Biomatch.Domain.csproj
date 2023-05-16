@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsTrimmable>true</IsTrimmable>
     <PackageId>Biomatch.Domain</PackageId>
-    <Version>0.12.0</Version>
+    <Version>0.13.0</Version>
     <Authors>Elvis Nieves Miranda</Authors>
     <Company>Puerto Rico Department of Health</Company>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
