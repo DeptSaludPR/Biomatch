@@ -73,4 +73,22 @@ public class MatchingService
       .OrderBy(e => e.FirstName)
       .ToArray();
   }
+
+  public void RemovePersonFromMatchData(string recordId)
+  {
+    _preprocessedRecordsToMatch = _preprocessedRecordsToMatch.Where(e => e.RecordId != recordId).ToArray();
+  }
+
+  public void UpdatePersonMatchData(IPersonRecord record)
+  {
+    var preprocessedRecord =
+      record.PreprocessRecord(_prepositionsToRemove, _suffixesToRemove, _firstNamesDictionary, _middleNamesDictionary,
+        _lastNamesDictionary);
+
+    _preprocessedRecordsToMatch = _preprocessedRecordsToMatch
+      .Where(e => e.RecordId != record.RecordId)
+      .Append(preprocessedRecord)
+      .OrderBy(e => e.FirstName)
+      .ToArray();
+  }
 }
