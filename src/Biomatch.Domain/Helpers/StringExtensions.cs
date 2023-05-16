@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Text;
 using Biomatch.Domain.Enums;
@@ -84,7 +85,7 @@ public static class StringExtensions
     return sb;
   }
 
-  public static IEnumerable<string> RemoveWords(this IEnumerable<string> words, HashSet<string> wordsToRemove)
+  public static IEnumerable<string> RemoveWords(this IEnumerable<string> words, FrozenSet<string> wordsToRemove)
   {
     foreach (var word in words)
     {

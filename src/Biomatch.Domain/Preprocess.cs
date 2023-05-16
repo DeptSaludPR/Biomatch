@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using Biomatch.Domain.Enums;
 using Biomatch.Domain.Helpers;
 using Biomatch.Domain.Models;
@@ -7,6 +8,57 @@ namespace Biomatch.Domain;
 
 public static class Preprocess
 {
+  public static PersonRecordForMatch PreprocessRecord(this IPersonRecord patientRecord,
+    FrozenSet<string> prepositionsToRemove, FrozenSet<string> suffixesToRemove,
+    WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
+    WordDictionary? lastNamesDictionary = null)
+  {
+    var normalizedFirstNames = patientRecord.FirstName
+      .NormalizeNames(NameType.Name)
+      .RemoveWords(prepositionsToRemove)
+      .RemoveWords(suffixesToRemove);
+    var normalizedMiddleNames = patientRecord.MiddleName
+      .NormalizeNames(NameType.Name)
+      .RemoveWords(prepositionsToRemove)
+      .RemoveWords(suffixesToRemove);
+    var normalizedLastNames = patientRecord.LastName
+      .NormalizeNames(NameType.LastName)
+      .RemoveWords(prepositionsToRemove);
+    var normalizedSecondLastNames = patientRecord.SecondLastName
+      .NormalizeNames(NameType.LastName)
+      .RemoveWords(prepositionsToRemove);
+
+    var personName = OrganizeNames(normalizedFirstNames, normalizedMiddleNames.ToList(),
+      normalizedLastNames, normalizedSecondLastNames, lastNamesDictionary);
+
+    var firstNames = personName.FirstName
+      .SanitizeName(NameType.Name, firstNamesDictionary);
+
+    var middleNames = personName.MiddleName
+      .SanitizeName(NameType.Name, middleNamesDictionary);
+
+    var lastNames = personName.LastName
+      .SanitizeName(NameType.LastName, lastNamesDictionary);
+
+    var secondLastNames = personName.SecondLastName
+      .SanitizeName(NameType.LastName, lastNamesDictionary);
+
+    return new PersonRecordForMatch
+    (
+      patientRecord.RecordId,
+      string.Concat(firstNames),
+      string.Concat(middleNames),
+      string.Concat(lastNames),
+      string.Concat(secondLastNames),
+      patientRecord.BirthDate.SanitizeBirthDate(),
+      patientRecord.BirthDate.HasValue
+        ? patientRecord.BirthDate.Value.ToByteArray()
+        : Array.Empty<byte>(),
+      patientRecord.City.SanitizeWord().ToString(),
+      PhoneNumberHelpers.Parse(patientRecord.PhoneNumber)
+    );
+  }
+
   public static IEnumerable<PersonRecordForMatch> PreprocessData(this IEnumerable<IPersonRecord> patientRecords,
     WordDictionary? firstNamesDictionary = null, WordDictionary? middleNamesDictionary = null,
     WordDictionary? lastNamesDictionary = null)
@@ -24,11 +76,11 @@ public static class Preprocess
     var prepositions = new HashSet<string>
     {
       "el", "la", "los", "las", "de", "del", "en", "y", "a", "di", "da", "le", "san"
-    };
+    }.ToFrozenSet(true);
     var suffixes = new HashSet<string>
     {
       "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms", "mrs"
-    };
+    }.ToFrozenSet(true);
     var processedPatientRecords = new ConcurrentBag<PersonRecordForMatch>();
     Parallel.For(0, patientRecordsList.Length, index =>
     {
