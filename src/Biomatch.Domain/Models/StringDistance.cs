@@ -19,6 +19,26 @@ public static class StringDistance
     return Levenshtein.GetDistance(a, b);
   }
 
+  public static int MiddleNameDemographicFieldDistance(ReadOnlySpan<char> a, ReadOnlySpan<char> b)
+  {
+    if (a.IsEmpty && b.IsEmpty)
+    {
+      return 0;
+    }
+
+    if (a.IsEmpty || b.IsEmpty)
+    {
+      return -1;
+    }
+
+    if ((a.Length == 1 || b.Length == 1) && a[0] == b[0])
+    {
+      return 0;
+    }
+
+    return Levenshtein.GetDistance(a, b);
+  }
+
   public static int DateDemographicFieldDistance(ReadOnlySpan<byte> date1, ReadOnlySpan<byte> date2)
   {
     if (date1.IsEmpty && date2.IsEmpty)

@@ -17,7 +17,7 @@ public readonly record struct DistanceVector
     return new DistanceVector
     (
       StringDistance.GeneralDemographicFieldDistance(firstRecord.FirstName, secondRecord.FirstName),
-      StringDistance.GeneralDemographicFieldDistance(firstRecord.MiddleName, secondRecord.MiddleName),
+      StringDistance.MiddleNameDemographicFieldDistance(firstRecord.MiddleName, secondRecord.MiddleName),
       StringDistance.GeneralDemographicFieldDistance(firstRecord.LastName, secondRecord.LastName),
       StringDistance.GeneralDemographicFieldDistance(firstRecord.SecondLastName, secondRecord.SecondLastName),
       StringDistance.DateDemographicFieldDistance(firstRecord.BirthDateText, secondRecord.BirthDateText),
