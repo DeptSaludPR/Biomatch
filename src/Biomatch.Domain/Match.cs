@@ -34,9 +34,9 @@ public static class Match
     return matchedRecords;
   }
 
-  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromDifferentDataSet(Memory<PersonRecordForMatch> records1,
-    Memory<PersonRecordForMatch> records2, double lowerScoreThreshold, double upperScoreThreshold,
-    IProgress<int>? matchProgressReport = null)
+  public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromDifferentDataSet(
+    Memory<PersonRecordForMatch> records1, Memory<PersonRecordForMatch> records2, double lowerScoreThreshold,
+    double upperScoreThreshold, IProgress<int>? matchProgressReport = null)
   {
     var potentialMatches = new ConcurrentBag<PotentialMatch>();
 
@@ -73,6 +73,33 @@ public static class Match
         matchProgressReport?.Report(1);
       });
     });
+
+    return potentialMatches;
+  }
+
+  public static IEnumerable<PotentialMatch> GetPotentialMatchesFromSameDataSet(PersonRecordForMatch record,
+    Span<PersonRecordForMatch> recordsToMatch, double lowerScoreThreshold, double upperScoreThreshold)
+  {
+    var potentialMatches = new List<PotentialMatch>();
+    var recordLetterIndexFromFirstCharacter = record.FirstName[0] - 'a';
+
+    var recordsToMatchCharacterStartAndEndIndex = GetCharactersStartAndEndIndex(recordsToMatch);
+    var recordsToMatchStartAndEnd = recordsToMatchCharacterStartAndEndIndex[recordLetterIndexFromFirstCharacter];
+
+    var recordsToCompare = recordsToMatchStartAndEnd.Item1 == -1
+      ? recordsToMatch
+      : recordsToMatch.Slice(recordsToMatchStartAndEnd.Item1,
+        recordsToMatchStartAndEnd.Item2 - recordsToMatchStartAndEnd.Item1 + 1);
+
+    for (var i = 0; i < recordsToCompare.Length; i++)
+    {
+      ref var secondaryRecord = ref recordsToCompare[i];
+      if (record.RecordId == secondaryRecord.RecordId) continue;
+      var potentialMatch = CompareRecords(ref record, ref secondaryRecord, lowerScoreThreshold,
+        upperScoreThreshold);
+      if (potentialMatch != null)
+        potentialMatches.Add(potentialMatch.Value);
+    }
 
     return potentialMatches;
   }
@@ -140,6 +167,26 @@ public static class Match
         )
       );
     }
+  }
+
+  private static PotentialMatch? CompareRecords(ref PersonRecordForMatch primaryRecord,
+    ref PersonRecordForMatch secondaryRecord, double lowerScoreThreshold, double upperScoreThreshold)
+  {
+    //get the distance vector for the ith vector of the first table and the jth record of the second table
+    var distanceVector = DistanceVector.CalculateDistance(ref primaryRecord, ref secondaryRecord);
+    var tempScore = Score.CalculateFinalScore(ref distanceVector);
+    if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
+    {
+      return new PotentialMatch
+      (
+        primaryRecord,
+        secondaryRecord,
+        distanceVector,
+        tempScore
+      );
+    }
+
+    return null;
   }
 
   private static (int, int)[] GetCharactersStartAndEndIndex(ReadOnlySpan<PersonRecordForMatch> records)

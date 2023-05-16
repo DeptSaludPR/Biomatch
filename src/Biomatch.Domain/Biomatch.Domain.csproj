@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsTrimmable>true</IsTrimmable>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.10" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.11" />
     <PackageReference Include="Quickenshtein" Version="1.5.1" />
     <PackageReference Include="SymSpell" Version="6.7.2" />
   </ItemGroup>
