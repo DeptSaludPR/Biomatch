@@ -1,6 +1,21 @@
 <Project>
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
   <PropertyGroup>
-    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <UseArtifactsOutput>$(MSBuildThisFileDirectory)artifacts</UseArtifactsOutput>
+    <NuGetAudit>true</NuGetAudit>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <Version>0.13.0</Version>
+    <PackageVersion>$(Version)</PackageVersion>
+    <Authors>Elvis Nieves Miranda</Authors>
+    <Company>Puerto Rico Department of Health</Company>
+    <PackageTags>biomatch;matching;records;persons;patients</PackageTags>
+    <RepositoryUrl>https://github.com/DeptSaludPR/Biomatch</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 </Project>

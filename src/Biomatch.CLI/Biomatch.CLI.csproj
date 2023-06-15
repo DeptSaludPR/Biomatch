@@ -1,12 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.13.0</Version>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>biomatch</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <PublishAot>true</PublishAot>
     <OptimizationPreference>Speed</OptimizationPreference>

@@ -77,7 +77,7 @@ public static class Match
     return potentialMatches;
   }
 
-  public static IEnumerable<PotentialMatch> GetPotentialMatchesFromSameDataSet(PersonRecordForMatch record,
+  public static IEnumerable<PotentialMatch> GetPotentialMatchesFromRecords(PersonRecordForMatch record,
     Span<PersonRecordForMatch> recordsToMatch, double lowerScoreThreshold, double upperScoreThreshold)
   {
     var potentialMatches = new List<PotentialMatch>();
@@ -94,7 +94,6 @@ public static class Match
     for (var i = 0; i < recordsToCompare.Length; i++)
     {
       ref var secondaryRecord = ref recordsToCompare[i];
-      if (record.RecordId == secondaryRecord.RecordId) continue;
       var potentialMatch = CompareRecords(ref record, ref secondaryRecord, lowerScoreThreshold,
         upperScoreThreshold);
       if (potentialMatch != null)
@@ -189,7 +188,7 @@ public static class Match
     return null;
   }
 
-  private static (int, int)[] GetCharactersStartAndEndIndex(ReadOnlySpan<PersonRecordForMatch> records)
+  public static (int, int)[] GetCharactersStartAndEndIndex(ReadOnlySpan<PersonRecordForMatch> records)
   {
     var characterIndex = new (int, int)[26]; // 26 letters in the alphabet
 

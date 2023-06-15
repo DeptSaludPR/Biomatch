@@ -3,22 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <IsTrimmable>true</IsTrimmable>
-    <PackageId>Biomatch.Domain</PackageId>
-    <Version>0.13.0</Version>
-    <Authors>Elvis Nieves Miranda</Authors>
-    <Company>Puerto Rico Department of Health</Company>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <RepositoryUrl>https://github.com/DeptSaludPR/Biomatch</RepositoryUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Title>Biomatch Domain</Title>
     <Description>Utilities to match person records via demographic data</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="LICENSE" Pack="true" PackagePath="" />
-    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="../../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

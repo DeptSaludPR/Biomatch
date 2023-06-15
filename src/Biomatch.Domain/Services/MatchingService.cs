@@ -59,7 +59,7 @@ public class MatchingService
       record.PreprocessRecord(_prepositionsToRemove, _suffixesToRemove, _firstNamesDictionary, _middleNamesDictionary,
         _lastNamesDictionary);
 
-    return Match.GetPotentialMatchesFromSameDataSet(preprocessedRecord, _preprocessedRecordsToMatch,
+    return Match.GetPotentialMatchesFromRecords(preprocessedRecord, _preprocessedRecordsToMatch,
       matchScoreThreshold, 1.0);
   }
 
