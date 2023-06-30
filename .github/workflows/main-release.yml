@@ -1,0 +1,59 @@
+name: Publish CLI assets to GitHub Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            runtime: win-x64
+            dotnet: '8.x'
+          - os: ubuntu-latest
+            runtime: linux-x64
+            dotnet: '8.x'
+          - os: macos-latest
+            runtime: osx-x64
+            dotnet: '8.x'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+
+      - name: Restore dependencies
+        run: dotnet restore --runtime ${{ matrix.runtime }}
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Publish
+        run: dotnet publish src/Biomatch.CLI --no-build --runtime ${{ matrix.runtime }}
+
+      - name: Zip Artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install 7zip
+          & 'C:\Program Files\7-Zip\7z.exe' a -tzip ./artifacts/publish/Biomatch.CLI/biomatch-cli_${{ matrix.runtime }}.zip ./artifacts/publish/Biomatch.CLI/release_${{ matrix.runtime }}/*
+
+      - name: Zip Artifacts (Linux and macOS)
+        if: runner.os != 'Windows'
+        run: |
+          tar -czvf artifacts/publish/Biomatch.CLI/biomatch-cli_${{ matrix.runtime }}.tar.gz artifacts/publish/Biomatch.CLI/release_${{ matrix.runtime }}
+
+      - name: Upload Release Asset
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: ./artifacts/publish/Biomatch.CLI/biomatch-cli_${{ matrix.runtime }}.${{ runner.os == 'Windows' && 'zip' || 'tar.gz' }}
+          tags: true
