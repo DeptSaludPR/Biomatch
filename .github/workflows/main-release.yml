@@ -33,11 +33,8 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore --runtime ${{ matrix.runtime }}
 
-      - name: Build
-        run: dotnet build --no-restore
-
       - name: Publish
-        run: dotnet publish src/Biomatch.CLI --no-build --runtime ${{ matrix.runtime }}
+        run: dotnet publish src/Biomatch.CLI --no-restore --runtime ${{ matrix.runtime }}
 
       - name: Zip Artifacts (Windows)
         if: runner.os == 'Windows'
