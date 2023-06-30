@@ -28,7 +28,7 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
-.artifacts
+artifacts
 
 # Rider Excludes
 # idea folder exclude

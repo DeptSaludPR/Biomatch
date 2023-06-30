@@ -1,7 +1,7 @@
 <Project>
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
   <PropertyGroup>
-    <UseArtifactsOutput>$(MSBuildThisFileDirectory)artifacts</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
     <NuGetAudit>true</NuGetAudit>
   </PropertyGroup>
 
