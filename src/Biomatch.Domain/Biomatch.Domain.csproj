@@ -4,21 +4,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsTrimmable>true</IsTrimmable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Title>Biomatch Domain</Title>
     <Description>Utilities to match person records via demographic data</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="../../README.md" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.14" />
-    <PackageReference Include="Quickenshtein" Version="1.5.1" />
-    <PackageReference Include="SymSpell" Version="6.7.2" />
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.14"/>
+    <PackageReference Include="Quickenshtein" Version="1.5.1"/>
+    <PackageReference Include="SymSpell" Version="6.7.2"/>
+    <PackageReference Include="System.Private.Uri" Version="4.3.2"/>
   </ItemGroup>
 
 </Project>

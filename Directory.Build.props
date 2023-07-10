@@ -2,20 +2,26 @@
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
   <PropertyGroup>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <Nullable>enable</Nullable>
     <NuGetAudit>true</NuGetAudit>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
     <Version>0.17.0</Version>
     <PackageVersion>$(Version)</PackageVersion>
     <Authors>Elvis Nieves Miranda</Authors>
     <Company>Puerto Rico Department of Health</Company>
     <PackageTags>biomatch;matching;records;persons;patients</PackageTags>
     <RepositoryUrl>https://github.com/DeptSaludPR/Biomatch</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <EnablePackageValidation>true</EnablePackageValidation>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 </Project>
