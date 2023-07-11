@@ -1,11 +1,31 @@
 using System.Globalization;
 using System.Text;
 using Biomatch.Domain.Models;
+using nietras.SeparatedValues;
 
 namespace Biomatch.CLI.Csv;
 
-public static class PersonRecordWriter
+public static class PersonRecordTemplate
 {
+  public static IEnumerable<IPersonRecord> ParseCsv(string csvFilePath)
+  {
+    using var reader = Sep.New(',').Reader().FromFile(csvFilePath);
+    foreach (var readRow in reader)
+    {
+      yield return new PersonRecord
+      (
+        readRow["RecordId"].ToString(),
+        readRow["FirstName"].ToString(),
+        readRow["MiddleName"].ToString(),
+        readRow["LastName"].ToString(),
+        readRow["SecondLastName"].ToString(),
+        readRow["BirthDate"].TryParse<DateOnly>(),
+        readRow["City"].ToString(),
+        readRow["PhoneNumber"].ToString()
+      );
+    }
+  }
+
   public static async Task WriteToCsv(IEnumerable<IPersonRecord> patientRecords, string csvFilePath)
   {
     var csvContent = new StringBuilder();

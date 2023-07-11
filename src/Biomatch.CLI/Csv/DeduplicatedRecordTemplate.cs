@@ -1,28 +1,18 @@
-using System.Text;
+using nietras.SeparatedValues;
 
 namespace Biomatch.CLI.Csv;
 
 public static class DeduplicatedRecordTemplate
 {
-  public static async Task WriteToCsv(IEnumerable<DeduplicatedRecord> deduplicatedRecords, string csvFilePath)
+  public static void WriteToCsv(Dictionary<string, string> deduplicatedRecords, string csvFilePath)
   {
-    var csvContent = new StringBuilder();
-    const string header = "RecordId,DuplicateRecordIds";
-    csvContent.AppendLine(header);
+    using var writer = Sep.New(',').Writer().ToFile(csvFilePath);
 
     foreach (var deduplicatedRecord in deduplicatedRecords)
     {
-      var values = new List<string>
-      {
-        deduplicatedRecord.RecordId,
-        deduplicatedRecord.DuplicateRecordIds
-      };
-
-      var escapedValues = values.Select(value => value.Contains(',') ? $"\"{value}\"" : value);
-      var line = string.Join(",", escapedValues);
-      csvContent.AppendLine(line);
+      using var row = writer.NewRow();
+      row["OriginalRecordId"].Set(deduplicatedRecord.Key);
+      row["UniqueMatchRecordId"].Set(deduplicatedRecord.Value);
     }
-
-    await File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
   }
 }

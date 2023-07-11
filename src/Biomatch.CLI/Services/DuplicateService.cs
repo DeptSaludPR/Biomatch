@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using Biomatch.CLI.Csv;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
 
@@ -8,15 +6,12 @@ namespace Biomatch.CLI.Services;
 
 public static class DuplicateService
 {
-  public static async Task RunFileComparisons(IEnumerable<IPersonRecord> records1,
-    IEnumerable<IPersonRecord> records2, FileInfo outputFileName, bool exactMatchesAllowed = false,
-    double lowerScoreThreshold = 0.65, WordDictionary? firstNamesDictionary = null,
+  public static IEnumerable<PotentialMatch> RunFileComparisons(IEnumerable<IPersonRecord> records1,
+    IEnumerable<IPersonRecord> records2, bool exactMatchesAllowed = false,
+    double lowerScoreThreshold = 0.85, WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null,
-    bool sameDataSetOptionValue = false)
+    bool sameDataSetOptionValue = false, Func<int, IProgress<int>>? matchProgressReport = null)
   {
-    //start a stopwatch
-    var timer = new Stopwatch();
-    timer.Start();
 
     var preprocessedRecords1 =
       records1.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
@@ -30,19 +25,13 @@ public static class DuplicateService
     if (sameDataSetOptionValue)
     {
       potentialDuplicates = Match.GetPotentialMatchesFromSameDataSet(preprocessedRecords1, preprocessedRecords2,
-        lowerScoreThreshold, upperScoreThreshold);
+        lowerScoreThreshold, upperScoreThreshold, matchProgressReport);
     }
     else
     {
       potentialDuplicates = Match.GetPotentialMatchesFromDifferentDataSet(preprocessedRecords1, preprocessedRecords2,
-        lowerScoreThreshold, upperScoreThreshold);
+        lowerScoreThreshold, upperScoreThreshold, matchProgressReport);
     }
-
-    //write the total elapsed time on the log
-    timer.Stop();
-
-    var urlDocs = potentialDuplicates
-      .Select(e => new DuplicateRecord(e));
-    await DuplicateRecordTemplate.WriteToCsv(urlDocs, outputFileName.FullName);
+    return potentialDuplicates;
   }
 }

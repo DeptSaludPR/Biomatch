@@ -1,5 +1,6 @@
 using System.CommandLine;
 using Biomatch.CLI.Csv;
+using Biomatch.CLI.Services;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
 
@@ -13,7 +14,7 @@ public static partial class MatchingCommand
     {
       GetTemplateGenerateCommand(),
       GetTemplateValidateCommand(),
-      GetPreprocessCommand()
+      GetPreprocessCommand(),
     };
 
     return command;
@@ -32,9 +33,9 @@ public static partial class MatchingCommand
     };
 
     command.SetHandler(
-      async (outputOptionValue) =>
+      async outputOptionValue =>
       {
-        await PersonRecordWriter.WriteToCsv(Array.Empty<IPersonRecord>(), outputOptionValue.FullName);
+        await PersonRecordTemplate.WriteToCsv(Array.Empty<IPersonRecord>(), outputOptionValue.FullName);
       }, outputOption);
 
     return command;
@@ -51,18 +52,14 @@ public static partial class MatchingCommand
     };
 
     command.SetHandler(
-      async (templateFilePathArgumentValue) =>
+      templateFilePathArgumentValue =>
       {
         try
         {
-          var records1FromCsv = PatientRecordParser.ParseCsv(templateFilePathArgumentValue.FullName);
-          List<PersonRecord> records = new();
-          await foreach (var record in records1FromCsv)
-          {
-            records.Add(record);
-          }
+          var recordsFromCsv = PersonRecordTemplate.ParseCsv(templateFilePathArgumentValue.FullName).ToArray();
+
           Console.ForegroundColor = ConsoleColor.Green;
-          Console.WriteLine($"Template file is valid, and contains {records.Count:N0} records.");
+          Console.WriteLine($"Template file is valid, and contains {recordsFromCsv.Length:N0} records.");
         }
         catch (Exception)
         {
@@ -113,60 +110,19 @@ public static partial class MatchingCommand
       async (filePath1ArgumentValue, firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue) =>
       {
-        var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
+        var records1FromCsv = PersonRecordTemplate.ParseCsv(filePath1ArgumentValue.FullName);
         List<IPersonRecord> records = new();
-        await foreach (var record in records1FromCsv)
+        foreach (var record in records1FromCsv)
         {
           records.Add(record);
         }
 
-        WordDictionary? firstNamesDictionary = null;
-        if (firstNamesDictionaryFilePathOptionValue.Exists)
-        {
-          firstNamesDictionary = new WordDictionary(firstNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"FirstNames dictionary loaded from {firstNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "FirstNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
-
-        WordDictionary? middleNamesDictionary = null;
-        if (middleNamesDictionaryFilePathOptionValue.Exists)
-        {
-          middleNamesDictionary = new WordDictionary(middleNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"MiddleNames dictionary loaded from {middleNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "MiddleNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
-
-        WordDictionary? lastNamesDictionary = null;
-        if (lastNamesDictionaryFilePathOptionValue.Exists)
-        {
-          lastNamesDictionary = new WordDictionary(lastNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"LastNames dictionary loaded from {lastNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "LastNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
+        var (firstNamesDictionary, middleNamesDictionary, lastNamesDictionary) = DictionaryLoader.LoadDictionaries(
+          firstNamesDictionaryFilePathOptionValue, middleNamesDictionaryFilePathOptionValue,
+          lastNamesDictionaryFilePathOptionValue);
 
         var processedRecords = records.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
-        await PersonRecordWriter.WriteToCsv(processedRecords.OfType<IPersonRecord>(), outputOptionValue.FullName);
+        await PersonRecordTemplate.WriteToCsv(processedRecords.OfType<IPersonRecord>(), outputOptionValue.FullName);
       },
       filePath1Argument, firstNamesDictionaryFilePathOption,
       middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption);
