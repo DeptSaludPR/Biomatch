@@ -8,7 +8,7 @@ public static class Match
   public static IEnumerable<PotentialMatch> FindBestMatches(IEnumerable<IPersonRecord> records1,
     IEnumerable<IPersonRecord> records2, double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null,
-    bool recordsFromSameDataSet = false, IProgress<int>? matchProgressReport = null)
+    bool recordsFromSameDataSet = false, Func<int, IProgress<int>>? matchProgressReport = null)
   {
     var preprocessedRecords1 =
       records1.PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary).ToArray();
@@ -36,12 +36,18 @@ public static class Match
 
   public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromDifferentDataSet(
     Memory<PersonRecordForMatch> records1, Memory<PersonRecordForMatch> records2, double lowerScoreThreshold,
-    double upperScoreThreshold, IProgress<int>? matchProgressReport = null)
+    double upperScoreThreshold, Func<int, IProgress<int>>? matchProgressReport = null)
   {
     var potentialMatches = new ConcurrentBag<PotentialMatch>();
 
     var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1.Span);
     var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2.Span);
+
+    IProgress<int>? progress = null;
+    if (matchProgressReport != null)
+    {
+      progress = matchProgressReport(records1.Length);
+    }
 
     var parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount};
     // Maximum of 26 iterations because of letters in the alphabet
@@ -70,7 +76,7 @@ public static class Match
             upperScoreThreshold);
         }
 
-        matchProgressReport?.Report(1);
+        progress?.Report(1);
       });
     });
 
@@ -105,12 +111,18 @@ public static class Match
 
   public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromSameDataSet(Memory<PersonRecordForMatch> records1,
     Memory<PersonRecordForMatch> records2, double lowerScoreThreshold, double upperScoreThreshold,
-    IProgress<int>? matchProgressReport = null)
+    Func<int, IProgress<int>>? matchProgressReport = null)
   {
     var potentialMatches = new ConcurrentBag<PotentialMatch>();
 
     var records1CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records1.Span);
     var records2CharacterStartAndEndIndex = GetCharactersStartAndEndIndex(records2.Span);
+
+    IProgress<int>? progress = null;
+    if (matchProgressReport != null)
+    {
+      progress = matchProgressReport(records1.Length);
+    }
 
     var parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount};
     // Maximum of 26 iterations because of letters in the alphabet
@@ -140,7 +152,7 @@ public static class Match
             upperScoreThreshold);
         }
 
-        matchProgressReport?.Report(1);
+        progress?.Report(1);
       });
     });
 

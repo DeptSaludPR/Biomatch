@@ -37,14 +37,9 @@ public static partial class MatchingCommand
     command.SetHandler(
       async (filePathTemplateArgumentValue, outputOptionValue) =>
       {
-        var records1FromCsv = PatientRecordParser.ParseCsv(filePathTemplateArgumentValue.FullName);
-        List<IPersonRecord> records1 = new();
-        await foreach (var record in records1FromCsv)
-        {
-          records1.Add(record);
-        }
+        var records1FromCsv = PersonRecordTemplate.ParseCsv(filePathTemplateArgumentValue.FullName).ToArray();
 
-        var firstNameFrequencyDictionary = records1
+        var firstNameFrequencyDictionary = records1FromCsv
           .GroupBy(e => e.FirstName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
           .Select(e => new FrequencyDictionary
@@ -55,7 +50,7 @@ public static partial class MatchingCommand
           .OrderByDescending(e => e.Frequency)
           .ToList();
 
-        var middleNameFrequencyDictionary = records1
+        var middleNameFrequencyDictionary = records1FromCsv
           .PreprocessData()
           .GroupBy(e => e.MiddleName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
@@ -67,7 +62,7 @@ public static partial class MatchingCommand
           .OrderByDescending(e => e.Frequency)
           .ToList();
 
-        var firstLastNameFrequencyDictionary = records1
+        var firstLastNameFrequencyDictionary = records1FromCsv
           .GroupBy(e => e.LastName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
           .Select(e => new FrequencyDictionary
@@ -76,7 +71,7 @@ public static partial class MatchingCommand
             e.Count()
           ));
 
-        var secondLastNameFrequencyDictionary = records1
+        var secondLastNameFrequencyDictionary = records1FromCsv
           .GroupBy(e => e.LastName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
           .Select(e => new FrequencyDictionary

@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using System.Text;
-
 namespace Biomatch.CLI.Progress;
 
 public static class MatchingProgress
@@ -11,41 +8,39 @@ public static class MatchingProgress
     var lastConsoleUpdateTime = DateTime.MinValue;
     Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine($"Matching {totalRecordsToMatch:N0} records...");
-    var cursorPositionTop = Console.CursorTop;
+    var consoleTextPrinted = false;
 
     // Create a lock object for synchronization
     var progressLock = new object();
 
     // Initialize a Stopwatch to measure elapsed time
-    Stopwatch? stopwatch = null;
-
-    var textBuilder = new StringBuilder();
+    long? startTimeStamp = null;
 
     var matchProgressReport = new Progress<int>(increment =>
     {
       lock (progressLock)
       {
-        stopwatch ??= Stopwatch.StartNew();
+        startTimeStamp ??= TimeProvider.System.GetTimestamp();
+
         completedOperations += increment;
 
         if ((DateTime.UtcNow - lastConsoleUpdateTime).TotalSeconds < 1 || completedOperations < 100) return;
 
         var currentPercentage = (int) ((double) completedOperations / totalRecordsToMatch * 100);
-        var elapsedSeconds = stopwatch.Elapsed.TotalSeconds;
-        var estimatedTotalSeconds = elapsedSeconds * totalRecordsToMatch / completedOperations;
-        var remainingSeconds = estimatedTotalSeconds - elapsedSeconds;
+        var elapsedTime = TimeProvider.System.GetElapsedTime(startTimeStamp.Value, TimeProvider.System.GetTimestamp());
+        var estimatedTotalTime = elapsedTime * totalRecordsToMatch / completedOperations;
+        var remainingTime = estimatedTotalTime - elapsedTime;
 
-        var remainingTime = TimeSpan.FromSeconds(remainingSeconds);
+        if (consoleTextPrinted)
+        {
+          Console.SetCursorPosition(0, Console.CursorTop - 2);
+        }
+        Console.Write($"""
+                       Progress: {currentPercentage,3}% | Record match operations performed: {completedOperations:N0}
+                       Total time: {elapsedTime} | Estimated time remaining: {remainingTime.Days:D2}d {remainingTime.Hours:D2}h {remainingTime.Minutes:D2}m {remainingTime.Seconds:D2}s
 
-        textBuilder.Append(
-          $"Progress: {currentPercentage,3}% | Record match operations performed: {completedOperations:N0}\n");
-        textBuilder.Append($"Total time: {stopwatch.Elapsed} | ");
-        textBuilder.Append(
-          $"Estimated time remaining: {remainingTime.Days:D2}d {remainingTime.Hours:D2}h {remainingTime.Minutes:D2}m {remainingTime.Seconds:D2}\n");
-
-        Console.SetCursorPosition(0, cursorPositionTop);
-        Console.Write(textBuilder);
-        textBuilder.Clear();
+                       """);
+        consoleTextPrinted = true;
         lastConsoleUpdateTime = DateTime.UtcNow;
       }
     });

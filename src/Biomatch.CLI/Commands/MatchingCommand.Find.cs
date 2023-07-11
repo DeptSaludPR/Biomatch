@@ -58,11 +58,6 @@ public static partial class MatchingCommand
       description: "If true, records with the same ID will be considered as matches and skipped",
       getDefaultValue: () => false);
 
-    var logPathOption = new Option<FileInfo?>
-    (name: "--log",
-      description: "Log file path. If not provided log file will not be generated.");
-    logPathOption.AddAlias("-l");
-
     var command = new Command("duplicates", "Find duplicates records in two files")
     {
       filePath1Argument,
@@ -72,7 +67,7 @@ public static partial class MatchingCommand
       lastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
-      sameDataSetOption
+      sameDataSetOption,
     };
 
     command.SetHandler(
@@ -80,70 +75,40 @@ public static partial class MatchingCommand
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
         scoreOptionValue, sameDataSetOptionValue) =>
       {
-        var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
+        var records1FromCsv = PersonRecordTemplate.ParseCsv(filePath1ArgumentValue.FullName);
         List<IPersonRecord> records1 = new();
-        await foreach (var record in records1FromCsv)
+        foreach (var record in records1FromCsv)
         {
           records1.Add(record);
         }
-        var records2FromCsv = PatientRecordParser.ParseCsv(filePath2ArgumentValue.FullName);
+
+        var records2FromCsv = PersonRecordTemplate.ParseCsv(filePath2ArgumentValue.FullName);
         List<IPersonRecord> records2 = new();
-        await foreach (var record in records2FromCsv)
+        foreach (var record in records2FromCsv)
         {
           records2.Add(record);
         }
 
-        WordDictionary? firstNamesDictionary = null;
-        if (firstNamesDictionaryFilePathOptionValue.Exists)
+        var (firstNamesDictionary, middleNamesDictionary, lastNamesDictionary) = DictionaryLoader.LoadDictionaries(
+          firstNamesDictionaryFilePathOptionValue, middleNamesDictionaryFilePathOptionValue,
+          lastNamesDictionaryFilePathOptionValue);
+
+        var potentialMatches = DuplicateService.RunFileComparisons(records1, records2, true,
+          scoreOptionValue, firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue,
+          MatchingProgress.GetMatchingProgressReport);
+
+        var potentialDuplicatesWorkItem = new List<DuplicateRecord>();
+        foreach (var potentialMatch in potentialMatches)
         {
-          firstNamesDictionary = new WordDictionary(firstNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"FirstNames dictionary loaded from {firstNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "FirstNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
+          potentialDuplicatesWorkItem.Add(new DuplicateRecord(potentialMatch));
         }
 
-        WordDictionary? middleNamesDictionary = null;
-        if (middleNamesDictionaryFilePathOptionValue.Exists)
-        {
-          middleNamesDictionary = new WordDictionary(middleNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"MiddleNames dictionary loaded from {middleNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "MiddleNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
-
-        WordDictionary? lastNamesDictionary = null;
-        if (lastNamesDictionaryFilePathOptionValue.Exists)
-        {
-          lastNamesDictionary = new WordDictionary(lastNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"LastNames dictionary loaded from {lastNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "LastNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
-
-        await DuplicateService.RunFileComparisons(records1, records2,
-          outputOptionValue, true,
-          scoreOptionValue, firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue);
+        // Write output to file
+        await DuplicateRecordTemplate.WriteToCsv(potentialDuplicatesWorkItem, outputOptionValue.FullName);
       },
       filePath1Argument, filePath2Argument, firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption, sameDataSetOption);
+      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption,
+      scoreOption, sameDataSetOption);
 
     return command;
   }
@@ -203,73 +168,22 @@ public static partial class MatchingCommand
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
         scoreOptionValue, sameDataSetOptionValue) =>
       {
-        var records1FromCsv = PatientRecordParser.ParseCsv(filePath1ArgumentValue.FullName);
-        List<IPersonRecord> records1 = new();
-        await foreach (var record in records1FromCsv)
-        {
-          records1.Add(record);
-        }
-        var records2FromCsv = PatientRecordParser.ParseCsv(filePath2ArgumentValue.FullName);
-        List<IPersonRecord> records2 = new();
-        await foreach (var record in records2FromCsv)
-        {
-          records2.Add(record);
-        }
+        var records1FromCsv = PersonRecordTemplate.ParseCsv(filePath1ArgumentValue.FullName).ToArray();
+        var records2FromCsv = PersonRecordTemplate.ParseCsv(filePath2ArgumentValue.FullName);
 
-        WordDictionary? firstNamesDictionary = null;
-        if (firstNamesDictionaryFilePathOptionValue.Exists)
-        {
-          firstNamesDictionary = new WordDictionary(firstNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"FirstNames dictionary loaded from {firstNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "FirstNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
+        var (firstNamesDictionary, middleNamesDictionary, lastNamesDictionary) = DictionaryLoader.LoadDictionaries(
+          firstNamesDictionaryFilePathOptionValue, middleNamesDictionaryFilePathOptionValue,
+          lastNamesDictionaryFilePathOptionValue);
 
-        WordDictionary? middleNamesDictionary = null;
-        if (middleNamesDictionaryFilePathOptionValue.Exists)
-        {
-          middleNamesDictionary = new WordDictionary(middleNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"MiddleNames dictionary loaded from {middleNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "MiddleNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
-
-        WordDictionary? lastNamesDictionary = null;
-        if (lastNamesDictionaryFilePathOptionValue.Exists)
-        {
-          lastNamesDictionary = new WordDictionary(lastNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"LastNames dictionary loaded from {lastNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "LastNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
-
-        var matchProgressReport = MatchingProgress.GetMatchingProgressReport(records1.Count);
-
-        var possibleMatches = Match.FindBestMatches(records1, records2, scoreOptionValue,
-          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue, matchProgressReport);
+        var possibleMatches = Match.FindBestMatches(records1FromCsv, records2FromCsv, scoreOptionValue,
+          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, sameDataSetOptionValue,
+          MatchingProgress.GetMatchingProgressReport);
 
         await PotentialMatchTemplate.WriteToCsv(possibleMatches, outputOptionValue.FullName);
       },
       filePath1Argument, filePath2Argument, firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption, sameDataSetOption);
+      middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption,
+      sameDataSetOption);
 
     return command;
   }

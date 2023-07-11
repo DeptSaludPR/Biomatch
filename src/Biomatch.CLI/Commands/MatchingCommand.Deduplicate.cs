@@ -1,7 +1,8 @@
 using System.CommandLine;
 using Biomatch.CLI.Csv;
+using Biomatch.CLI.Progress;
+using Biomatch.CLI.Services;
 using Biomatch.Domain;
-using Biomatch.Domain.Models;
 
 namespace Biomatch.CLI.Commands;
 
@@ -53,73 +54,20 @@ public partial class MatchingCommand
     };
 
     command.SetHandler(
-      async (filePathArgumentValue, firstNamesDictionaryFilePathOptionValue,
+      (filePathArgumentValue, firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue, lastNamesDictionaryFilePathOptionValue, outputOptionValue,
         scoreOptionValue) =>
       {
-        var records1FromCsv = PatientRecordParser.ParseCsv(filePathArgumentValue.FullName);
-        List<IPersonRecord> records1 = new();
-        await foreach (var record in records1FromCsv)
-        {
-          records1.Add(record);
-        }
+        var records1FromCsv = PersonRecordTemplate.ParseCsv(filePathArgumentValue.FullName).ToArray();
 
-        WordDictionary? firstNamesDictionary = null;
-        if (firstNamesDictionaryFilePathOptionValue.Exists)
-        {
-          firstNamesDictionary = new WordDictionary(firstNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"FirstNames dictionary loaded from {firstNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "FirstNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
+        var (firstNamesDictionary, middleNamesDictionary, lastNamesDictionary) = DictionaryLoader.LoadDictionaries(
+          firstNamesDictionaryFilePathOptionValue, middleNamesDictionaryFilePathOptionValue,
+          lastNamesDictionaryFilePathOptionValue);
 
-        WordDictionary? middleNamesDictionary = null;
-        if (middleNamesDictionaryFilePathOptionValue.Exists)
-        {
-          middleNamesDictionary = new WordDictionary(middleNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"MiddleNames dictionary loaded from {middleNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "MiddleNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
+        var deduplicatedRecords = Deduplicate.TryDeduplicate(records1FromCsv, scoreOptionValue,
+          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary, MatchingProgress.GetMatchingProgressReport);
 
-        WordDictionary? lastNamesDictionary = null;
-        if (lastNamesDictionaryFilePathOptionValue.Exists)
-        {
-          lastNamesDictionary = new WordDictionary(lastNamesDictionaryFilePathOptionValue);
-          Console.WriteLine(
-            $"LastNames dictionary loaded from {lastNamesDictionaryFilePathOptionValue}");
-        }
-        else
-        {
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine(
-            "LastNames dictionary not loaded, generate dictionary files to improve preprocessing.");
-          Console.ResetColor();
-        }
-
-        var deduplicatedRecords = Deduplicate.TryDeduplicate(records1, scoreOptionValue,
-          firstNamesDictionary, middleNamesDictionary, lastNamesDictionary);
-
-        var deduplicatedResult = deduplicatedRecords
-          .Select(x => new DeduplicatedRecord
-            (
-              x.Value.RecordId,
-              string.Join('|', x.Matches.Select(m => m.Value.RecordId))
-            )
-          );
-        await DeduplicatedRecordTemplate.WriteToCsv(deduplicatedResult, outputOptionValue.FullName);
+        DeduplicatedRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
       },
       filePathArgument, firstNamesDictionaryFilePathOption,
       middleNamesDictionaryFilePathOption, lastNamesDictionaryFilePathOption, outputOption, scoreOption);
