@@ -18,11 +18,11 @@ public class MatchingService
     _prepositionsToRemove = new HashSet<string>
     {
       "el", "la", "los", "las", "de", "del", "en", "y", "a", "di", "da", "le", "san"
-    }.ToFrozenSet(true);
+    }.ToFrozenSet();
     _suffixesToRemove = new HashSet<string>
     {
       "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms", "mrs"
-    }.ToFrozenSet(true);
+    }.ToFrozenSet();
     _preprocessedRecordsToMatch = recordsToMatch.PreprocessData().ToArray();
     var firstNameFrequencyDictionary = _preprocessedRecordsToMatch
       .GroupBy(e => e.FirstName)
