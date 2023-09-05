@@ -33,7 +33,12 @@ public static class MatchingProgress
 
         if (consoleTextPrinted)
         {
-          Console.SetCursorPosition(0, Console.CursorTop - 2);
+          if (Console.CursorTop >= 2) {
+            Console.SetCursorPosition(0, Console.CursorTop - 2);
+          }
+          else {
+            Console.SetCursorPosition(0, 0);
+          }
         }
         Console.Write($"""
                        Progress: {currentPercentage,3}% | Record match operations performed: {completedOperations:N0}
