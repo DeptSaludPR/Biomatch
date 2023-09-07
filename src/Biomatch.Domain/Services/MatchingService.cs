@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using Biomatch.Domain.Models;
 
@@ -11,7 +12,7 @@ public class MatchingService
   private readonly WordDictionary? _middleNamesDictionary;
   private readonly WordDictionary? _lastNamesDictionary;
 
-  private PersonRecordForMatch[] _preprocessedRecordsToMatch;
+  private readonly ConcurrentDictionary<string, PersonRecordForMatch> _preprocessedRecordsToMatch;
 
   public MatchingService(IEnumerable<IPersonRecord> recordsToMatch)
   {
@@ -23,8 +24,12 @@ public class MatchingService
     {
       "lcdo", "lcda", "dr", "dra", "sor", "jr", "junior", "sr", "sra", "ii", "iii", "mr", "ms", "mrs"
     }.ToFrozenSet();
-    _preprocessedRecordsToMatch = recordsToMatch.PreprocessData().ToArray();
-    var firstNameFrequencyDictionary = _preprocessedRecordsToMatch
+
+    var preprocessedRecords = recordsToMatch.PreprocessData().ToList();
+    _preprocessedRecordsToMatch =
+      new ConcurrentDictionary<string, PersonRecordForMatch>(preprocessedRecords.ToDictionary(e => e.RecordId));
+
+    var firstNameFrequencyDictionary = preprocessedRecords
       .GroupBy(e => e.FirstName)
       .Where(e => e.Count() > 20 && e.Key.Length > 3)
       .Select(e => new FrequencyDictionary
@@ -32,7 +37,7 @@ public class MatchingService
         e.Key,
         e.Count()
       ));
-    var middleNameFrequencyDictionary = _preprocessedRecordsToMatch
+    var middleNameFrequencyDictionary = preprocessedRecords
       .GroupBy(e => e.MiddleName)
       .Where(e => e.Count() > 20 && e.Key.Length > 3)
       .Select(e => new FrequencyDictionary
@@ -40,7 +45,7 @@ public class MatchingService
         e.Key,
         e.Count()
       ));
-    var firstLastNameFrequencyDictionary = _preprocessedRecordsToMatch
+    var firstLastNameFrequencyDictionary = preprocessedRecords
       .GroupBy(e => e.LastName)
       .Where(e => e.Count() > 20 && e.Key.Length > 3)
       .Select(e => new FrequencyDictionary
@@ -59,24 +64,22 @@ public class MatchingService
       record.PreprocessRecord(_prepositionsToRemove, _suffixesToRemove, _firstNamesDictionary, _middleNamesDictionary,
         _lastNamesDictionary);
 
-    return Match.GetPotentialMatchesFromRecords(preprocessedRecord, _preprocessedRecordsToMatch,
+    return Match.GetPotentialMatchesFromRecords(preprocessedRecord, _preprocessedRecordsToMatch.Values,
       matchScoreThreshold, 1.0);
   }
 
-  public void AddPersonToMatchData(IPersonRecord record)
+  public bool TryAddPersonToMatchData(IPersonRecord record)
   {
     var preprocessedRecord =
       record.PreprocessRecord(_prepositionsToRemove, _suffixesToRemove, _firstNamesDictionary, _middleNamesDictionary,
         _lastNamesDictionary);
 
-    _preprocessedRecordsToMatch = _preprocessedRecordsToMatch.Append(preprocessedRecord)
-      .OrderBy(e => e.FirstName)
-      .ToArray();
+    return _preprocessedRecordsToMatch.TryAdd(preprocessedRecord.RecordId, preprocessedRecord);
   }
 
-  public void RemovePersonFromMatchData(string recordId)
+  public bool TryRemovePersonFromMatchData(string recordId, out PersonRecordForMatch recordToRemove)
   {
-    _preprocessedRecordsToMatch = _preprocessedRecordsToMatch.Where(e => e.RecordId != recordId).ToArray();
+    return _preprocessedRecordsToMatch.TryRemove(recordId, out recordToRemove);
   }
 
   public void UpdatePersonMatchData(IPersonRecord record)
@@ -85,10 +88,7 @@ public class MatchingService
       record.PreprocessRecord(_prepositionsToRemove, _suffixesToRemove, _firstNamesDictionary, _middleNamesDictionary,
         _lastNamesDictionary);
 
-    _preprocessedRecordsToMatch = _preprocessedRecordsToMatch
-      .Where(e => e.RecordId != record.RecordId)
-      .Append(preprocessedRecord)
-      .OrderBy(e => e.FirstName)
-      .ToArray();
+    _preprocessedRecordsToMatch.AddOrUpdate(preprocessedRecord.RecordId, preprocessedRecord,
+      (_, _) => preprocessedRecord);
   }
 }

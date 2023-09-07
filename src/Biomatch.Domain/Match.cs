@@ -84,29 +84,16 @@ public static class Match
   }
 
   public static IEnumerable<PotentialMatch> GetPotentialMatchesFromRecords(PersonRecordForMatch record,
-    Span<PersonRecordForMatch> recordsToMatch, double lowerScoreThreshold, double upperScoreThreshold)
+    ICollection<PersonRecordForMatch> recordsToMatch, double lowerScoreThreshold, double upperScoreThreshold)
   {
-    var potentialMatches = new List<PotentialMatch>();
-    var recordLetterIndexFromFirstCharacter = record.FirstName[0] - 'a';
-
-    var recordsToMatchCharacterStartAndEndIndex = GetCharactersStartAndEndIndex(recordsToMatch);
-    var recordsToMatchStartAndEnd = recordsToMatchCharacterStartAndEndIndex[recordLetterIndexFromFirstCharacter];
-
-    var recordsToCompare = recordsToMatchStartAndEnd.Item1 == -1
-      ? recordsToMatch
-      : recordsToMatch.Slice(recordsToMatchStartAndEnd.Item1,
-        recordsToMatchStartAndEnd.Item2 - recordsToMatchStartAndEnd.Item1 + 1);
-
-    for (var i = 0; i < recordsToCompare.Length; i++)
+    for (var i = 0; i < recordsToMatch.Count; i++)
     {
-      ref var secondaryRecord = ref recordsToCompare[i];
-      var potentialMatch = CompareRecords(ref record, ref secondaryRecord, lowerScoreThreshold,
-        upperScoreThreshold);
+      var personRecordForMatch = recordsToMatch.ElementAt(i);
+      var potentialMatch = CompareRecords(ref record, ref personRecordForMatch,
+        lowerScoreThreshold, upperScoreThreshold);
       if (potentialMatch != null)
-        potentialMatches.Add(potentialMatch.Value);
+        yield return potentialMatch.Value;
     }
-
-    return potentialMatches;
   }
 
   public static ConcurrentBag<PotentialMatch> GetPotentialMatchesFromSameDataSet(Memory<PersonRecordForMatch> records1,
