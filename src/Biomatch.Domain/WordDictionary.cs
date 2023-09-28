@@ -10,8 +10,10 @@ public sealed class WordDictionary
   public WordDictionary(FileInfo dictionaryFilePath)
   {
     if (!dictionaryFilePath.Exists)
-      throw new FileNotFoundException($"Dictionary file not found: {dictionaryFilePath.FullName}",
-        dictionaryFilePath.FullName);
+      throw new FileNotFoundException(
+        $"Dictionary file not found: {dictionaryFilePath.FullName}",
+        dictionaryFilePath.FullName
+      );
     //create object
     const int initialCapacity = 82765;
     const int maxEditDistanceDictionary = 2; //maximum edit distance per dictionary pre-calculation
@@ -31,7 +33,9 @@ public sealed class WordDictionary
     _symSpell = symSpell;
   }
 
-  public static WordDictionary CreateWordDictionary(IEnumerable<FrequencyDictionary> frequencyDictionary)
+  public static WordDictionary CreateWordDictionary(
+    IEnumerable<FrequencyDictionary> frequencyDictionary
+  )
   {
     var content = new StringBuilder();
 
@@ -61,8 +65,7 @@ public sealed class WordDictionary
   public List<SymSpell.SuggestItem> TrySpellCheck(string recordToSearch)
   {
     //lookup suggestions for single-word input strings
-    const int
-      maxEditDistanceLookup = 2; //max edit distance per lookup (maxEditDistanceLookup<=maxEditDistanceDictionary)
+    const int maxEditDistanceLookup = 2; //max edit distance per lookup (maxEditDistanceLookup<=maxEditDistanceDictionary)
     const SymSpell.Verbosity suggestionVerbosity = SymSpell.Verbosity.Closest; //Top, Closest, All
     return _symSpell.Lookup(recordToSearch, suggestionVerbosity, maxEditDistanceLookup);
   }

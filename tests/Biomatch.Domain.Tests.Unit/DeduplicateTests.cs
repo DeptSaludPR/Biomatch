@@ -11,8 +11,7 @@ public class DeduplicateTests
     // Arrange
     var patientRecords = new List<IPersonRecord>
     {
-      new PersonRecord
-      (
+      new PersonRecord(
         "3688374",
         "Juan",
         "",
@@ -22,8 +21,7 @@ public class DeduplicateTests
         "Aguada",
         "7875982789"
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "3697831",
         "Juan Del Puéblo",
         "",
@@ -33,8 +31,7 @@ public class DeduplicateTests
         "San Juan",
         "7875982789"
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1238",
         "Guillermo",
         "",
@@ -44,8 +41,7 @@ public class DeduplicateTests
         "San Juan",
         ""
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1230",
         "Clara",
         "",
@@ -55,8 +51,7 @@ public class DeduplicateTests
         "Adjuntas",
         ""
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1875",
         "Clara",
         "",
@@ -66,8 +61,7 @@ public class DeduplicateTests
         "Adjuntas",
         ""
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1276",
         "Juan Del Puéblo",
         "",
@@ -80,9 +74,7 @@ public class DeduplicateTests
     };
 
     // Act
-    var duplicatesToFix = Deduplicate
-      .TryDeduplicate(patientRecords, 0.85)
-      .ToList();
+    var duplicatesToFix = Deduplicate.TryDeduplicate(patientRecords, 0.85).ToList();
 
     // Assert
     duplicatesToFix.Should().HaveCount(2);

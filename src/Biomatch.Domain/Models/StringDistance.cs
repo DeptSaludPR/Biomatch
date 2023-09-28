@@ -59,9 +59,9 @@ public static class StringDistance
     var date1Year = date1[4..];
     var date2Year = date2[4..];
 
-    if (date1Year.SequenceEqual(date2Year) &&
-        month1.SequenceEqual(day2) &&
-        day1.SequenceEqual(month2))
+    if (
+      date1Year.SequenceEqual(date2Year) && month1.SequenceEqual(day2) && day1.SequenceEqual(month2)
+    )
     {
       return 0;
     }

@@ -4,35 +4,41 @@ namespace Biomatch.Domain;
 
 public static class Deduplicate
 {
-  public static Dictionary<string, string> TryDeduplicate(IEnumerable<IPersonRecord> records,
-    double matchScoreThreshold, WordDictionary? firstNamesDictionary = null,
-    WordDictionary? middleNamesDictionary = null, WordDictionary? lastNamesDictionary = null,
-    Func<int, IProgress<int>>? matchProgressReport = null)
+  public static Dictionary<string, string> TryDeduplicate(
+    IEnumerable<IPersonRecord> records,
+    double matchScoreThreshold,
+    WordDictionary? firstNamesDictionary = null,
+    WordDictionary? middleNamesDictionary = null,
+    WordDictionary? lastNamesDictionary = null,
+    Func<int, IProgress<int>>? matchProgressReport = null
+  )
   {
-    var preprocessedRecords =
-      records
-        .PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary)
-        .ToArray();
+    var preprocessedRecords = records
+      .PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary)
+      .ToArray();
 
-    var potentialDuplicates =
-      Match.GetPotentialMatchesFromSameDataSet(preprocessedRecords, preprocessedRecords, matchScoreThreshold, 1.0,
-        matchProgressReport);
+    var potentialDuplicates = Match.GetPotentialMatchesFromSameDataSet(
+      preprocessedRecords,
+      preprocessedRecords,
+      matchScoreThreshold,
+      1.0,
+      matchProgressReport
+    );
 
     var potentialMatchesGroupedByRecord = potentialDuplicates
       .GroupBy(x => x.Value)
-      .ToDictionary(x => x.Key, x =>
-        x.Select(y => y.Match)
-          .ToList()
-      );
+      .ToDictionary(x => x.Key, x => x.Select(y => y.Match).ToList());
 
     var results = new Dictionary<string, string>();
     var alreadyProcessed = new HashSet<IPersonRecord>();
     Console.WriteLine("Processing potential matches...");
     foreach (var potentialMatch in potentialMatchesGroupedByRecord)
     {
-      if (alreadyProcessed.Contains(potentialMatch.Key)) continue;
+      if (alreadyProcessed.Contains(potentialMatch.Key))
+        continue;
       var matches = GetAllMatches(potentialMatch.Key, potentialMatchesGroupedByRecord);
-      if (matches.Count <= 1) continue;
+      if (matches.Count <= 1)
+        continue;
       alreadyProcessed.UnionWith(matches);
 
       var firstMatch = matches.First();
@@ -47,8 +53,10 @@ public static class Deduplicate
   }
 
   // Use Breadth-First Search to find all matches for a given record
-  private static HashSet<IPersonRecord> GetAllMatches(IPersonRecord start,
-    Dictionary<IPersonRecord, List<IPersonRecord>> matches)
+  private static HashSet<IPersonRecord> GetAllMatches(
+    IPersonRecord start,
+    Dictionary<IPersonRecord, List<IPersonRecord>> matches
+  )
   {
     var visited = new HashSet<IPersonRecord>();
     var queue = new Queue<IPersonRecord>();
@@ -60,10 +68,12 @@ public static class Deduplicate
     {
       var current = queue.Dequeue();
 
-      if (!matches.TryGetValue(current, out var match1)) continue;
+      if (!matches.TryGetValue(current, out var match1))
+        continue;
       foreach (var match in match1)
       {
-        if (visited.Contains(match)) continue;
+        if (visited.Contains(match))
+          continue;
         visited.Add(match);
         queue.Enqueue(match);
       }

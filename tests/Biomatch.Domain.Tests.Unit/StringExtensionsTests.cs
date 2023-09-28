@@ -10,7 +10,10 @@ public class StringExtensionsTests
   [InlineData("Juán", "juan")]
   [InlineData("MáRiÖ", "mario")]
   [InlineData("    ", "")]
-  public void NormalizeWord_ShouldReplaceAccents_WhenStringWithAccentsIsPassed(string word, string expected)
+  public void NormalizeWord_ShouldReplaceAccents_WhenStringWithAccentsIsPassed(
+    string word,
+    string expected
+  )
   {
     // Arrange
 
@@ -22,9 +25,13 @@ public class StringExtensionsTests
   }
 
   [Theory]
-  [InlineData("Elvís Gabriel", NameType.Name, new[] {"elvis", "gabriel"})]
-  [InlineData("Nieves Miranda", NameType.LastName, new[] {"nieves", "miranda"})]
-  public void NormalizeNames_ShouldFixNames_WhenNameIsPassed(string name, NameType nameType, string[] expected)
+  [InlineData("Elvís Gabriel", NameType.Name, new[] { "elvis", "gabriel" })]
+  [InlineData("Nieves Miranda", NameType.LastName, new[] { "nieves", "miranda" })]
+  public void NormalizeNames_ShouldFixNames_WhenNameIsPassed(
+    string name,
+    NameType nameType,
+    string[] expected
+  )
   {
     // Arrange
 

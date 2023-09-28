@@ -24,24 +24,38 @@ public static class Score
     //culminating at 1-step at the threshold
     else
     {
-      singleFieldScore = 1 - step * ((double) distance / threshold);
+      singleFieldScore = 1 - step * ((double)distance / threshold);
     }
 
     return singleFieldScore;
   }
 
-  public static double CalculateFinalScore(ref DistanceVector d,
-    int firstNameThreshold = 2, int middleNameThreshold = 1, int lastNameThreshold = 2, int secondLastNameThreshold = 2,
-    int birthDateThreshold = 1, int cityThreshold = 2, int phoneNumberThreshold = 1,
-    double firstNameWeight = 0.18, double middleNameWeight = 0.1, double lastNameWeight = 0.17,
+  public static double CalculateFinalScore(
+    ref DistanceVector d,
+    int firstNameThreshold = 2,
+    int middleNameThreshold = 1,
+    int lastNameThreshold = 2,
+    int secondLastNameThreshold = 2,
+    int birthDateThreshold = 1,
+    int cityThreshold = 2,
+    int phoneNumberThreshold = 1,
+    double firstNameWeight = 0.18,
+    double middleNameWeight = 0.1,
+    double lastNameWeight = 0.17,
     double secondLastNameWeight = 0.17,
-    double birthDateWeight = 0.20, double cityWeight = 0.08, double phoneNumberWeight = 0.1)
+    double birthDateWeight = 0.20,
+    double cityWeight = 0.08,
+    double phoneNumberWeight = 0.1
+  )
   {
     // Get the individual field score distances
     var firstNameDistance = SingleFieldScoreStepMode(d.FirstNameDistance, firstNameThreshold);
     var middleNameDistance = SingleFieldScoreStepMode(d.MiddleNameDistance, middleNameThreshold);
     var lastNameDistance = SingleFieldScoreStepMode(d.LastNameDistance, lastNameThreshold);
-    var secondLastNameDistance = SingleFieldScoreStepMode(d.SecondLastNameDistance, secondLastNameThreshold);
+    var secondLastNameDistance = SingleFieldScoreStepMode(
+      d.SecondLastNameDistance,
+      secondLastNameThreshold
+    );
     var birthDateDistance = SingleFieldScoreStepMode(d.BirthDateDistance, birthDateThreshold);
     var cityDistance = SingleFieldScoreStepMode(d.CityDistance, cityThreshold);
     var phoneNumberDistance = SingleFieldScoreStepMode(d.PhoneNumberDistance, phoneNumberThreshold);

@@ -12,8 +12,7 @@ public static class PersonRecordTemplate
     using var reader = Sep.New(',').Reader().FromFile(csvFilePath);
     foreach (var readRow in reader)
     {
-      yield return new PersonRecord
-      (
+      yield return new PersonRecord(
         readRow["RecordId"].ToString(),
         readRow["FirstName"].ToString(),
         readRow["MiddleName"].ToString(),
@@ -29,7 +28,8 @@ public static class PersonRecordTemplate
   public static async Task WriteToCsv(IEnumerable<IPersonRecord> patientRecords, string csvFilePath)
   {
     var csvContent = new StringBuilder();
-    const string header = "RecordId,FirstName,MiddleName,LastName,SecondLastName,BirthDate,City,PhoneNumber";
+    const string header =
+      "RecordId,FirstName,MiddleName,LastName,SecondLastName,BirthDate,City,PhoneNumber";
     csvContent.AppendLine(header);
 
     foreach (var patientRecord in patientRecords)
