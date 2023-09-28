@@ -5,7 +5,10 @@ namespace Biomatch.CLI.Csv;
 
 public static class FrequencyDictionaryTemplate
 {
-  public static async Task WriteToTabDelimitedFile(IEnumerable<FrequencyDictionary> frequencyDictionaries, string outputFilePath)
+  public static async Task WriteToTabDelimitedFile(
+    IEnumerable<FrequencyDictionary> frequencyDictionaries,
+    string outputFilePath
+  )
   {
     var content = new StringBuilder();
 

@@ -6,10 +6,14 @@ namespace Biomatch.CLI.Csv;
 
 public static class DuplicateRecordTemplate
 {
-  public static async Task WriteToCsv(IEnumerable<DuplicateRecord> duplicateRecords, string csvFilePath)
+  public static async Task WriteToCsv(
+    IEnumerable<DuplicateRecord> duplicateRecords,
+    string csvFilePath
+  )
   {
     var csvContent = new StringBuilder();
-    const string header = "Patient1Url,Patient2Url,Score,Distance,DuplicateStatus,Error1,Error2,Error3,ProfileModified,ProfileMerged,User,Date";
+    const string header =
+      "Patient1Url,Patient2Url,Score,Distance,DuplicateStatus,Error1,Error2,Error3,ProfileModified,ProfileMerged,User,Date";
     csvContent.AppendLine(header);
 
     foreach (var duplicateRecord in duplicateRecords)

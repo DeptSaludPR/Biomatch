@@ -12,8 +12,7 @@ public class MatchingServiceTests
   {
     var patientRecordsToMatch = new List<IPersonRecord>
     {
-      new PersonRecord
-      (
+      new PersonRecord(
         "123456",
         "Elvis",
         "",
@@ -23,8 +22,7 @@ public class MatchingServiceTests
         "Aguada",
         "7875982789"
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1234568",
         "Elvis",
         "Gabriel",
@@ -34,8 +32,7 @@ public class MatchingServiceTests
         "Aguada",
         "7875982789"
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "3688374",
         "Juan",
         "",
@@ -45,8 +42,7 @@ public class MatchingServiceTests
         "Aguada",
         "7875982789"
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "3697831",
         "Juan Del Puéblo",
         "",
@@ -56,8 +52,7 @@ public class MatchingServiceTests
         "San Juan",
         "7875982789"
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1238",
         "Guillermo",
         "",
@@ -67,8 +62,7 @@ public class MatchingServiceTests
         "San Juan",
         ""
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1230",
         "Clara",
         "",
@@ -78,8 +72,7 @@ public class MatchingServiceTests
         "Adjuntas",
         ""
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1276",
         "Juan Del Puéblo",
         "",
@@ -97,8 +90,7 @@ public class MatchingServiceTests
   public void FindPotentialMatches_ShouldReturnPotentialMatches_WhenRecordIsPassed()
   {
     // Arrange
-   var recordToMatch = new PersonRecord
-    (
+    var recordToMatch = new PersonRecord(
       "1234",
       "Elvis",
       "",
@@ -110,8 +102,7 @@ public class MatchingServiceTests
     );
 
     // Act
-    var possibleMatches = _sut.FindPotentialMatches(recordToMatch, 0.85)
-      .ToList();
+    var possibleMatches = _sut.FindPotentialMatches(recordToMatch, 0.85).ToList();
 
     // Assert
     possibleMatches.Should().HaveCount(2);

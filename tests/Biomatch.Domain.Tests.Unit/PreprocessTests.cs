@@ -11,8 +11,7 @@ public class PreprocessTests
     // Arrange
     var patientRecords = new List<IPersonRecord>
     {
-      new PersonRecord
-      (
+      new PersonRecord(
         "1234",
         "Juan",
         "",
@@ -22,8 +21,7 @@ public class PreprocessTests
         "Aguada",
         "7875982789"
       ),
-      new PersonRecord
-      (
+      new PersonRecord(
         "1235",
         "Maria 789 Del Puéblo Del Valle",
         "",

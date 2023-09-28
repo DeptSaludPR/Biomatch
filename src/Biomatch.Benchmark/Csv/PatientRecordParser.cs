@@ -43,7 +43,6 @@ public static class PatientRecordParser
 
       var values = SplitCsvLine(line);
 
-
       var recordId = values[0];
       var firstName = values[1];
       var middleName = values[2];
@@ -59,8 +58,16 @@ public static class PatientRecordParser
       var city = values[6];
       var phoneNumber = values[7];
 
-      var patientRecord = new PersonRecord(recordId, firstName, middleName, lastName, secondLastName, birthDate, city,
-        phoneNumber);
+      var patientRecord = new PersonRecord(
+        recordId,
+        firstName,
+        middleName,
+        lastName,
+        secondLastName,
+        birthDate,
+        city,
+        phoneNumber
+      );
       yield return patientRecord;
     }
   }

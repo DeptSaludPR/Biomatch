@@ -11,34 +11,40 @@ public static class StringExtensions
   {
     var separators = nameType switch
     {
-      NameType.LastName => new[] {' ', '-', '_'},
-      _ => new[] {' '}
+      NameType.LastName => new[] { ' ', '-', '_' },
+      _ => new[] { ' ' }
     };
 
     var words = name.Split(separators);
     foreach (var word in words)
     {
-      if (word.Length == 0) continue;
+      if (word.Length == 0)
+        continue;
       var normalizedWord = word.NormalizeWord();
-      if (normalizedWord.Length == 0) continue;
+      if (normalizedWord.Length == 0)
+        continue;
 
       yield return normalizedWord.ToString();
     }
   }
 
-  public static IEnumerable<string> SanitizeName(this string name, NameType nameType = NameType.Name,
-    WordDictionary? wordDictionary = null)
+  public static IEnumerable<string> SanitizeName(
+    this string name,
+    NameType nameType = NameType.Name,
+    WordDictionary? wordDictionary = null
+  )
   {
     var separators = nameType switch
     {
-      NameType.LastName => new[] {' ', '-', '_'},
-      _ => new[] {' '}
+      NameType.LastName => new[] { ' ', '-', '_' },
+      _ => new[] { ' ' }
     };
 
     var words = name.Split(separators);
     foreach (var word in words)
     {
-      if (word.Length == 0) continue;
+      if (word.Length == 0)
+        continue;
 
       var wordToSanitize = word;
       if (wordDictionary is not null)
@@ -49,7 +55,8 @@ public static class StringExtensions
       }
 
       var sanitizedWord = wordToSanitize.SanitizeWord();
-      if (sanitizedWord.Length == 0) continue;
+      if (sanitizedWord.Length == 0)
+        continue;
       yield return sanitizedWord.ToString();
     }
   }
@@ -60,7 +67,8 @@ public static class StringExtensions
 
     foreach (var c in word.AsSpan())
     {
-      if (!char.IsAsciiLetter(c)) continue;
+      if (!char.IsAsciiLetter(c))
+        continue;
 
       sb.Append(char.ToLowerInvariant(c));
     }
@@ -77,7 +85,8 @@ public static class StringExtensions
     {
       var unicodeCategory = Rune.GetUnicodeCategory(c);
 
-      if (unicodeCategory is UnicodeCategory.NonSpacingMark or UnicodeCategory.SpaceSeparator) continue;
+      if (unicodeCategory is UnicodeCategory.NonSpacingMark or UnicodeCategory.SpaceSeparator)
+        continue;
 
       sb.Append(Rune.ToLowerInvariant(c));
     }
@@ -85,7 +94,10 @@ public static class StringExtensions
     return sb;
   }
 
-  public static IEnumerable<string> RemoveWords(this IEnumerable<string> words, FrozenSet<string> wordsToRemove)
+  public static IEnumerable<string> RemoveWords(
+    this IEnumerable<string> words,
+    FrozenSet<string> wordsToRemove
+  )
   {
     foreach (var word in words)
     {

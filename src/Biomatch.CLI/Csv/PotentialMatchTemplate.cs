@@ -6,13 +6,17 @@ namespace Biomatch.CLI.Csv;
 
 public static class PotentialMatchTemplate
 {
-  public static async Task WriteToCsv(IEnumerable<PotentialMatch> potentialMatches, string csvFilePath)
+  public static async Task WriteToCsv(
+    IEnumerable<PotentialMatch> potentialMatches,
+    string csvFilePath
+  )
   {
     var csvContent = new StringBuilder();
-    const string header = "Value_RecordId,Value_FirstName,Value_MiddleName,Value_LastName,Value_SecondLastName,Value_BirthDate,Value_City,Value_PhoneNumber," +
-                          "Match_RecordId,Match_FirstName,Match_MiddleName,Match_LastName,Match_SecondLastName,Match_BirthDate,Match_City,Match_PhoneNumber," +
-                          "FirstNameDistance,MiddleNameDistance,LastNameDistance,SecondLastNameDistance,BirthDateDistance,CityDistance,PhoneNumberDistance," +
-                          "Score";
+    const string header =
+      "Value_RecordId,Value_FirstName,Value_MiddleName,Value_LastName,Value_SecondLastName,Value_BirthDate,Value_City,Value_PhoneNumber,"
+      + "Match_RecordId,Match_FirstName,Match_MiddleName,Match_LastName,Match_SecondLastName,Match_BirthDate,Match_City,Match_PhoneNumber,"
+      + "FirstNameDistance,MiddleNameDistance,LastNameDistance,SecondLastNameDistance,BirthDateDistance,CityDistance,PhoneNumberDistance,"
+      + "Score";
     csvContent.AppendLine(header);
 
     foreach (var potentialMatch in potentialMatches)
@@ -32,18 +36,36 @@ public static class PotentialMatchTemplate
 
       var values = new List<string>
       {
-        value.RecordId, value.FirstName, value.MiddleName, value.LastName, value.SecondLastName, valueBirthDate, value.City, value.PhoneNumber,
-        match.RecordId, match.FirstName, match.MiddleName, match.LastName, match.SecondLastName, matchBirthDate, match.City, match.PhoneNumber,
-        distance.FirstNameDistance.ToString(), distance.MiddleNameDistance.ToString(), distance.LastNameDistance.ToString(),
-        distance.SecondLastNameDistance.ToString(), distance.BirthDateDistance.ToString(), distance.CityDistance.ToString(),
-        distance.PhoneNumberDistance.ToString(), score.ToString(CultureInfo.InvariantCulture)
+        value.RecordId,
+        value.FirstName,
+        value.MiddleName,
+        value.LastName,
+        value.SecondLastName,
+        valueBirthDate,
+        value.City,
+        value.PhoneNumber,
+        match.RecordId,
+        match.FirstName,
+        match.MiddleName,
+        match.LastName,
+        match.SecondLastName,
+        matchBirthDate,
+        match.City,
+        match.PhoneNumber,
+        distance.FirstNameDistance.ToString(),
+        distance.MiddleNameDistance.ToString(),
+        distance.LastNameDistance.ToString(),
+        distance.SecondLastNameDistance.ToString(),
+        distance.BirthDateDistance.ToString(),
+        distance.CityDistance.ToString(),
+        distance.PhoneNumberDistance.ToString(),
+        score.ToString(CultureInfo.InvariantCulture)
       };
 
       var escapedValues = values.Select(v => v.Contains(',') ? $"\"{v}\"" : v);
       var line = string.Join(",", escapedValues);
       csvContent.AppendLine(line);
     }
-
 
     await File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
   }

@@ -12,8 +12,7 @@ public class DistanceVectorTests
     // Arrange
     var birthDate1 = new DateOnly(1990, 02, 01);
     var birthDate2 = new DateOnly(1990, 01, 02);
-    var record1 = new PersonRecordForMatch
-    (
+    var record1 = new PersonRecordForMatch(
       "3688374",
       "Juan",
       "",
@@ -24,8 +23,7 @@ public class DistanceVectorTests
       "Aguada",
       "7875982789"
     );
-    var record2 = new PersonRecordForMatch
-    (
+    var record2 = new PersonRecordForMatch(
       "3688374",
       "Juan",
       "",

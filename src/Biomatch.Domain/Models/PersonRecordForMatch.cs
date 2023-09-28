@@ -1,7 +1,6 @@
 namespace Biomatch.Domain.Models;
 
-public readonly record struct PersonRecordForMatch
-(
+public readonly record struct PersonRecordForMatch(
   string RecordId,
   string FirstName,
   string MiddleName,
