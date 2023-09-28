@@ -1,0 +1,9 @@
+{
+  "dotnet.defaultSolution": "Biomatch.sln",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "[csharp]": {
+    "editor.defaultFormatter": "csharpier.csharpier-vscode"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
