@@ -5,8 +5,8 @@ namespace Biomatch.CLI.Csv;
 
 public static class FrequencyDictionaryTemplate
 {
-  public static async Task WriteToTabDelimitedFile(
-    IEnumerable<FrequencyDictionary> frequencyDictionaries,
+  public static Task WriteToTabDelimitedFile(
+    IEnumerable<WordFrequency> frequencyDictionaries,
     string outputFilePath
   )
   {
@@ -18,6 +18,6 @@ public static class FrequencyDictionaryTemplate
       content.AppendLine(line);
     }
 
-    await File.WriteAllTextAsync(outputFilePath, content.ToString());
+    return File.WriteAllTextAsync(outputFilePath, content.ToString());
   }
 }

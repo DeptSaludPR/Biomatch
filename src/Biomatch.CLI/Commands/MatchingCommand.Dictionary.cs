@@ -48,7 +48,7 @@ public static partial class MatchingCommand
         var firstNameFrequencyDictionary = records1FromCsv
           .GroupBy(e => e.FirstName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
-          .Select(e => new FrequencyDictionary(e.Key, e.Count()))
+          .Select(e => new WordFrequency(e.Key, e.Count()))
           .OrderByDescending(e => e.Frequency)
           .ToList();
 
@@ -56,24 +56,24 @@ public static partial class MatchingCommand
           .PreprocessData()
           .GroupBy(e => e.MiddleName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
-          .Select(e => new FrequencyDictionary(e.Key, e.Count()))
+          .Select(e => new WordFrequency(e.Key, e.Count()))
           .OrderByDescending(e => e.Frequency)
           .ToList();
 
         var firstLastNameFrequencyDictionary = records1FromCsv
           .GroupBy(e => e.LastName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
-          .Select(e => new FrequencyDictionary(e.Key, e.Count()));
+          .Select(e => new WordFrequency(e.Key, e.Count()));
 
         var secondLastNameFrequencyDictionary = records1FromCsv
           .GroupBy(e => e.LastName)
           .Where(e => e.Count() > 20 && e.Key.Length > 3)
-          .Select(e => new FrequencyDictionary(e.Key, e.Count()));
+          .Select(e => new WordFrequency(e.Key, e.Count()));
 
         var lastNameFrequencyDictionary = firstLastNameFrequencyDictionary
           .Concat(secondLastNameFrequencyDictionary)
           .GroupBy(e => e.Word)
-          .Select(e => new FrequencyDictionary(e.Key, e.Sum(f => f.Frequency)))
+          .Select(e => new WordFrequency(e.Key, e.Sum(f => f.Frequency)))
           .OrderByDescending(e => e.Frequency)
           .ToList();
 
@@ -101,13 +101,13 @@ public static partial class MatchingCommand
     return command;
   }
 
-  private static async Task CreateDictionaryFile(
-    IEnumerable<FrequencyDictionary> frequencyDictionary,
+  private static Task CreateDictionaryFile(
+    IEnumerable<WordFrequency> frequencyDictionary,
     DirectoryInfo directoryInfo,
     string fileName
   )
   {
-    await FrequencyDictionaryTemplate.WriteToTabDelimitedFile(
+    return FrequencyDictionaryTemplate.WriteToTabDelimitedFile(
       frequencyDictionary,
       Path.Combine(directoryInfo.FullName, fileName)
     );

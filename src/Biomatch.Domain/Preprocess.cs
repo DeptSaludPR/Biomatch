@@ -67,6 +67,18 @@ public static class Preprocess
   }
 
   public static IEnumerable<PersonRecordForMatch> PreprocessData(
+    this ICollection<IPersonRecord> patientRecords,
+    WordDictionary? firstNamesDictionary = null,
+    WordDictionary? middleNamesDictionary = null,
+    WordDictionary? lastNamesDictionary = null
+  )
+  {
+    return patientRecords
+      .SanitizeRecords(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary)
+      .OrderBy(e => e.FirstName);
+  }
+
+  public static IEnumerable<PersonRecordForMatch> PreprocessData(
     this IEnumerable<IPersonRecord> patientRecords,
     WordDictionary? firstNamesDictionary = null,
     WordDictionary? middleNamesDictionary = null,
