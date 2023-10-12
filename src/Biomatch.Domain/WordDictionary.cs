@@ -33,9 +33,7 @@ public sealed class WordDictionary
     _symSpell = symSpell;
   }
 
-  public static WordDictionary CreateWordDictionary(
-    IEnumerable<WordFrequency> frequencyDictionary
-  )
+  public static WordDictionary CreateWordDictionary(IEnumerable<WordFrequency> frequencyDictionary)
   {
     var content = new StringBuilder();
 
