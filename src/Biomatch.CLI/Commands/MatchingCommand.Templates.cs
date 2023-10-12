@@ -1,5 +1,6 @@
 using System.CommandLine;
 using Biomatch.CLI.Csv;
+using Biomatch.CLI.Options;
 using Biomatch.CLI.Services;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
@@ -92,27 +93,6 @@ public static partial class MatchingCommand
       description: "The path of the file to be preprocessed"
     );
 
-    var firstNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-first-names",
-      description: "First names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/FirstNamesDictionary.txt")
-    );
-    firstNamesDictionaryFilePathOption.AddAlias("-df");
-
-    var middleNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-middle-names",
-      description: "Middle names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/MiddleNamesDictionary.txt")
-    );
-    middleNamesDictionaryFilePathOption.AddAlias("-dm");
-
-    var lastNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-last-names",
-      description: "Last names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/LastNamesDictionary.txt")
-    );
-    lastNamesDictionaryFilePathOption.AddAlias("-dl");
-
     var outputOption = new Option<FileInfo>(
       name: "--output",
       description: "Output file path",
@@ -120,12 +100,14 @@ public static partial class MatchingCommand
     );
     outputOption.AddAlias("-o");
 
+    var dictionaryOptions = GeneralOptions.GetDictionaryOptions();
+
     var command = new Command("preprocess", "Executes the preprocessing pipeline on a template")
     {
       filePath1Argument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
     };
 
@@ -163,9 +145,9 @@ public static partial class MatchingCommand
         );
       },
       filePath1Argument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption
     );
 

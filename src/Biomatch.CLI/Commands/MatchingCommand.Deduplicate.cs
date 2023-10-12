@@ -1,5 +1,6 @@
 using System.CommandLine;
 using Biomatch.CLI.Csv;
+using Biomatch.CLI.Options;
 using Biomatch.CLI.Progress;
 using Biomatch.CLI.Services;
 using Biomatch.Domain;
@@ -20,27 +21,6 @@ public partial class MatchingCommand
       description: "The path to the file to be deduplicated"
     );
 
-    var firstNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-first-names",
-      description: "First names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/FirstNamesDictionary.txt")
-    );
-    firstNamesDictionaryFilePathOption.AddAlias("-df");
-
-    var middleNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-middle-names",
-      description: "Middle names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/MiddleNamesDictionary.txt")
-    );
-    middleNamesDictionaryFilePathOption.AddAlias("-dm");
-
-    var lastNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-last-names",
-      description: "Last names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/LastNamesDictionary.txt")
-    );
-    lastNamesDictionaryFilePathOption.AddAlias("-dl");
-
     var outputOption = new Option<FileInfo>(
       name: "--output",
       description: "Output file path",
@@ -54,12 +34,14 @@ public partial class MatchingCommand
       getDefaultValue: () => 0.85
     );
 
+    var dictionaryOptions = GeneralOptions.GetDictionaryOptions();
+
     var command = new Command("deduplicate", "Deduplicate records from a template file")
     {
       filePathArgument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
     };
@@ -97,9 +79,9 @@ public partial class MatchingCommand
         DeduplicatedRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
       },
       filePathArgument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption
     );

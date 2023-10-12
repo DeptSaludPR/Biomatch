@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Biomatch.Domain;
+using Biomatch.Domain.Models;
 
 namespace Biomatch.CLI.Services;
 
@@ -17,7 +19,16 @@ public static class DictionaryLoader
     WordDictionary? firstNamesDictionary = null;
     if (firstNamesDictionaryFilePath is not null && firstNamesDictionaryFilePath.Exists)
     {
-      firstNamesDictionary = new WordDictionary(firstNamesDictionaryFilePath);
+      var firstNameWordsFrequency = JsonSerializer.Deserialize(
+        File.ReadAllText(firstNamesDictionaryFilePath.FullName),
+        WordFrequencySerializationContext.Default.ListWordFrequency
+      );
+      if (firstNameWordsFrequency is null)
+      {
+        Console.WriteLine($"No words found in {firstNamesDictionaryFilePath.FullName}");
+        return (null, null, null);
+      }
+      firstNamesDictionary = WordDictionary.CreateWordDictionary(firstNameWordsFrequency);
       Console.WriteLine($"FirstNames dictionary loaded from {firstNamesDictionaryFilePath}");
     }
     else
@@ -32,7 +43,16 @@ public static class DictionaryLoader
     WordDictionary? middleNamesDictionary = null;
     if (middleNamesDictionaryFilePath is not null && middleNamesDictionaryFilePath.Exists)
     {
-      middleNamesDictionary = new WordDictionary(middleNamesDictionaryFilePath);
+      var middleNameWordsFrequency = JsonSerializer.Deserialize(
+        File.ReadAllText(middleNamesDictionaryFilePath.FullName),
+        WordFrequencySerializationContext.Default.ListWordFrequency
+      );
+      if (middleNameWordsFrequency is null)
+      {
+        Console.WriteLine($"No words found in {middleNamesDictionaryFilePath.FullName}");
+        return (null, null, null);
+      }
+      middleNamesDictionary = WordDictionary.CreateWordDictionary(middleNameWordsFrequency);
       Console.WriteLine($"MiddleNames dictionary loaded from {middleNamesDictionaryFilePath}");
     }
     else
@@ -47,7 +67,16 @@ public static class DictionaryLoader
     WordDictionary? lastNamesDictionary = null;
     if (lastNamesDictionaryFilePath is not null && lastNamesDictionaryFilePath.Exists)
     {
-      lastNamesDictionary = new WordDictionary(lastNamesDictionaryFilePath);
+      var lastNameWordsFrequency = JsonSerializer.Deserialize(
+        File.ReadAllText(lastNamesDictionaryFilePath.FullName),
+        WordFrequencySerializationContext.Default.ListWordFrequency
+      );
+      if (lastNameWordsFrequency is null)
+      {
+        Console.WriteLine($"No words found in {lastNamesDictionaryFilePath.FullName}");
+        return (null, null, null);
+      }
+      lastNamesDictionary = WordDictionary.CreateWordDictionary(lastNameWordsFrequency);
       Console.WriteLine($"LastNames dictionary loaded from {lastNamesDictionaryFilePath}");
     }
     else
