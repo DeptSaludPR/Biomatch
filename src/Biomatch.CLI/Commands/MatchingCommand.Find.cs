@@ -3,6 +3,7 @@ using Biomatch.CLI.Progress;
 using Biomatch.CLI.Services;
 using Biomatch.Domain;
 using Biomatch.CLI.Csv;
+using Biomatch.CLI.Options;
 using Biomatch.Domain.Models;
 
 namespace Biomatch.CLI.Commands;
@@ -32,27 +33,6 @@ public static partial class MatchingCommand
       description: "The path to the second file to be compared"
     );
 
-    var firstNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-first-names",
-      description: "First names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/FirstNamesDictionary.txt")
-    );
-    firstNamesDictionaryFilePathOption.AddAlias("-df");
-
-    var middleNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-middle-names",
-      description: "Middle names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/MiddleNamesDictionary.txt")
-    );
-    middleNamesDictionaryFilePathOption.AddAlias("-dm");
-
-    var lastNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-last-names",
-      description: "Last names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/LastNamesDictionary.txt")
-    );
-    lastNamesDictionaryFilePathOption.AddAlias("-dl");
-
     var outputOption = new Option<FileInfo>(
       name: "--output",
       description: "Output file path",
@@ -72,13 +52,15 @@ public static partial class MatchingCommand
       getDefaultValue: () => false
     );
 
+    var dictionaryOptions = GeneralOptions.GetDictionaryOptions();
+
     var command = new Command("duplicates", "Find duplicates records in two files")
     {
       filePath1Argument,
       filePath2Argument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
       sameDataSetOption,
@@ -143,9 +125,9 @@ public static partial class MatchingCommand
       },
       filePath1Argument,
       filePath2Argument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
       sameDataSetOption
@@ -166,27 +148,6 @@ public static partial class MatchingCommand
       description: "The path to the second file to be compared"
     );
 
-    var firstNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-first-names",
-      description: "First names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/FirstNamesDictionary.txt")
-    );
-    firstNamesDictionaryFilePathOption.AddAlias("-df");
-
-    var middleNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-middle-names",
-      description: "Middle names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/MiddleNamesDictionary.txt")
-    );
-    middleNamesDictionaryFilePathOption.AddAlias("-dm");
-
-    var lastNamesDictionaryFilePathOption = new Option<FileInfo>(
-      name: "-dictionary-last-names",
-      description: "Last names dictionary file path",
-      getDefaultValue: () => new FileInfo("Dictionaries/LastNamesDictionary.txt")
-    );
-    lastNamesDictionaryFilePathOption.AddAlias("-dl");
-
     var outputOption = new Option<FileInfo>(
       name: "--output",
       description: "Output file path",
@@ -206,13 +167,15 @@ public static partial class MatchingCommand
       getDefaultValue: () => false
     );
 
+    var dictionaryOptions = GeneralOptions.GetDictionaryOptions();
+
     var command = new Command("matches", "Match records in two files")
     {
       filePath1Argument,
       filePath2Argument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
       sameDataSetOption
@@ -257,9 +220,9 @@ public static partial class MatchingCommand
       },
       filePath1Argument,
       filePath2Argument,
-      firstNamesDictionaryFilePathOption,
-      middleNamesDictionaryFilePathOption,
-      lastNamesDictionaryFilePathOption,
+      dictionaryOptions.FirstNamesDictionaryFilePathOption,
+      dictionaryOptions.MiddleNamesDictionaryFilePathOption,
+      dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
       sameDataSetOption

@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Text.Json;
 using Biomatch.CLI.Csv;
 using Biomatch.Domain;
 using Biomatch.Domain.Models;
@@ -78,20 +79,28 @@ public static partial class MatchingCommand
           .ToList();
 
         Directory.CreateDirectory(outputOptionValue.FullName);
-        await CreateDictionaryFile(
-          firstNameFrequencyDictionary,
-          outputOptionValue,
-          "FirstNamesDictionary.txt"
+        await File.WriteAllTextAsync(
+          Path.Combine(outputOptionValue.FullName, "FirstNamesDictionary.json"),
+          JsonSerializer.Serialize(
+            firstNameFrequencyDictionary,
+            WordFrequencySerializationContext.Default.WordFrequency
+          )
         );
-        await CreateDictionaryFile(
-          middleNameFrequencyDictionary,
-          outputOptionValue,
-          "MiddleNamesDictionary.txt"
+
+        await File.WriteAllTextAsync(
+          Path.Combine(outputOptionValue.FullName, "MiddleNamesDictionary.json"),
+          JsonSerializer.Serialize(
+            middleNameFrequencyDictionary,
+            WordFrequencySerializationContext.Default.WordFrequency
+          )
         );
-        await CreateDictionaryFile(
-          lastNameFrequencyDictionary,
-          outputOptionValue,
-          "LastNamesDictionary.txt"
+
+        await File.WriteAllTextAsync(
+          Path.Combine(outputOptionValue.FullName, "LastNamesDictionary.json"),
+          JsonSerializer.Serialize(
+            lastNameFrequencyDictionary,
+            WordFrequencySerializationContext.Default.WordFrequency
+          )
         );
       },
       filePathTemplateArgument,
@@ -99,18 +108,6 @@ public static partial class MatchingCommand
     );
 
     return command;
-  }
-
-  private static Task CreateDictionaryFile(
-    IEnumerable<WordFrequency> frequencyDictionary,
-    DirectoryInfo directoryInfo,
-    string fileName
-  )
-  {
-    return FrequencyDictionaryTemplate.WriteToTabDelimitedFile(
-      frequencyDictionary,
-      Path.Combine(directoryInfo.FullName, fileName)
-    );
   }
 
   private static Command GetDictionaryTestCommand()
@@ -135,7 +132,16 @@ public static partial class MatchingCommand
       (filePathTemplateArgumentValue, wordArgumentValue) =>
       {
         var sanitizedWord = wordArgumentValue.ToLower();
-        var dictionary = new WordDictionary(filePathTemplateArgumentValue);
+        var wordsFrequency = JsonSerializer.Deserialize(
+          File.ReadAllText(filePathTemplateArgumentValue.FullName),
+          WordFrequencySerializationContext.Default.ListWordFrequency
+        );
+        if (wordsFrequency is null)
+        {
+          Console.WriteLine($"No words found in {filePathTemplateArgumentValue.FullName}");
+          return;
+        }
+        var dictionary = WordDictionary.CreateWordDictionary(wordsFrequency);
         var correctWord = dictionary
           .TrySpellCheck(sanitizedWord)
           .Select(e => e.term)
