@@ -4,7 +4,7 @@ using Biomatch.Domain.Models;
 
 namespace Biomatch.Domain.Services;
 
-public class MatchingService
+public sealed class MatchingService
 {
   private readonly FrozenSet<string> _prepositionsToRemove;
   private readonly FrozenSet<string> _suffixesToRemove;
@@ -14,7 +14,12 @@ public class MatchingService
 
   private readonly ConcurrentDictionary<string, PersonRecordForMatch> _preprocessedRecordsToMatch;
 
-  public MatchingService(IEnumerable<IPersonRecord> recordsToMatch)
+  public MatchingService(
+    IEnumerable<IPersonRecord> recordsToMatch,
+    IEnumerable<WordFrequency>? firstNamesDictionary = null,
+    IEnumerable<WordFrequency>? middleNamesDictionary = null,
+    IEnumerable<WordFrequency>? lastNamesDictionary = null
+  )
   {
     _prepositionsToRemove = new HashSet<string>
     {
@@ -50,26 +55,19 @@ public class MatchingService
       "mrs"
     }.ToFrozenSet();
 
-    var preprocessedRecords = recordsToMatch.PreprocessData().ToList();
+    if (firstNamesDictionary is not null)
+      _firstNamesDictionary = WordDictionary.CreateWordDictionary(firstNamesDictionary);
+    if (middleNamesDictionary is not null)
+      _middleNamesDictionary = WordDictionary.CreateWordDictionary(middleNamesDictionary);
+    if (lastNamesDictionary is not null)
+      _lastNamesDictionary = WordDictionary.CreateWordDictionary(lastNamesDictionary);
+
+    var preprocessedRecords = recordsToMatch
+      .PreprocessData(_firstNamesDictionary, _middleNamesDictionary, _lastNamesDictionary)
+      .ToList();
     _preprocessedRecordsToMatch = new ConcurrentDictionary<string, PersonRecordForMatch>(
       preprocessedRecords.ToDictionary(e => e.RecordId)
     );
-
-    var firstNameFrequencyDictionary = preprocessedRecords
-      .GroupBy(e => e.FirstName)
-      .Where(e => e.Count() > 20 && e.Key.Length > 3)
-      .Select(e => new FrequencyDictionary(e.Key, e.Count()));
-    var middleNameFrequencyDictionary = preprocessedRecords
-      .GroupBy(e => e.MiddleName)
-      .Where(e => e.Count() > 20 && e.Key.Length > 3)
-      .Select(e => new FrequencyDictionary(e.Key, e.Count()));
-    var firstLastNameFrequencyDictionary = preprocessedRecords
-      .GroupBy(e => e.LastName)
-      .Where(e => e.Count() > 20 && e.Key.Length > 3)
-      .Select(e => new FrequencyDictionary(e.Key, e.Count()));
-    _firstNamesDictionary = WordDictionary.CreateWordDictionary(firstNameFrequencyDictionary);
-    _middleNamesDictionary = WordDictionary.CreateWordDictionary(middleNameFrequencyDictionary);
-    _lastNamesDictionary = WordDictionary.CreateWordDictionary(firstLastNameFrequencyDictionary);
   }
 
   public IEnumerable<PotentialMatch> FindPotentialMatches(

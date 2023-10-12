@@ -34,7 +34,7 @@ public sealed class WordDictionary
   }
 
   public static WordDictionary CreateWordDictionary(
-    IEnumerable<FrequencyDictionary> frequencyDictionary
+    IEnumerable<WordFrequency> frequencyDictionary
   )
   {
     var content = new StringBuilder();
