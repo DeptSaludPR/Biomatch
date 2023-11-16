@@ -6,7 +6,7 @@ namespace Biomatch.CLI.Csv;
 
 public static class DuplicateRecordTemplate
 {
-  public static async Task WriteToCsv(
+  public static Task WriteToCsv(
     IEnumerable<DuplicateRecord> duplicateRecords,
     string csvFilePath
   )
@@ -39,6 +39,6 @@ public static class DuplicateRecordTemplate
       csvContent.AppendLine(line);
     }
 
-    await File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
+    return File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
   }
 }

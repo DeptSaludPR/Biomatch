@@ -9,7 +9,7 @@ public static class PersonRecordTemplate
 {
   public static IEnumerable<IPersonRecord> ParseCsv(string csvFilePath)
   {
-    using var reader = Sep.New(',').Reader().FromFile(csvFilePath);
+    using var reader = Sep.New(',').Reader(o => o with {  }).FromFile(csvFilePath);
     foreach (var readRow in reader)
     {
       yield return new PersonRecord(
@@ -25,7 +25,7 @@ public static class PersonRecordTemplate
     }
   }
 
-  public static async Task WriteToCsv(IEnumerable<IPersonRecord> patientRecords, string csvFilePath)
+  public static Task WriteToCsv(IEnumerable<IPersonRecord> patientRecords, string csvFilePath)
   {
     var csvContent = new StringBuilder();
     const string header =
@@ -55,6 +55,6 @@ public static class PersonRecordTemplate
       csvContent.AppendLine(line);
     }
 
-    await File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
+    return File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
   }
 }

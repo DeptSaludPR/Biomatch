@@ -55,8 +55,8 @@ public class DeduplicateTests
         "1875",
         "Clara",
         "",
-        "1234",
         "Pique",
+        "",
         new DateOnly(1995, 01, 02),
         "Adjuntas",
         ""
