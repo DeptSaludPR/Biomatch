@@ -83,7 +83,7 @@ public static partial class MatchingCommand
           Path.Combine(outputOptionValue.FullName, "FirstNamesDictionary.json"),
           JsonSerializer.Serialize(
             firstNameFrequencyDictionary,
-            WordFrequencySerializationContext.Default.WordFrequency
+            WordFrequencySerializationContext.Default.ListWordFrequency
           )
         );
 
@@ -91,7 +91,7 @@ public static partial class MatchingCommand
           Path.Combine(outputOptionValue.FullName, "MiddleNamesDictionary.json"),
           JsonSerializer.Serialize(
             middleNameFrequencyDictionary,
-            WordFrequencySerializationContext.Default.WordFrequency
+            WordFrequencySerializationContext.Default.ListWordFrequency
           )
         );
 
@@ -99,7 +99,7 @@ public static partial class MatchingCommand
           Path.Combine(outputOptionValue.FullName, "LastNamesDictionary.json"),
           JsonSerializer.Serialize(
             lastNameFrequencyDictionary,
-            WordFrequencySerializationContext.Default.WordFrequency
+            WordFrequencySerializationContext.Default.ListWordFrequency
           )
         );
       },
