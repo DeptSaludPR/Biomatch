@@ -46,7 +46,8 @@ public partial class MatchingCommand
       scoreOption,
     };
 
-    command.SetHandler((
+    command.SetHandler(
+      (
         filePathArgumentValue,
         firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue,
