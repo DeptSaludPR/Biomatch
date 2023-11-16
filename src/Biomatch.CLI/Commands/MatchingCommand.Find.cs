@@ -1,9 +1,9 @@
 using System.CommandLine;
+using Biomatch.CLI.Csv;
+using Biomatch.CLI.Options;
 using Biomatch.CLI.Progress;
 using Biomatch.CLI.Services;
 using Biomatch.Domain;
-using Biomatch.CLI.Csv;
-using Biomatch.CLI.Options;
 using Biomatch.Domain.Models;
 
 namespace Biomatch.CLI.Commands;

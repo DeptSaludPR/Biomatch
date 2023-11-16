@@ -46,8 +46,7 @@ public partial class MatchingCommand
       scoreOption,
     };
 
-    command.SetHandler(
-      (
+    command.SetHandler((
         filePathArgumentValue,
         firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue,
@@ -76,7 +75,7 @@ public partial class MatchingCommand
           MatchingProgress.GetMatchingProgressReport
         );
 
-        DeduplicatedRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
+        return PersonRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
       },
       filePathArgument,
       dictionaryOptions.FirstNamesDictionaryFilePathOption,

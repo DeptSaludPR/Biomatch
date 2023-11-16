@@ -77,8 +77,6 @@ public class DeduplicateTests
     var duplicatesToFix = Deduplicate.TryDeduplicate(patientRecords, 0.85).ToList();
 
     // Assert
-    duplicatesToFix.Should().HaveCount(2);
-    var duplicateUniqueRecordIds = duplicatesToFix.GroupBy(e => e.Value).ToList();
-    duplicateUniqueRecordIds.Should().HaveCount(1);
+    duplicatesToFix.Should().HaveCount(3);
   }
 }

@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Biomatch.Domain.Helpers;
+using FluentAssertions;
 
 namespace Biomatch.Domain.Tests.Unit.Helpers;
 

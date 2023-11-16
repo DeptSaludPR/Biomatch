@@ -4,7 +4,7 @@ namespace Biomatch.Domain;
 
 public static class Deduplicate
 {
-  public static Dictionary<string, string> TryDeduplicate(
+  public static IEnumerable<IPersonRecord> TryDeduplicate(
     IEnumerable<IPersonRecord> records,
     double matchScoreThreshold,
     WordDictionary? firstNamesDictionary = null,
@@ -29,56 +29,49 @@ public static class Deduplicate
       .GroupBy(x => x.Value)
       .ToDictionary(x => x.Key, x => x.Select(y => y.Match).ToList());
 
-    var results = new Dictionary<string, string>();
-    var alreadyProcessed = new HashSet<IPersonRecord>();
+    var duplicates = new Dictionary<string, IPersonRecord>();
+    var uniqueDuplicateRecords = new Dictionary<string, IPersonRecord>();
     Console.WriteLine("Processing potential matches...");
     foreach (var potentialMatch in potentialMatchesGroupedByRecord)
     {
-      if (alreadyProcessed.Contains(potentialMatch.Key))
+      if (duplicates.ContainsKey(potentialMatch.Key.RecordId))
         continue;
-      var matches = GetAllMatches(potentialMatch.Key, potentialMatchesGroupedByRecord);
-      if (matches.Count <= 1)
-        continue;
-      alreadyProcessed.UnionWith(matches);
-
-      var firstMatch = matches.First();
-      for (var i = 1; i < matches.Count; i++)
-      {
-        var originalValue = matches.ElementAt(i);
-        results.TryAdd(originalValue.RecordId, firstMatch.RecordId);
-      }
+      MarkDuplicates(
+        potentialMatch.Key,
+        potentialMatchesGroupedByRecord,
+        potentialMatch.Value,
+        duplicates
+      );
+      uniqueDuplicateRecords.Add(potentialMatch.Key.RecordId, potentialMatch.Key);
+      yield return potentialMatch.Key;
     }
 
-    return results;
+    foreach (var record in preprocessedRecords)
+    {
+      if (uniqueDuplicateRecords.ContainsKey(record.RecordId))
+        continue;
+      if (duplicates.ContainsKey(record.RecordId))
+        continue;
+      yield return record;
+    }
   }
 
-  // Use Breadth-First Search to find all matches for a given record
-  private static HashSet<IPersonRecord> GetAllMatches(
-    IPersonRecord start,
-    Dictionary<IPersonRecord, List<IPersonRecord>> matches
+  private static void MarkDuplicates(
+    IPersonRecord originalRecord,
+    Dictionary<IPersonRecord, List<IPersonRecord>> potentialDuplicates,
+    List<IPersonRecord> duplicatesToMark,
+    Dictionary<string, IPersonRecord> duplicates
   )
   {
-    var visited = new HashSet<IPersonRecord>();
-    var queue = new Queue<IPersonRecord>();
-
-    visited.Add(start);
-    queue.Enqueue(start);
-
-    while (queue.Count > 0)
+    foreach (var duplicate in duplicatesToMark)
     {
-      var current = queue.Dequeue();
-
-      if (!matches.TryGetValue(current, out var match1))
+      if (duplicate.RecordId == originalRecord.RecordId)
         continue;
-      foreach (var match in match1)
-      {
-        if (visited.Contains(match))
-          continue;
-        visited.Add(match);
-        queue.Enqueue(match);
-      }
+      if (duplicates.ContainsKey(duplicate.RecordId))
+        continue;
+      duplicates.TryAdd(duplicate.RecordId, duplicate);
+      var newDuplicatesToMark = potentialDuplicates[duplicate];
+      MarkDuplicates(originalRecord, potentialDuplicates, newDuplicatesToMark, duplicates);
     }
-
-    return visited; // Return all visited nodes, these are all matches directly or indirectly
   }
 }
