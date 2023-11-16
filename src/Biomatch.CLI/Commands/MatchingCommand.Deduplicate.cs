@@ -76,7 +76,7 @@ public partial class MatchingCommand
           MatchingProgress.GetMatchingProgressReport
         );
 
-        DeduplicatedRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
+        return PersonRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
       },
       filePathArgument,
       dictionaryOptions.FirstNamesDictionaryFilePathOption,
