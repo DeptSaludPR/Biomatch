@@ -19,8 +19,4 @@
     <ProjectReference Include="..\Biomatch.Domain\Biomatch.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\" />
-  </ItemGroup>
-
 </Project>
