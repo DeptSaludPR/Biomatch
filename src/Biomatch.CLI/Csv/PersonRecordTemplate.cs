@@ -9,7 +9,7 @@ public static class PersonRecordTemplate
 {
   public static IEnumerable<IPersonRecord> ParseCsv(string csvFilePath)
   {
-    using var reader = Sep.New(',').Reader(o => o with { Unescape = true}).FromFile(csvFilePath);
+    using var reader = Sep.New(',').Reader(o => o with { Unescape = true }).FromFile(csvFilePath);
     foreach (var readRow in reader)
     {
       yield return new PersonRecord(
