@@ -6,10 +6,7 @@ namespace Biomatch.CLI.Csv;
 
 public static class PotentialMatchTemplate
 {
-  public static async Task WriteToCsv(
-    IEnumerable<PotentialMatch> potentialMatches,
-    string csvFilePath
-  )
+  public static Task WriteToCsv(IEnumerable<PotentialMatch> potentialMatches, string csvFilePath)
   {
     var csvContent = new StringBuilder();
     const string header =
@@ -67,6 +64,6 @@ public static class PotentialMatchTemplate
       csvContent.AppendLine(line);
     }
 
-    await File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
+    return File.WriteAllTextAsync(csvFilePath, csvContent.ToString());
   }
 }
