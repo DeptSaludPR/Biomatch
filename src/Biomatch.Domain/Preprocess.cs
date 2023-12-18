@@ -18,22 +18,18 @@ public static class Preprocess
   )
   {
     var normalizedFirstNames = patientRecord
-      .FirstName
-      .NormalizeNames(NameType.Name)
+      .FirstName.NormalizeNames(NameType.Name)
       .RemoveWords(prepositionsToRemove)
       .RemoveWords(suffixesToRemove);
     var normalizedMiddleNames = patientRecord
-      .MiddleName
-      .NormalizeNames(NameType.Name)
+      .MiddleName.NormalizeNames(NameType.Name)
       .RemoveWords(prepositionsToRemove)
       .RemoveWords(suffixesToRemove);
     var normalizedLastNames = patientRecord
-      .LastName
-      .NormalizeNames(NameType.LastName)
+      .LastName.NormalizeNames(NameType.LastName)
       .RemoveWords(prepositionsToRemove);
     var normalizedSecondLastNames = patientRecord
-      .SecondLastName
-      .NormalizeNames(NameType.LastName)
+      .SecondLastName.NormalizeNames(NameType.LastName)
       .RemoveWords(prepositionsToRemove);
 
     var personName = OrganizeNames(
@@ -50,9 +46,10 @@ public static class Preprocess
 
     var lastNames = personName.LastName.SanitizeName(NameType.LastName, lastNamesDictionary);
 
-    var secondLastNames = personName
-      .SecondLastName
-      .SanitizeName(NameType.LastName, lastNamesDictionary);
+    var secondLastNames = personName.SecondLastName.SanitizeName(
+      NameType.LastName,
+      lastNamesDictionary
+    );
 
     return new PersonRecordForMatch(
       patientRecord.RecordId,
@@ -143,22 +140,18 @@ public static class Preprocess
         var patientRecord = patientRecordsList[index];
 
         var normalizedFirstNames = patientRecord
-          .FirstName
-          .NormalizeNames(NameType.Name)
+          .FirstName.NormalizeNames(NameType.Name)
           .RemoveWords(prepositions)
           .RemoveWords(suffixes);
         var normalizedMiddleNames = patientRecord
-          .MiddleName
-          .NormalizeNames(NameType.Name)
+          .MiddleName.NormalizeNames(NameType.Name)
           .RemoveWords(prepositions)
           .RemoveWords(suffixes);
         var normalizedLastNames = patientRecord
-          .LastName
-          .NormalizeNames(NameType.LastName)
+          .LastName.NormalizeNames(NameType.LastName)
           .RemoveWords(prepositions);
         var normalizedSecondLastNames = patientRecord
-          .SecondLastName
-          .NormalizeNames(NameType.LastName)
+          .SecondLastName.NormalizeNames(NameType.LastName)
           .RemoveWords(prepositions);
 
         var personName = OrganizeNames(
@@ -175,9 +168,10 @@ public static class Preprocess
 
         var lastNames = personName.LastName.SanitizeName(NameType.LastName, lastNamesDictionary);
 
-        var secondLastNames = personName
-          .SecondLastName
-          .SanitizeName(NameType.LastName, lastNamesDictionary);
+        var secondLastNames = personName.SecondLastName.SanitizeName(
+          NameType.LastName,
+          lastNamesDictionary
+        );
 
         processedPatientRecords.Add(
           new PersonRecordForMatch(
