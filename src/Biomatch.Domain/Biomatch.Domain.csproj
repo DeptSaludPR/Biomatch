@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.25" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.26" />
     <PackageReference Include="Quickenshtein" Version="1.5.1"/>
     <PackageReference Include="SymSpell" Version="6.7.2"/>
     <PackageReference Include="System.Private.Uri" Version="4.3.2"/>

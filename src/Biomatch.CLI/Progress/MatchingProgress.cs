@@ -28,9 +28,10 @@ public static class MatchingProgress
           return;
 
         var currentPercentage = (int)((double)completedOperations / totalRecordsToMatch * 100);
-        var elapsedTime = TimeProvider
-          .System
-          .GetElapsedTime(startTimeStamp.Value, TimeProvider.System.GetTimestamp());
+        var elapsedTime = TimeProvider.System.GetElapsedTime(
+          startTimeStamp.Value,
+          TimeProvider.System.GetTimestamp()
+        );
         var estimatedTotalTime = elapsedTime * totalRecordsToMatch / completedOperations;
         var remainingTime = estimatedTotalTime - elapsedTime;
 
