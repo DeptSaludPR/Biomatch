@@ -23,10 +23,10 @@ jobs:
             runtime: osx-x64
             dotnet: '8.x'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ matrix.dotnet }}
 
