@@ -48,10 +48,10 @@ public static class MatchingProgress
         }
         Console.Write(
           $"""
-                       Progress: {currentPercentage, 3}% | Record match operations performed: {completedOperations:N0}
-                       Total time: {elapsedTime} | Estimated time remaining: {remainingTime.Days:D2}d {remainingTime.Hours:D2}h {remainingTime.Minutes:D2}m {remainingTime.Seconds:D2}s
-
-                       """
+          Progress: {currentPercentage, 3}% | Record match operations performed: {completedOperations:N0}
+          Total time: {elapsedTime} | Estimated time remaining: {remainingTime.Days:D2}d {remainingTime.Hours:D2}h {remainingTime.Minutes:D2}m {remainingTime.Seconds:D2}s
+          
+          """
         );
         consoleTextPrinted = true;
         lastConsoleUpdateTime = DateTime.UtcNow;

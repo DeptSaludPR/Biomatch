@@ -42,7 +42,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -73,7 +73,7 @@ jobs:
     #   ./location_of_script_within_repo/buildscript.sh
 
     - name: Set up .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.x'
 
