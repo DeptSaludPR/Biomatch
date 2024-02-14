@@ -13,7 +13,7 @@ public static class StringDistance
 
     if (a.IsEmpty || b.IsEmpty)
     {
-      return -1;
+      return 0;
     }
 
     return Levenshtein.GetDistance(a, b);
@@ -28,7 +28,7 @@ public static class StringDistance
 
     if (a.IsEmpty || b.IsEmpty)
     {
-      return -1;
+      return 0;
     }
 
     if ((a.Length == 1 || b.Length == 1) && a[0] == b[0])
@@ -48,7 +48,7 @@ public static class StringDistance
 
     if (date1.IsEmpty || date2.IsEmpty)
     {
-      return -1;
+      return 0;
     }
 
     // Check for inverted day and month
