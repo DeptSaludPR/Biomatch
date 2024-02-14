@@ -182,7 +182,7 @@ public static partial class MatchingCommand
     };
 
     command.SetHandler(
-      async (
+      (
         filePath1ArgumentValue,
         filePath2ArgumentValue,
         firstNamesDictionaryFilePathOptionValue,
@@ -216,7 +216,7 @@ public static partial class MatchingCommand
           MatchingProgress.GetMatchingProgressReport
         );
 
-        await PotentialMatchTemplate.WriteToCsv(possibleMatches, outputOptionValue.FullName);
+        PotentialMatchTemplate.WriteToCsv(possibleMatches, outputOptionValue.FullName);
       },
       filePath1Argument,
       filePath2Argument,
