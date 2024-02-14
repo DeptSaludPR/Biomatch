@@ -56,6 +56,42 @@ public static class Deduplicate
     }
   }
 
+  public static IEnumerable<IPersonRecord> TryDeduplicate(
+    IEnumerable<PersonRecordForMatch> originalRecords,
+    IEnumerable<PotentialMatch> potentialDuplicates
+  )
+  {
+    var potentialMatchesGroupedByRecord = potentialDuplicates
+      .GroupBy(x => x.Value)
+      .ToDictionary(x => x.Key, x => x.Select(y => y.Match).ToList());
+
+    var duplicates = new Dictionary<string, IPersonRecord>();
+    var uniqueDuplicateRecords = new Dictionary<string, IPersonRecord>();
+    Console.WriteLine("Processing potential matches...");
+    foreach (var potentialMatch in potentialMatchesGroupedByRecord)
+    {
+      if (duplicates.ContainsKey(potentialMatch.Key.RecordId))
+        continue;
+      MarkDuplicates(
+        potentialMatch.Key,
+        potentialMatchesGroupedByRecord,
+        potentialMatch.Value,
+        duplicates
+      );
+      uniqueDuplicateRecords.Add(potentialMatch.Key.RecordId, potentialMatch.Key);
+      yield return potentialMatch.Key;
+    }
+
+    foreach (var record in originalRecords)
+    {
+      if (uniqueDuplicateRecords.ContainsKey(record.RecordId))
+        continue;
+      if (duplicates.ContainsKey(record.RecordId))
+        continue;
+      yield return record;
+    }
+  }
+
   private static void MarkDuplicates(
     IPersonRecord originalRecord,
     Dictionary<IPersonRecord, List<IPersonRecord>> potentialDuplicates,

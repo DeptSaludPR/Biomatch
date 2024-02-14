@@ -24,7 +24,7 @@ public partial class MatchingCommand
     var outputOption = new Option<FileInfo>(
       name: "--output",
       description: "Output file path",
-      getDefaultValue: () => new FileInfo("Duplicates.csv")
+      getDefaultValue: () => new FileInfo("Deduplicated.csv")
     );
     outputOption.AddAlias("-o");
 
@@ -33,6 +33,16 @@ public partial class MatchingCommand
       description: "Score for matching",
       getDefaultValue: () => 0.85
     );
+
+    var mapOption = new Option<bool>(name: "--map", description: "Generate duplicate map");
+    mapOption.AddAlias("-m");
+
+    var outputMapOption = new Option<FileInfo>(
+      name: "--output-map",
+      description: "File location for duplicate map",
+      getDefaultValue: () => new FileInfo("DuplicateMap.csv")
+    );
+    outputMapOption.AddAlias("-om");
 
     var dictionaryOptions = GeneralOptions.GetDictionaryOptions();
 
@@ -44,16 +54,20 @@ public partial class MatchingCommand
       dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
+      mapOption,
+      outputMapOption
     };
 
     command.SetHandler(
-      (
+      async (
         filePathArgumentValue,
         firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue,
         lastNamesDictionaryFilePathOptionValue,
         outputOptionValue,
-        scoreOptionValue
+        scoreOptionValue,
+        mapOptionValue,
+        outputMapOptionValue
       ) =>
       {
         var records1FromCsv = PersonRecordTemplate
@@ -67,23 +81,41 @@ public partial class MatchingCommand
             lastNamesDictionaryFilePathOptionValue
           );
 
-        var deduplicatedRecords = Deduplicate.TryDeduplicate(
-          records1FromCsv,
+        var preprocessedRecords = records1FromCsv
+          .PreprocessData(firstNamesDictionary, middleNamesDictionary, lastNamesDictionary)
+          .ToArray();
+
+        var potentialDuplicates = Match.GetPotentialMatchesFromSameDataSet(
+          preprocessedRecords,
+          preprocessedRecords,
           scoreOptionValue,
-          firstNamesDictionary,
-          middleNamesDictionary,
-          lastNamesDictionary,
+          1.0,
           MatchingProgress.GetMatchingProgressReport
         );
 
-        return PersonRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
+        var deduplicatedRecords = Deduplicate.TryDeduplicate(
+          preprocessedRecords,
+          potentialDuplicates
+        );
+
+        if (mapOptionValue)
+        {
+          await PotentialMatchTemplate.WriteToCsv(
+            potentialDuplicates,
+            outputMapOptionValue.FullName
+          );
+        }
+
+        await PersonRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
       },
       filePathArgument,
       dictionaryOptions.FirstNamesDictionaryFilePathOption,
       dictionaryOptions.MiddleNamesDictionaryFilePathOption,
       dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
-      scoreOption
+      scoreOption,
+      mapOption,
+      outputMapOption
     );
 
     return command;
