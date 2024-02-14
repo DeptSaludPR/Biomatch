@@ -59,7 +59,7 @@ public partial class MatchingCommand
     };
 
     command.SetHandler(
-      async (
+      (
         filePathArgumentValue,
         firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue,
@@ -100,13 +100,10 @@ public partial class MatchingCommand
 
         if (mapOptionValue)
         {
-          await PotentialMatchTemplate.WriteToCsv(
-            potentialDuplicates,
-            outputMapOptionValue.FullName
-          );
+          PotentialMatchTemplate.WriteToCsv(potentialDuplicates, outputMapOptionValue.FullName);
         }
 
-        await PersonRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
+        PersonRecordTemplate.WriteToCsv(deduplicatedRecords, outputOptionValue.FullName);
       },
       filePathArgument,
       dictionaryOptions.FirstNamesDictionaryFilePathOption,

@@ -33,12 +33,9 @@ public static partial class MatchingCommand
     var command = new Command("generate", "Creates an empty template file") { outputOption, };
 
     command.SetHandler(
-      async outputOptionValue =>
+      outputOptionValue =>
       {
-        await PersonRecordTemplate.WriteToCsv(
-          Array.Empty<IPersonRecord>(),
-          outputOptionValue.FullName
-        );
+        PersonRecordTemplate.WriteToCsv(Array.Empty<IPersonRecord>(), outputOptionValue.FullName);
       },
       outputOption
     );
@@ -112,7 +109,7 @@ public static partial class MatchingCommand
     };
 
     command.SetHandler(
-      async (
+      (
         filePath1ArgumentValue,
         firstNamesDictionaryFilePathOptionValue,
         middleNamesDictionaryFilePathOptionValue,
@@ -139,7 +136,7 @@ public static partial class MatchingCommand
           middleNamesDictionary,
           lastNamesDictionary
         );
-        await PersonRecordTemplate.WriteToCsv(
+        PersonRecordTemplate.WriteToCsv(
           processedRecords.OfType<IPersonRecord>(),
           outputOptionValue.FullName
         );
