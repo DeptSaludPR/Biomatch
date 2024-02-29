@@ -51,16 +51,21 @@ public static class Preprocess
       lastNamesDictionary
     );
 
+    var firstName = string.Concat(firstNames);
+    var middleName = string.Concat(middleNames);
+    var lastName = string.Concat(lastNames);
+    var secondLastName = string.Concat(secondLastNames);
+    var fullName = string.Concat(firstName, middleName, lastName, secondLastName);
+
     return new PersonRecordForMatch(
       patientRecord.RecordId,
-      string.Concat(firstNames),
-      string.Concat(middleNames),
-      string.Concat(lastNames),
-      string.Concat(secondLastNames),
+      firstName,
+      middleName,
+      lastName,
+      secondLastName,
+      fullName,
       patientRecord.BirthDate.SanitizeBirthDate(),
-      patientRecord.BirthDate.HasValue
-        ? patientRecord.BirthDate.Value.ToByteArray()
-        : Array.Empty<byte>(),
+      patientRecord.BirthDate.HasValue ? patientRecord.BirthDate.Value.ToByteArray() : [],
       patientRecord.City.SanitizeWord().ToString(),
       PhoneNumberHelpers.Parse(patientRecord.PhoneNumber)
     );
@@ -173,17 +178,22 @@ public static class Preprocess
           lastNamesDictionary
         );
 
+        var firstName = string.Concat(firstNames);
+        var middleName = string.Concat(middleNames);
+        var lastName = string.Concat(lastNames);
+        var secondLastName = string.Concat(secondLastNames);
+        var fullName = string.Concat(firstName, middleName, lastName, secondLastName);
+
         processedPatientRecords.Add(
           new PersonRecordForMatch(
             patientRecord.RecordId,
-            string.Concat(firstNames),
-            string.Concat(middleNames),
-            string.Concat(lastNames),
-            string.Concat(secondLastNames),
+            firstName,
+            middleName,
+            lastName,
+            secondLastName,
+            fullName,
             patientRecord.BirthDate.SanitizeBirthDate(),
-            patientRecord.BirthDate.HasValue
-              ? patientRecord.BirthDate.Value.ToByteArray()
-              : Array.Empty<byte>(),
+            patientRecord.BirthDate.HasValue ? patientRecord.BirthDate.Value.ToByteArray() : [],
             patientRecord.City.SanitizeWord().ToString(),
             PhoneNumberHelpers.Parse(patientRecord.PhoneNumber)
           )

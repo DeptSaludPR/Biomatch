@@ -4,11 +4,11 @@ public static class Score
 {
   private static double SingleFieldScoreStepMode(int distance, int threshold = 2, double step = 0.3)
   {
-    //Experimental version for now, assigns 1 if the distance is 0, and lowers in increments to
-    //0.7
+    // Experimental version for now, assigns 1 if the distance is 0, and lowers in increments to
+    // 0.7
     double singleFieldScore;
 
-    //If the distance > threshold, assign 0
+    // If the distance > threshold, assign 0
     if (distance > threshold)
     {
       singleFieldScore = 0.0;
@@ -19,9 +19,9 @@ public static class Score
     {
       singleFieldScore = 0.5;
     }
-    //else, return 1-(step/threshold)*dist.
-    //This results in a higher individual score the closer the distance is to 0
-    //culminating at 1-step at the threshold
+    // else, return 1-(step/threshold) * dist.
+    // This results in a higher individual score the closer the distance is to 0
+    // culminating at 1-step at the threshold
     else
     {
       singleFieldScore = 1 - step * ((double)distance / threshold);
@@ -35,6 +35,7 @@ public static class Score
     int firstNameThreshold = 2,
     int middleNameThreshold = 1,
     int lastNameThreshold = 2,
+    int fullNameThreshold = 5,
     int secondLastNameThreshold = 2,
     int birthDateThreshold = 1,
     int cityThreshold = 2,
@@ -43,6 +44,7 @@ public static class Score
     double middleNameWeight = 0.1,
     double lastNameWeight = 0.17,
     double secondLastNameWeight = 0.17,
+    double fullNameWeight = 0.62,
     double birthDateWeight = 0.20,
     double cityWeight = 0.08,
     double phoneNumberWeight = 0.1
@@ -56,15 +58,21 @@ public static class Score
       d.SecondLastNameDistance,
       secondLastNameThreshold
     );
+    var fullNameDistance = SingleFieldScoreStepMode(d.FullNameDistance, fullNameThreshold);
     var birthDateDistance = SingleFieldScoreStepMode(d.BirthDateDistance, birthDateThreshold);
     var cityDistance = SingleFieldScoreStepMode(d.CityDistance, cityThreshold);
     var phoneNumberDistance = SingleFieldScoreStepMode(d.PhoneNumberDistance, phoneNumberThreshold);
 
+    var separateNameScore =
+      firstNameDistance * firstNameWeight
+      + middleNameDistance * middleNameWeight
+      + lastNameDistance * lastNameWeight
+      + secondLastNameDistance * secondLastNameWeight;
+    var fullNameScore = fullNameDistance * fullNameWeight;
+    var nameScore = separateNameScore > fullNameScore ? separateNameScore : fullNameScore;
+
     // Then compute the weighted average
-    var totalScore = firstNameWeight * firstNameDistance;
-    totalScore += middleNameWeight * middleNameDistance;
-    totalScore += lastNameWeight * lastNameDistance;
-    totalScore += secondLastNameWeight * secondLastNameDistance;
+    var totalScore = nameScore;
     totalScore += birthDateWeight * birthDateDistance;
     totalScore += cityWeight * cityDistance;
     totalScore += phoneNumberWeight * phoneNumberDistance;

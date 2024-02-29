@@ -6,6 +6,7 @@ public readonly record struct PersonRecordForMatch(
   string MiddleName,
   string LastName,
   string SecondLastName,
+  string FullName,
   DateOnly? BirthDate,
   byte[] BirthDateText,
   string City,

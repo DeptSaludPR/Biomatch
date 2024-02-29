@@ -5,6 +5,7 @@ public readonly record struct DistanceVector(
   int MiddleNameDistance,
   int LastNameDistance,
   int SecondLastNameDistance,
+  int FullNameDistance,
   int BirthDateDistance,
   int CityDistance,
   int PhoneNumberDistance
@@ -26,6 +27,7 @@ public readonly record struct DistanceVector(
         firstRecord.SecondLastName,
         secondRecord.SecondLastName
       ),
+      StringDistance.GeneralDemographicFieldDistance(firstRecord.FullName, secondRecord.FullName),
       StringDistance.DateDemographicFieldDistance(
         firstRecord.BirthDateText,
         secondRecord.BirthDateText
