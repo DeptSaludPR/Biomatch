@@ -82,6 +82,16 @@ public class MatchingServiceTests
         "San Juan",
         "7875982789"
       ),
+      new PersonRecord(
+        "1276678",
+        "myrna",
+        "",
+        "rodriguez",
+        "diaz",
+        new DateOnly(1978, 01, 26),
+        "Bayamón",
+        ""
+      ),
     };
     _sut = new MatchingService(patientRecordsToMatch);
   }
@@ -107,5 +117,27 @@ public class MatchingServiceTests
     // Assert
     possibleMatches.Should().HaveCount(2);
     possibleMatches[0].Score.Should().BeGreaterThan(0.85);
+  }
+
+  [Fact]
+  public void FindPotentialMatches_ShouldReturnPotentialMatches_WhenMinimalRecordIsPassed()
+  {
+    // Arrange
+    var recordToMatch = new PersonRecord(
+      "1234",
+      "maria",
+      "",
+      "",
+      "",
+      new DateOnly(1978, 05, 26),
+      "Dorado",
+      ""
+    );
+
+    // Act
+    var possibleMatches = _sut.FindPotentialMatches(recordToMatch, 0.85).ToList();
+
+    // Assert
+    possibleMatches.Should().HaveCount(0);
   }
 }

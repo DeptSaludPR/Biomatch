@@ -13,7 +13,7 @@ public static class StringDistance
 
     if (a.IsEmpty || b.IsEmpty)
     {
-      return 0;
+      return -1;
     }
 
     return Levenshtein.GetDistance(a, b);
@@ -28,7 +28,7 @@ public static class StringDistance
 
     if (a.IsEmpty || b.IsEmpty)
     {
-      return 0;
+      return -1;
     }
 
     if ((a.Length == 1 || b.Length == 1) && a[0] == b[0])
