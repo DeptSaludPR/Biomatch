@@ -30,8 +30,44 @@ public static class Score
     return singleFieldScore;
   }
 
+  public static double GetScore(int distance, double weight, int threshold)
+  {
+    const double step = 0.3;
+    // Experimental version for now, assigns 1 if the distance is 0, and lowers in increments to
+    // 0.7
+    double singleFieldScore;
+
+    // If the distance > threshold, assign 0
+    if (distance > threshold)
+    {
+      singleFieldScore = 0.0;
+    }
+    // else if the distance is -1 (special exception) return 0.5
+    // this corresponds to the case where one is empty and the other is not
+    else if (distance == -1)
+    {
+      singleFieldScore = 0.5;
+    }
+    // else, return 1-(step/threshold) * dist.
+    // This results in a higher individual score the closer the distance is to 0
+    // culminating at 1-step at the threshold
+    else
+    {
+      singleFieldScore = 1 - step * ((double)distance / threshold);
+    }
+
+    return singleFieldScore * weight;
+  }
+
   public static double CalculateFinalScore(
-    ref DistanceVector d,
+    int firstNameDistance,
+    int middleNameDistance,
+    int lastNameDistance,
+    int secondLastNameDistance,
+    int fullNameDistance,
+    int birthDateDistance,
+    int cityDistance,
+    int phoneNumberDistance,
     int firstNameThreshold = 2,
     int middleNameThreshold = 1,
     int lastNameThreshold = 2,
@@ -51,31 +87,35 @@ public static class Score
   )
   {
     // Get the individual field score distances
-    var firstNameDistance = SingleFieldScoreStepMode(d.FirstNameDistance, firstNameThreshold);
-    var middleNameDistance = SingleFieldScoreStepMode(d.MiddleNameDistance, middleNameThreshold);
-    var lastNameDistance = SingleFieldScoreStepMode(d.LastNameDistance, lastNameThreshold);
-    var secondLastNameDistance = SingleFieldScoreStepMode(
-      d.SecondLastNameDistance,
+    var firstNameSingleScore = SingleFieldScoreStepMode(firstNameDistance, firstNameThreshold);
+    var middleNameSingleScore = SingleFieldScoreStepMode(middleNameDistance, middleNameThreshold);
+    var lastNameSingleScore = SingleFieldScoreStepMode(lastNameDistance, lastNameThreshold);
+    var secondLastNameSingleScore = SingleFieldScoreStepMode(
+      secondLastNameDistance,
       secondLastNameThreshold
     );
-    var fullNameDistance = SingleFieldScoreStepMode(d.FullNameDistance, fullNameThreshold);
-    var birthDateDistance = SingleFieldScoreStepMode(d.BirthDateDistance, birthDateThreshold);
-    var cityDistance = SingleFieldScoreStepMode(d.CityDistance, cityThreshold);
-    var phoneNumberDistance = SingleFieldScoreStepMode(d.PhoneNumberDistance, phoneNumberThreshold);
+    var fullNameSingleScore = SingleFieldScoreStepMode(fullNameDistance, fullNameThreshold);
+    var birthDateSingleScore = SingleFieldScoreStepMode(birthDateDistance, birthDateThreshold);
+    var citySingleScore = SingleFieldScoreStepMode(cityDistance, cityThreshold);
+    var phoneNumberSingleScore = SingleFieldScoreStepMode(
+      phoneNumberDistance,
+      phoneNumberThreshold
+    );
 
     var separateNameScore =
-      firstNameDistance * firstNameWeight
-      + middleNameDistance * middleNameWeight
-      + lastNameDistance * lastNameWeight
-      + secondLastNameDistance * secondLastNameWeight;
-    var fullNameScore = fullNameDistance * fullNameWeight;
+      firstNameSingleScore * firstNameWeight
+      + middleNameSingleScore * middleNameWeight
+      + lastNameSingleScore * lastNameWeight
+      + secondLastNameSingleScore * secondLastNameWeight;
+    var fullNameScore = fullNameSingleScore * fullNameWeight;
+
     var nameScore = separateNameScore > fullNameScore ? separateNameScore : fullNameScore;
 
     // Then compute the weighted average
     var totalScore = nameScore;
-    totalScore += birthDateWeight * birthDateDistance;
-    totalScore += cityWeight * cityDistance;
-    totalScore += phoneNumberWeight * phoneNumberDistance;
+    totalScore += birthDateWeight * birthDateSingleScore;
+    totalScore += cityWeight * citySingleScore;
+    totalScore += phoneNumberWeight * phoneNumberSingleScore;
     return totalScore;
   }
 }

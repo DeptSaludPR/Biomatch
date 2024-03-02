@@ -235,18 +235,17 @@ public static class Match
     double upperScoreThreshold
   )
   {
-    //get the distance vector for the ith vector of the first table and the jth record of the second table
-    var distanceVector = DistanceVector.CalculateDistance(ref primaryRecord, ref secondaryRecord);
-    var tempScore = Score.CalculateFinalScore(ref distanceVector);
-    if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
-    {
-      potentialMatches.Add(
-        new PotentialMatch(primaryRecord, secondaryRecord, distanceVector, tempScore)
-      );
-    }
+    var potentialMatch = CompareRecords(
+      ref primaryRecord,
+      ref secondaryRecord,
+      lowerScoreThreshold,
+      upperScoreThreshold
+    );
+    if (potentialMatch is not null)
+      potentialMatches.Add(potentialMatch.Value);
   }
 
-  private static PotentialMatch? CompareRecords(
+  public static PotentialMatch? CompareRecords(
     ref PersonRecordForMatch primaryRecord,
     ref PersonRecordForMatch secondaryRecord,
     double lowerScoreThreshold,
@@ -254,17 +253,109 @@ public static class Match
   )
   {
     //get the distance vector for the ith vector of the first table and the jth record of the second table
-    var distanceVector = DistanceVector.CalculateDistance(ref primaryRecord, ref secondaryRecord);
-    var tempScore = Score.CalculateFinalScore(ref distanceVector);
-    if (tempScore >= lowerScoreThreshold && tempScore <= upperScoreThreshold)
+    const double maxNameScore = 0.62;
+    const double maxBirthDateScore = 0.22;
+    const double maxCityScore = 0.08;
+    const double maxPhoneNumberScore = 0.08;
+    var maxScore = 1.0;
+    //get the distance vector for the ith vector of the first table and the jth record of the second table
+
+    var birthDateDistance = StringDistance.DateDemographicFieldDistance(
+      primaryRecord.BirthDateText,
+      secondaryRecord.BirthDateText
+    );
+    var birthDateScore = Score.GetScore(birthDateDistance, maxBirthDateScore, 1);
+
+    maxScore -= maxBirthDateScore - birthDateScore;
+    if (maxScore < lowerScoreThreshold)
+      return null;
+    // Name parts
+    var firstNameDistance = StringDistance.GeneralDemographicFieldDistance(
+      primaryRecord.FirstName,
+      secondaryRecord.FirstName
+    );
+    var firstNameScore = Score.GetScore(firstNameDistance, 0.18, 2);
+    var middleNameDistance = StringDistance.MiddleNameDemographicFieldDistance(
+      primaryRecord.MiddleName,
+      secondaryRecord.MiddleName
+    );
+    var middleNameScore = Score.GetScore(middleNameDistance, 0.1, 1);
+    var lastNameDistance = StringDistance.GeneralDemographicFieldDistance(
+      primaryRecord.LastName,
+      secondaryRecord.LastName
+    );
+    var lastNameScore = Score.GetScore(lastNameDistance, 0.17, 2);
+    var secondLastNameDistance = StringDistance.GeneralDemographicFieldDistance(
+      primaryRecord.SecondLastName,
+      secondaryRecord.SecondLastName
+    );
+    var secondLastNameScore = Score.GetScore(secondLastNameDistance, 0.17, 2);
+
+    var separateNameScore = firstNameScore + middleNameScore + lastNameScore + secondLastNameScore;
+
+    // Fullname
+    var fullNameDistance = StringDistance.GeneralDemographicFieldDistance(
+      primaryRecord.FullName,
+      secondaryRecord.FullName
+    );
+    var fullNameScore = Score.GetScore(fullNameDistance, maxNameScore, 5);
+
+    var nameScore = separateNameScore > fullNameScore ? separateNameScore : fullNameScore;
+
+    maxScore -= maxNameScore - nameScore;
+    if (maxScore < lowerScoreThreshold)
+      return null;
+
+    var cityDistance = StringDistance.GeneralDemographicFieldDistance(
+      primaryRecord.City,
+      secondaryRecord.City
+    );
+    var cityScore = Score.GetScore(cityDistance, maxCityScore, 2);
+
+    maxScore -= maxCityScore - cityScore;
+    if (maxScore < lowerScoreThreshold)
+      return null;
+
+    var phoneNumberDistance = StringDistance.GeneralDemographicFieldDistance(
+      primaryRecord.PhoneNumber,
+      secondaryRecord.PhoneNumber
+    );
+    var phoneNumberScore = Score.GetScore(phoneNumberDistance, maxPhoneNumberScore, 1);
+
+    maxScore -= maxPhoneNumberScore - phoneNumberScore;
+    if (maxScore < lowerScoreThreshold)
+      return null;
+
+    // Scoring
+    // Then compute the weighted average
+    var totalScore = nameScore;
+    totalScore += birthDateScore;
+    totalScore += cityScore;
+    totalScore += phoneNumberScore;
+
+    if (totalScore >= lowerScoreThreshold && totalScore <= upperScoreThreshold)
     {
-      return new PotentialMatch(primaryRecord, secondaryRecord, distanceVector, tempScore);
+      return new PotentialMatch(
+        primaryRecord,
+        secondaryRecord,
+        new DistanceVector(
+          firstNameDistance,
+          middleNameDistance,
+          lastNameDistance,
+          secondLastNameDistance,
+          fullNameDistance,
+          birthDateDistance,
+          cityDistance,
+          phoneNumberDistance
+        ),
+        totalScore
+      );
     }
 
     return null;
   }
 
-  public static (int, int)[] GetCharactersStartAndEndIndex(
+  private static (int, int)[] GetCharactersStartAndEndIndex(
     ReadOnlySpan<PersonRecordForMatch> records
   )
   {

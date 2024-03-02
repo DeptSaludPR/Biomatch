@@ -28,12 +28,12 @@ public class FindDuplicateBenchmark
   [Benchmark]
   public void DuplicateBenchmarkSameDataSet()
   {
-    Match.GetPotentialMatchesFromSameDataSet(RecordsToMatch, SampleRecords, 0.85, 1.0);
+    Match.GetPotentialMatchesFromSameDataSet(RecordsToMatch, SampleRecords, 0.80, 1.0);
   }
 
   [Benchmark]
   public void DuplicateBenchmarkDifferentDataSet()
   {
-    Match.GetPotentialMatchesFromDifferentDataSet(RecordsToMatch, SampleRecords, 0.85, 1.0);
+    Match.GetPotentialMatchesFromDifferentDataSet(RecordsToMatch, SampleRecords, 0.80, 1.0);
   }
 }

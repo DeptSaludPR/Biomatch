@@ -48,7 +48,7 @@ public static class StringDistance
 
     if (date1.IsEmpty || date2.IsEmpty)
     {
-      return 0;
+      return -1;
     }
 
     // Check for inverted day and month
