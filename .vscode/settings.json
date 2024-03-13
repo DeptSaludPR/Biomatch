@@ -2,6 +2,7 @@
   "dotnet.defaultSolution": "Biomatch.sln",
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
+  "csharp.debug.logging.moduleLoad": false,
   "[csharp]": {
     "editor.defaultFormatter": "csharpier.csharpier-vscode"
   },
