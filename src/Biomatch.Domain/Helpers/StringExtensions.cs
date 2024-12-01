@@ -12,7 +12,7 @@ public static class StringExtensions
     var separators = nameType switch
     {
       NameType.LastName => new[] { ' ', '-', '_' },
-      _ => new[] { ' ' }
+      _ => new[] { ' ' },
     };
 
     var words = name.Split(separators);
@@ -37,7 +37,7 @@ public static class StringExtensions
     var separators = nameType switch
     {
       NameType.LastName => new[] { ' ', '-', '_' },
-      _ => new[] { ' ' }
+      _ => new[] { ' ' },
     };
 
     var words = name.Split(separators);

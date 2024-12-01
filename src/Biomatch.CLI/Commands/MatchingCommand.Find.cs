@@ -178,7 +178,7 @@ public static partial class MatchingCommand
       dictionaryOptions.LastNamesDictionaryFilePathOption,
       outputOption,
       scoreOption,
-      sameDataSetOption
+      sameDataSetOption,
     };
 
     command.SetHandler(

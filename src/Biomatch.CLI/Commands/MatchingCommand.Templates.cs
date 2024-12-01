@@ -30,7 +30,7 @@ public static partial class MatchingCommand
     );
     outputOption.AddAlias("-o");
 
-    var command = new Command("generate", "Creates an empty template file") { outputOption, };
+    var command = new Command("generate", "Creates an empty template file") { outputOption };
 
     command.SetHandler(
       outputOptionValue =>

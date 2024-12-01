@@ -35,7 +35,7 @@ public sealed class MatchingService
       "di",
       "da",
       "le",
-      "san"
+      "san",
     }.ToFrozenSet();
     _suffixesToRemove = new HashSet<string>
     {
@@ -52,7 +52,7 @@ public sealed class MatchingService
       "iii",
       "mr",
       "ms",
-      "mrs"
+      "mrs",
     }.ToFrozenSet();
 
     if (firstNamesDictionary is not null)
