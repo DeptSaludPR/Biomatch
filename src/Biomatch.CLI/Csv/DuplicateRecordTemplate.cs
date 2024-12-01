@@ -28,7 +28,7 @@ public static class DuplicateRecordTemplate
         duplicateRecord.ProfileModified,
         duplicateRecord.ProfileMerged,
         duplicateRecord.User,
-        duplicateRecord.Date
+        duplicateRecord.Date,
       };
 
       var escapedValues = values.Select(value => value.Contains(',') ? $"\"{value}\"" : value);

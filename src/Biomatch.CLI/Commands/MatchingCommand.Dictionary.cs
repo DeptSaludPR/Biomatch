@@ -13,7 +13,7 @@ public static partial class MatchingCommand
     var command = new Command("dictionary", "Dictionary operations")
     {
       GetDictionaryGenerateCommand(),
-      GetDictionaryTestCommand()
+      GetDictionaryTestCommand(),
     };
 
     return command;
@@ -125,7 +125,7 @@ public static partial class MatchingCommand
     var command = new Command("test", "Test dictionary files with spelling errors")
     {
       filePathTemplateArgument,
-      wordArgument
+      wordArgument,
     };
 
     command.SetHandler(

@@ -117,7 +117,7 @@ public static class Preprocess
       "di",
       "da",
       "le",
-      "san"
+      "san",
     }.ToFrozenSet();
     var suffixes = new HashSet<string>
     {
@@ -134,7 +134,7 @@ public static class Preprocess
       "iii",
       "mr",
       "ms",
-      "mrs"
+      "mrs",
     }.ToFrozenSet();
     var processedPatientRecords = new ConcurrentBag<PersonRecordForMatch>();
     Parallel.For(

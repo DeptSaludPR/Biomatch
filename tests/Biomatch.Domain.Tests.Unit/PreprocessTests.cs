@@ -30,7 +30,7 @@ public class PreprocessTests
         new DateOnly(1890, 03, 16), // This is an invalid date
         "San Juan",
         "787598278910100" // This is an invalid phone number
-      )
+      ),
     };
 
     // Act

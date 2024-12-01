@@ -55,7 +55,7 @@ public partial class MatchingCommand
       outputOption,
       scoreOption,
       mapOption,
-      outputMapOption
+      outputMapOption,
     };
 
     command.SetHandler(

@@ -71,7 +71,7 @@ public static class Match
 
     var parallelOptions = new ParallelOptions
     {
-      MaxDegreeOfParallelism = Environment.ProcessorCount
+      MaxDegreeOfParallelism = Environment.ProcessorCount,
     };
     // Maximum of 26 iterations because of letters in the alphabet
     Parallel.For(
@@ -169,7 +169,7 @@ public static class Match
 
     var parallelOptions = new ParallelOptions
     {
-      MaxDegreeOfParallelism = Environment.ProcessorCount
+      MaxDegreeOfParallelism = Environment.ProcessorCount,
     };
     // Maximum of 26 iterations because of letters in the alphabet
     Parallel.For(
